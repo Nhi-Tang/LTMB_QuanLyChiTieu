@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../database/db_helper.dart';
 import '../models/user_model.dart';
 import 'auth_screen.dart';
@@ -20,6 +22,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
   Map<String, int> _stats = {'total': 0, 'admins': 0, 'active': 0};
 
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -29,6 +32,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -50,17 +54,66 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
   }
 
   void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      setState(() {
+        _searchQuery = query;
+      });
+      _loadUsers();
     });
-    _loadUsers();
+  }
+
+  Future<void> _showAlertDialog({
+    required String title,
+    required String message,
+    bool isSuccess = true,
+  }) {
+    return showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(
+              isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
+              color: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+              size: 28,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14, color: Colors.black87),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _toggleUserStatus(UserModel user) async {
     if (user.id == widget.currentAdmin.id) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể khóa tài khoản Admin đang đăng nhập!')),
+      _showAlertDialog(
+        title: 'Cảnh báo',
+        message: 'Không thể khóa tài khoản Admin đang đăng nhập!',
+        isSuccess: false,
       );
       return;
     }
@@ -69,22 +122,22 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     if (!mounted) return;
     await _loadUsers();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          user.isActive
-              ? 'Đã khóa tài khoản ${user.email}'
-              : 'Đã mở khóa tài khoản ${user.email}',
-        ),
-      ),
+    _showAlertDialog(
+      title: 'Cập nhật trạng thái',
+      message: user.isActive
+          ? 'Đã khóa tài khoản ${user.email}'
+          : 'Đã mở khóa tài khoản ${user.email}',
+      isSuccess: true,
     );
   }
 
   Future<void> _deleteUser(UserModel user) async {
     if (user.id == widget.currentAdmin.id) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể xóa tài khoản Admin đang đăng nhập!')),
+      _showAlertDialog(
+        title: 'Cảnh báo',
+        message: 'Không thể xóa tài khoản Admin đang đăng nhập!',
+        isSuccess: false,
       );
       return;
     }
@@ -92,15 +145,19 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Xác nhận xóa tài khoản'),
         content: Text('Bạn có chắc chắn muốn xóa tài khoản "${user.name}" (${user.email})?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Xóa', style: TextStyle(color: Colors.white)),
           ),
@@ -113,8 +170,10 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       if (!mounted) return;
       await _loadUsers();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã xóa tài khoản ${user.email}')),
+      _showAlertDialog(
+        title: 'Xóa tài khoản thành công',
+        message: 'Đã xóa tài khoản ${user.email} khỏi hệ thống!',
+        isSuccess: true,
       );
     }
   }
@@ -147,6 +206,10 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   children: [
                     TextFormField(
                       controller: nameController,
+                      keyboardType: TextInputType.text,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textCapitalization: TextCapitalization.none,
                       decoration: const InputDecoration(
                         labelText: 'Họ và tên',
                         prefixIcon: Icon(Icons.person_outline),
@@ -157,6 +220,13 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textCapitalization: TextCapitalization.none,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._\-+]')),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Email / Số điện thoại',
                         prefixIcon: Icon(Icons.email_outlined),
@@ -167,6 +237,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: passwordController,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      textCapitalization: TextCapitalization.none,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[\x20-\x7E]')),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Mật khẩu',
                         prefixIcon: Icon(Icons.lock_outline),
@@ -204,7 +280,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         isActive ? 'Tài khoản đang hoạt động' : 'Tài khoản bị khóa',
                       ),
                       value: isActive,
-                      activeThumbColor: const Color(0xFFFF5252),
+                      activeThumbColor: const Color(0xFF6FCF97),
                       onChanged: (val) {
                         setDialogState(() => isActive = val);
                       },
@@ -220,7 +296,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF5252),
+                  backgroundColor: const Color(0xFF6FCF97),
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () async {
@@ -236,8 +312,11 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         );
                         await _dbHelper.updateUser(updatedUser);
                         if (!dialogContext.mounted) return;
-                        ScaffoldMessenger.of(dialogContext).showSnackBar(
-                          const SnackBar(content: Text('Đã cập nhật thông tin tài khoản!')),
+                        Navigator.pop(dialogContext);
+                        _showAlertDialog(
+                          title: 'Cập nhật thành công',
+                          message: 'Đã cập nhật thông tin tài khoản!',
+                          isSuccess: true,
                         );
                       } else {
                         final newUser = UserModel(
@@ -250,17 +329,20 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         );
                         await _dbHelper.registerUser(newUser);
                         if (!dialogContext.mounted) return;
-                        ScaffoldMessenger.of(dialogContext).showSnackBar(
-                          const SnackBar(content: Text('Đã tạo tài khoản mới thành công!')),
+                        Navigator.pop(dialogContext);
+                        _showAlertDialog(
+                          title: 'Tạo tài khoản thành công',
+                          message: 'Đã tạo tài khoản mới thành công!',
+                          isSuccess: true,
                         );
                       }
-                      if (!dialogContext.mounted) return;
-                      Navigator.pop(dialogContext);
                       _loadUsers();
                     } catch (e) {
                       if (!dialogContext.mounted) return;
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                      _showAlertDialog(
+                        title: 'Lỗi',
+                        message: e.toString().replaceAll('Exception: ', ''),
+                        isSuccess: false,
                       );
                     }
                   }
@@ -283,7 +365,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = Color(0xFFFF5252);
+    const themeColor = Color(0xFF6FCF97);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

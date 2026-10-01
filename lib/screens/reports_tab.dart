@@ -1,0 +1,1671 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'home_screen.dart';
+
+class ReportsTab extends StatefulWidget {
+  final List<TransactionItem> transactions;
+
+  const ReportsTab({super.key, required this.transactions});
+
+  @override
+  State<ReportsTab> createState() => _ReportsTabState();
+}
+
+class _ReportsTabState extends State<ReportsTab> {
+  int _reportTypeIndex = 0; // 0: Chi tiêu, 1: Thu nhập, 2: Số dư
+  String _timeRange = 'Toàn bộ thời gian';
+  String _selectedCategoryFilter = 'Tất cả';
+  bool _showAllCategories = false;
+  int _trendMonthRange = 6; // 3t, 6t, 12t, 24t
+
+  String _formatCurrency(double amount) {
+    final isNegative = amount < 0;
+    final absAmount = amount.abs();
+    final formatted = absAmount.toInt().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
+    return '${isNegative ? '-' : ''}đ$formatted';
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Ăn uống':
+        return const Color(0xFFE53935);
+      case 'Hóa đơn':
+        return const Color(0xFF78909C);
+      case 'Di chuyển':
+        return const Color(0xFFFB8C00);
+      case 'Mua sắm':
+        return const Color(0xFF8E24AA);
+      case 'Giải trí':
+        return const Color(0xFFD81B60);
+      case 'Sức khoẻ':
+        return const Color(0xFF00ACC1);
+      case 'Làm đẹp':
+        return const Color(0xFFEC407A);
+      case 'Quần áo':
+        return const Color(0xFF5C6BC0);
+      case 'Học tập':
+        return const Color(0xFF1E88E5);
+      case 'Thú cưng':
+        return const Color(0xFFFF7043);
+      case 'Con cái':
+        return const Color(0xFFAB47BC);
+      case 'Hỗ trợ gia đình':
+        return const Color(0xFF26A69A);
+      case 'Bảo hiểm':
+        return const Color(0xFF3949AB);
+      case 'Thuế':
+        return const Color(0xFF5D4037);
+      case 'Công việc':
+        return const Color(0xFF455A64);
+      case 'Nhà ở':
+        return const Color(0xFF8D6E63);
+      case 'Tiền nợ':
+      case 'Tiền Nợ':
+        return const Color(0xFFD32F2F);
+      case 'Lương':
+        return const Color(0xFF43A047);
+      case 'Thưởng':
+        return const Color(0xFF00ACC1);
+      case 'Đầu tư':
+        return const Color(0xFF3949AB);
+      case 'Bán hàng':
+        return const Color(0xFF7CB342);
+      default:
+        return const Color(0xFF009688);
+    }
+  }
+
+  String _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Ăn uống':
+        return '🍜';
+      case 'Hóa đơn':
+        return '🧾';
+      case 'Di chuyển':
+        return '🚌';
+      case 'Mua sắm':
+        return '🛍️';
+      case 'Giải trí':
+        return '🎮';
+      case 'Sức khoẻ':
+        return '🏥';
+      case 'Làm đẹp':
+        return '💅';
+      case 'Quần áo':
+        return '👕';
+      case 'Học tập':
+        return '🎓';
+      case 'Thú cưng':
+        return '🐾';
+      case 'Con cái':
+        return '👶';
+      case 'Hỗ trợ gia đình':
+        return '👨‍👩‍👧';
+      case 'Bảo hiểm':
+        return '🛡️';
+      case 'Thuế':
+        return '🏛️';
+      case 'Công việc':
+        return '💼';
+      case 'Nhà ở':
+        return '🏠';
+      case 'Tiền nợ':
+      case 'Tiền Nợ':
+        return '💸';
+      case 'Lương':
+        return '💰';
+      case 'Thưởng':
+        return '🎁';
+      case 'Đầu tư':
+        return '📈';
+      case 'Bán hàng':
+        return '🏪';
+      default:
+        return '📦';
+    }
+  }
+
+  // Dynamic Filtering based on selected type (Chi tiêu / Thu nhập) and Category Filter
+  List<TransactionItem> get _filteredTransactions {
+    return widget.transactions.where((t) {
+      if (_reportTypeIndex == 0 && !t.isExpense) return false;
+      if (_reportTypeIndex == 1 && t.isExpense) return false;
+      if (_selectedCategoryFilter != 'Tất cả' && t.category != _selectedCategoryFilter) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  double get _totalReportAmount {
+    double sum = 0.0;
+    for (var t in _filteredTransactions) {
+      sum += t.amount;
+    }
+    return sum;
+  }
+
+  // Group transactions by category dynamically
+  List<Map<String, dynamic>> get _dynamicCategories {
+    final Map<String, double> categorySums = {};
+
+    for (var t in _filteredTransactions) {
+      categorySums[t.category] = (categorySums[t.category] ?? 0.0) + t.amount;
+    }
+
+    final total = _totalReportAmount;
+    final List<Map<String, dynamic>> result = [];
+
+    categorySums.forEach((catName, sumAmount) {
+      final pct = total > 0 ? (sumAmount / total) * 100.0 : 0.0;
+      result.add({
+        'name': catName,
+        'amount': sumAmount,
+        'percentage': pct,
+        'color': _getCategoryColor(catName),
+        'icon': _getCategoryIcon(catName),
+      });
+    });
+
+    result.sort((a, b) => (b['amount'] as double).compareTo(a['amount'] as double));
+    return result;
+  }
+
+  // Dynamic calculations for "Số dư" (Balance / Net Income)
+  double get _totalIncomeAll {
+    double sum = 0.0;
+    for (var t in widget.transactions) {
+      if (!t.isExpense) sum += t.amount;
+    }
+    return sum;
+  }
+
+  double get _totalExpenseAll {
+    double sum = 0.0;
+    for (var t in widget.transactions) {
+      if (t.isExpense) sum += t.amount;
+    }
+    return sum;
+  }
+
+  double get _netBalance => _totalIncomeAll - _totalExpenseAll;
+
+  double get _savingsPercentage {
+    if (_totalIncomeAll <= 0) return 0.0;
+    final pct = (_netBalance / _totalIncomeAll) * 100.0;
+    return pct < 0 ? 0.0 : pct;
+  }
+
+  String get _aiInsightQuote {
+    final categories = _dynamicCategories;
+    if (categories.isEmpty || _totalReportAmount == 0) {
+      if (_reportTypeIndex == 1) {
+        return '"Chưa có dữ liệu thu nhập. Hãy ghi nhận khoản thu đầu tiên để Piggy giúp bạn theo dõi tài chính nhé!"';
+      }
+      return '"Chưa có dữ liệu phân tích chi tiêu. Hãy ghi chép giao dịch đầu tiên để Piggy giúp bạn theo dõi tài chính nhé!"';
+    }
+    final top = categories.first;
+    if (_reportTypeIndex == 1) {
+      return '"${top['name']} gánh team dữ lắm, chiếm ${(top['percentage'] as double).toStringAsFixed(0)}%. Làm tốt lắm. Đã ghi nhận, không sao đâu."';
+    }
+    return '"${top['name']} là một trong những khoản chi lớn nhất của bạn, chiếm ${(top['percentage'] as double).toStringAsFixed(0)}%. Cùng Piggy duy trì quản lý tài chính thông minh nhé!"';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // // 1. Title for Balance Tab ("Thu nhập ròng")
+          // if (_reportTypeIndex == 2) ...[
+          //   const Padding(
+          //     padding: EdgeInsets.only(bottom: 8.0, left: 4.0),
+          //     child: Text(
+          //       'Thu nhập ròng',
+          //       style: TextStyle(
+          //         fontSize: 28,
+          //         fontWeight: FontWeight.w900,
+          //         color: Color(0xFF1E1E1E),
+          //       ),
+          //     ),
+          //   ),
+          // ],
+
+          // 2. Segmented Selector Tabs (Chi tiêu | Thu nhập | Số dư)
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECE7DB),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                _buildSegmentTab(0, 'Chi tiêu'),
+                _buildSegmentTab(1, 'Thu nhập'),
+                _buildSegmentTab(2, 'Số dư'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // 3. Filter Bar
+          Row(
+            children: [
+              InkWell(
+                onTap: _showTimeRangePicker,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE5E0D3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_month_outlined, size: 18, color: Color(0xFF4A463D)),
+                      const SizedBox(width: 6),
+                      Text(
+                        _timeRange,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF222222),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF4A463D)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              InkWell(
+                onTap: _showCategoryFilterPicker,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFE8F5E9) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFF2E7D32) : const Color(0xFFE5E0D3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF4A463D)),
+                      const SizedBox(width: 6),
+                      Text(
+                        _selectedCategoryFilter != 'Tất cả' ? _selectedCategoryFilter : 'Bộ lọc',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF222222),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Render view based on active tab:
+          if (_reportTypeIndex == 2)
+            _buildBalanceView()
+          else
+            _buildExpenseOrIncomeView(),
+        ],
+      ),
+    );
+  }
+
+  // --- EXPENSE / INCOME TAB VIEW ---
+  Widget _buildExpenseOrIncomeView() {
+    final categories = _dynamicCategories;
+    final displayedCategories = _showAllCategories
+        ? categories
+        : categories.take(5).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Hero Card (Chi tiêu / Thu nhập)
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF6FCF97),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0xFF6FCF97),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _reportTypeIndex == 0
+                        ? 'TỔNG ĐÃ CHI · TOÀN BỘ THỜI GIAN'
+                        : 'TỔNG ĐÃ KIẾM · TOÀN BỘ THỜI GIAN',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const PiggyAvatar(size: 48),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _formatCurrency(_totalReportAmount),
+                style: const TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _aiInsightQuote,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.black,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      '— Piggy, Người bạn ngân sách thân thiện của bạn',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Section: CHI TIẾT / NGUỒN THU
+        Text(
+          _reportTypeIndex == 1 ? 'NGUỒN THU' : 'CHI TIẾT',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
+            color: Color(0xFF706C66),
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        // Detail Card Container
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFECE7DB)),
+          ),
+          child: categories.isEmpty
+              ? Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Icon(
+                      _reportTypeIndex == 1
+                          ? Icons.account_balance_wallet_outlined
+                          : Icons.pie_chart_outline_rounded,
+                      size: 52,
+                      color: const Color(0xFFA5D6A7),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _reportTypeIndex == 1 ? 'Chưa có nguồn thu nào' : 'Chưa có dữ liệu báo cáo',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF222222),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _reportTypeIndex == 1
+                          ? 'Thêm giao dịch thu nhập mới để xem phân tích nguồn thu nhé!'
+                          : 'Thêm giao dịch mới để xem phân tích chi tiết theo danh mục nhé!',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                )
+              : Column(
+                  children: [
+                    // Donut Chart + Legend Row
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 120,
+                          height: 120,
+                          child: CustomPaint(
+                            painter: DonutChartPainter(
+                              percentages: categories
+                                  .map((c) => (c['percentage'] as double))
+                                  .toList(),
+                              colors: categories
+                                  .map((c) => (c['color'] as Color))
+                                  .toList(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: categories.take(5).map((cat) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 3),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 10,
+                                          height: 10,
+                                          decoration: BoxDecoration(
+                                            color: cat['color'] as Color,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          cat['name'] as String,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: Color(0xFF222222),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      '${(cat['percentage'] as double).toStringAsFixed(1)}%',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF222222),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                    const Divider(color: Color(0xFFF0EBE0), height: 1),
+                    const SizedBox(height: 12),
+
+                    // Category List with Progress Bars
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: displayedCategories.length,
+                      separatorBuilder: (ctx, i) => const SizedBox(height: 14),
+                      itemBuilder: (ctx, index) {
+                        final cat = displayedCategories[index];
+                        final double pct = cat['percentage'] as double;
+                        final Color catColor = cat['color'] as Color;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 38,
+                                      height: 38,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFFAF7EE),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          cat['icon'] as String,
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      cat['name'] as String,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF222222),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  _formatCurrency(cat['amount'] as double),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF222222),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: LinearProgressIndicator(
+                                      value: pct / 100.0,
+                                      minHeight: 10,
+                                      backgroundColor: const Color(0xFFF2EFE6),
+                                      valueColor: AlwaysStoppedAnimation<Color>(catColor),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                SizedBox(
+                                  width: 52,
+                                  child: Text(
+                                    '${pct.toStringAsFixed(1)}%',
+                                    textAlign: TextAlign.right,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF706C66),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+
+                    if (categories.length > 5) ...[
+                      const SizedBox(height: 16),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _showAllCategories = !_showAllCategories;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                          child: Text(
+                            _showAllCategories
+                                ? 'Thu gọn ^'
+                                : 'Hiện tất cả (${categories.length}) v',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF555048),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Section: XU HƯỚNG
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'XU HƯỚNG',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+                color: Color(0xFF706C66),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECE7DB),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: const [
+                  _SmallPillText('N'),
+                  SizedBox(width: 8),
+                  _SmallPillText('T'),
+                  SizedBox(width: 8),
+                  _SmallPillText('T', isActive: true),
+                  SizedBox(width: 8),
+                  _SmallPillText('N'),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // Trend Chart Container
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFECE7DB)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _formatCurrency(_totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0),
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF222222),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'TB / tháng · $_trendMonthRange gần nhất',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF888480),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [3, 6, 12, 24].map((range) {
+                      final isSel = _trendMonthRange == range;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() => _trendMonthRange = range);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSel ? const Color(0xFF222222) : const Color(0xFFF2EEE5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${range}t',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isSel ? Colors.white : const Color(0xFF666666),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              SizedBox(
+                height: 180,
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: StackedBarChartPainter(
+                    months: _getRecent6MonthsLabels(),
+                    transactions: _filteredTransactions,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- BALANCE TAB VIEW ("Số dư") ---
+  Widget _buildBalanceView() {
+    final net = _netBalance;
+    final isPositive = net >= 0;
+    final monthlyTableData = _getMonthlyTableData();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Hero Card Số Dư
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4F7F2),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFE2E9E0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'SỐ DƯ · TOÀN BỘ THỜI GIAN',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                  color: Color(0xFF706C66),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '${isPositive ? '+' : ''}${_formatCurrency(net)}',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w900,
+                      color: isPositive ? const Color(0xFF2E7D32) : Colors.red[700],
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'đã tiết kiệm',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF555048),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                _totalIncomeAll > 0
+                    ? 'Bạn đã giữ lại ${_savingsPercentage.toStringAsFixed(0)}% so với thu nhập. Đừng xài hết nhé.'
+                    : 'Chưa có dữ liệu số dư. Bắt đầu tích lũy tài chính ngay hôm nay nhé!',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF666666),
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Section: THU NHẬP & CHI TIÊU
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'THU NHẬP & CHI TIÊU',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+                color: Color(0xFF706C66),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECE7DB),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: const [
+                  _SmallPillText('N'),
+                  SizedBox(width: 8),
+                  _SmallPillText('T'),
+                  SizedBox(width: 8),
+                  _SmallPillText('T', isActive: true),
+                  SizedBox(width: 8),
+                  _SmallPillText('N'),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // Dual Bar & Line Trend Container
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFECE7DB)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Legend row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: const [
+                      _LegendLineDot('Thu nhập', Color(0xFF2E7D32)),
+                      SizedBox(width: 12),
+                      _LegendLineDot('Chi tiêu', Color(0xFFE53935)),
+                      SizedBox(width: 12),
+                      _LegendLineDot('Số dư', Color(0xFFFB8C00)),
+                    ],
+                  ),
+                  Row(
+                    children: [6, 12, 24].map((range) {
+                      final isSel = _trendMonthRange == range;
+                      return GestureDetector(
+                        onTap: () => setState(() => _trendMonthRange = range),
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isSel ? const Color(0xFF222222) : const Color(0xFFF2EEE5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${range}t',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isSel ? Colors.white : const Color(0xFF666666),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Dual-direction Bar + Balance Line Chart
+              SizedBox(
+                height: 190,
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: BalanceTrendChartPainter(
+                    months: _getRecent6MonthsLabels(),
+                    transactions: widget.transactions,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              const Divider(color: Color(0xFFF0EBE0), height: 1),
+              const SizedBox(height: 16),
+
+              // Monthly Breakdown Table
+              Row(
+                children: const [
+                  Expanded(flex: 2, child: Text('KỲ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                  Expanded(flex: 3, child: Text('THU NHẬP', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                  Expanded(flex: 3, child: Text('CHI TIÊU', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                  Expanded(flex: 3, child: Text('SỐ DƯ', textAlign: TextAlign.right, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              if (monthlyTableData.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  child: Center(
+                    child: Text('Chưa có dữ liệu kỳ tài chính', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: monthlyTableData.length,
+                  separatorBuilder: (ctx, i) => const Divider(color: Color(0xFFF5F2EA), height: 16),
+                  itemBuilder: (ctx, index) {
+                    final row = monthlyTableData[index];
+                    final double inc = row['income'] as double;
+                    final double exp = row['expense'] as double;
+                    final double bal = inc - exp;
+
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            row['label'] as String,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            _formatCurrency(inc),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            '-${_formatCurrency(exp)}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFFE53935)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            '${bal >= 0 ? '+' : ''}${_formatCurrency(bal)}',
+                            textAlign: TextAlign.right,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Map<String, dynamic>> _getMonthlyTableData() {
+    final now = DateTime.now();
+    final List<Map<String, dynamic>> list = [];
+
+    for (int i = 0; i < 6; i++) {
+      final targetMonth = DateTime(now.year, now.month - i, 1);
+      double inc = 0.0;
+      double exp = 0.0;
+
+      for (var t in widget.transactions) {
+        if (t.date.year == targetMonth.year && t.date.month == targetMonth.month) {
+          if (t.isExpense) {
+            exp += t.amount;
+          } else {
+            inc += t.amount;
+          }
+        }
+      }
+
+      if (inc > 0 || exp > 0) {
+        list.add({
+          'label': 'thg ${targetMonth.month} ${targetMonth.year.toString().substring(2)}',
+          'income': inc,
+          'expense': exp,
+        });
+      }
+    }
+    return list;
+  }
+
+  List<String> _getRecent6MonthsLabels() {
+    final now = DateTime.now();
+    final List<String> labels = [];
+    for (int i = 5; i >= 0; i--) {
+      final m = DateTime(now.year, now.month - i, 1);
+      labels.add('Thg ${m.month}');
+    }
+    return labels;
+  }
+
+  Widget _buildSegmentTab(int index, String label) {
+    final isSel = _reportTypeIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _reportTypeIndex = index;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSel ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isSel
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
+              color: isSel ? const Color(0xFF222222) : const Color(0xFF706C66),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showTimeRangePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        final options = [
+          'Toàn bộ thời gian',
+          'Tháng này',
+          'Tháng trước',
+          '3 tháng gần nhất',
+          'Năm nay',
+        ];
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Chọn khoảng thời gian',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...options.map((opt) => ListTile(
+                    title: Text(opt, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    trailing: _timeRange == opt
+                        ? const Icon(Icons.check_circle, color: Color(0xFF2E7D32))
+                        : null,
+                    onTap: () {
+                      setState(() => _timeRange = opt);
+                      Navigator.pop(ctx);
+                    },
+                  )),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCategoryFilterPicker() {
+    final expenseCategories = [
+      'Tất cả',
+      'Ăn uống',
+      'Hóa đơn',
+      'Di chuyển',
+      'Mua sắm',
+      'Giải trí',
+      'Sức khoẻ',
+      'Làm đẹp',
+      'Quần áo',
+      'Học tập',
+      'Thú cưng',
+      'Con cái',
+      'Hỗ trợ gia đình',
+      'Bảo hiểm',
+      'Thuế',
+      'Công việc',
+      'Nhà ở',
+      'Tiền nợ',
+      'Khác'
+    ];
+
+    final incomeCategories = [
+      'Tất cả',
+      'Lương',
+      'Thưởng',
+      'Đầu tư',
+      'Bán hàng',
+      'Khác'
+    ];
+
+    final categories = _reportTypeIndex == 1 ? incomeCategories : expenseCategories;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.65,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Lọc theo danh mục',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final cat = categories[index];
+                    final isSel = _selectedCategoryFilter == cat;
+                    return ListTile(
+                      leading: Text(
+                        cat == 'Tất cả' ? '📌' : _getCategoryIcon(cat),
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      title: Text(
+                        cat,
+                        style: TextStyle(
+                          fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                          color: isSel ? const Color(0xFF2E7D32) : Colors.black87,
+                        ),
+                      ),
+                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF2E7D32)) : null,
+                      onTap: () {
+                        setState(() {
+                          _selectedCategoryFilter = cat;
+                        });
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// --- DONUT CHART PAINTER ---
+class DonutChartPainter extends CustomPainter {
+  final List<double> percentages;
+  final List<Color> colors;
+
+  DonutChartPainter({required this.percentages, required this.colors});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 10;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 22.0
+      ..strokeCap = StrokeCap.butt;
+
+    if (percentages.isEmpty || percentages.fold(0.0, (a, b) => a + b) == 0) {
+      paint.color = const Color(0xFFE8E5D8);
+      canvas.drawCircle(center, radius, paint);
+      return;
+    }
+
+    double startAngle = -math.pi / 2;
+
+    for (int i = 0; i < percentages.length; i++) {
+      final sweepAngle = (percentages[i] / 100.0) * 2 * math.pi;
+      if (sweepAngle <= 0) continue;
+      paint.color = colors[i % colors.length];
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle - 0.05,
+        false,
+        paint,
+      );
+      startAngle += sweepAngle;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// --- STACKED BAR CHART PAINTER ---
+class StackedBarChartPainter extends CustomPainter {
+  final List<String> months;
+  final List<TransactionItem> transactions;
+
+  StackedBarChartPainter({required this.months, required this.transactions});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double barWidth = 26.0;
+    final double spacing = (size.width - (months.length * barWidth)) / (months.length + 1);
+
+    final now = DateTime.now();
+    final List<double> monthlyTotals = List.filled(months.length, 0.0);
+
+    for (var t in transactions) {
+      for (int i = 0; i < months.length; i++) {
+        final targetMonth = DateTime(now.year, now.month - (5 - i), 1);
+        if (t.date.year == targetMonth.year && t.date.month == targetMonth.month) {
+          monthlyTotals[i] += t.amount;
+        }
+      }
+    }
+
+    double maxVal = monthlyTotals.fold(0.0, math.max);
+    if (maxVal == 0) maxVal = 100000.0;
+
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    for (int i = 0; i < months.length; i++) {
+      final x = spacing + i * (barWidth + spacing);
+      final chartHeight = size.height - 28;
+
+      // Draw light background column
+      final bgPaint = Paint()..color = const Color(0xFFF5F3EC);
+      final RRect bgRect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, 0, barWidth, chartHeight),
+        const Radius.circular(6),
+      );
+      canvas.drawRRect(bgRect, bgPaint);
+
+      // Draw filled bar
+      final val = monthlyTotals[i];
+      if (val > 0) {
+        final segH = (val / maxVal) * chartHeight;
+        final segPaint = Paint()..color = const Color(0xFFA5D6A7);
+
+        final segRect = Rect.fromLTWH(x, chartHeight - segH, barWidth, segH);
+        canvas.drawRect(segRect, segPaint);
+      }
+
+      // Draw Month Label below bar
+      textPainter.text = TextSpan(
+        text: months[i],
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF706C66),
+        ),
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(x + (barWidth - textPainter.width) / 2, size.height - 18),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// --- BALANCE DUAL BAR & LINE CHART PAINTER ---
+class BalanceTrendChartPainter extends CustomPainter {
+  final List<String> months;
+  final List<TransactionItem> transactions;
+
+  BalanceTrendChartPainter({required this.months, required this.transactions});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double barWidth = 22.0;
+    final double spacing = (size.width - (months.length * barWidth)) / (months.length + 1);
+    final double zeroY = size.height * 0.55; // Baseline 0 line
+
+    final now = DateTime.now();
+    final List<double> monthlyIncomes = List.filled(months.length, 0.0);
+    final List<double> monthlyExpenses = List.filled(months.length, 0.0);
+
+    for (var t in transactions) {
+      for (int i = 0; i < months.length; i++) {
+        final targetMonth = DateTime(now.year, now.month - (5 - i), 1);
+        if (t.date.year == targetMonth.year && t.date.month == targetMonth.month) {
+          if (t.isExpense) {
+            monthlyExpenses[i] += t.amount;
+          } else {
+            monthlyIncomes[i] += t.amount;
+          }
+        }
+      }
+    }
+
+    double maxVal = 100000.0;
+    for (int i = 0; i < months.length; i++) {
+      maxVal = math.max(maxVal, math.max(monthlyIncomes[i], monthlyExpenses[i]));
+    }
+
+    // Draw 0 Baseline
+    final linePaint = Paint()
+      ..color = const Color(0xFFE0DACF)
+      ..strokeWidth = 1.0;
+    canvas.drawLine(Offset(0, zeroY), Offset(size.width, zeroY), linePaint);
+
+    final List<Offset> linePoints = [];
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    for (int i = 0; i < months.length; i++) {
+      final x = spacing + i * (barWidth + spacing);
+      final centerX = x + barWidth / 2;
+
+      // Draw Income Bar (pointing UP)
+      final inc = monthlyIncomes[i];
+      if (inc > 0) {
+        final incH = (inc / maxVal) * (zeroY - 20);
+        final incPaint = Paint()..color = const Color(0xFF2E7D32);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(x, zeroY - incH, barWidth, incH),
+            const Radius.circular(4),
+          ),
+          incPaint,
+        );
+      }
+
+      // Draw Expense Bar (pointing DOWN)
+      final exp = monthlyExpenses[i];
+      if (exp > 0) {
+        final expH = (exp / maxVal) * (size.height - zeroY - 25);
+        final expPaint = Paint()..color = const Color(0xFFE53935);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(x, zeroY, barWidth, expH),
+            const Radius.circular(4),
+          ),
+          expPaint,
+        );
+      }
+
+      // Balance point for line
+      final net = inc - exp;
+      final netY = zeroY - (net / maxVal) * (zeroY - 25);
+      linePoints.add(Offset(centerX, netY));
+
+      // Draw Month Label below bar
+      textPainter.text = TextSpan(
+        text: months[i],
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF706C66),
+        ),
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(centerX - textPainter.width / 2, size.height - 18),
+      );
+    }
+
+    // Draw Balance Connecting Yellow/Orange Line
+    if (linePoints.length > 1) {
+      final yellowLinePaint = Paint()
+        ..color = const Color(0xFFFB8C00)
+        ..strokeWidth = 3.0
+        ..style = PaintingStyle.stroke;
+
+      final path = Path()..moveTo(linePoints[0].dx, linePoints[0].dy);
+      for (int i = 1; i < linePoints.length; i++) {
+        path.lineTo(linePoints[i].dx, linePoints[i].dy);
+      }
+      canvas.drawPath(path, yellowLinePaint);
+
+      // Draw dots on nodes
+      final dotPaint = Paint()..color = const Color(0xFFFB8C00);
+      final dotInnerPaint = Paint()..color = Colors.white;
+      for (var pt in linePoints) {
+        canvas.drawCircle(pt, 5, dotPaint);
+        canvas.drawCircle(pt, 2.5, dotInnerPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _LegendLineDot extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _LegendLineDot(this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 3,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF555048),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SmallPillText extends StatelessWidget {
+  final String text;
+  final bool isActive;
+
+  const _SmallPillText(this.text, {this.isActive = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: isActive
+          ? BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+            )
+          : null,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+          color: isActive ? const Color(0xFF222222) : const Color(0xFF888480),
+        ),
+      ),
+    );
+  }
+}
+
+class PiggyAvatar extends StatelessWidget {
+  final double size;
+
+  const PiggyAvatar({super.key, this.size = 50});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD6D6),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFFFB2B2), width: size * 0.04),
+            ),
+          ),
+          Positioned(
+            top: size * 0.05,
+            left: size * 0.1,
+            child: Container(
+              width: size * 0.25,
+              height: size * 0.25,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF8A8A),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            top: size * 0.05,
+            right: size * 0.1,
+            child: Container(
+              width: size * 0.25,
+              height: size * 0.25,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF8A8A),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            top: size * 0.35,
+            left: size * 0.28,
+            child: Container(
+              width: size * 0.1,
+              height: size * 0.12,
+              decoration: const BoxDecoration(
+                color: Color(0xFF222222),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            top: size * 0.35,
+            right: size * 0.28,
+            child: Container(
+              width: size * 0.1,
+              height: size * 0.12,
+              decoration: const BoxDecoration(
+                color: Color(0xFF222222),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: size * 0.22,
+            child: Container(
+              width: size * 0.36,
+              height: size * 0.24,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6F80),
+                borderRadius: BorderRadius.circular(size * 0.12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: size * 0.07,
+                    height: size * 0.12,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD64D5F),
+                      borderRadius: BorderRadius.circular(size),
+                    ),
+                  ),
+                  Container(
+                    width: size * 0.07,
+                    height: size * 0.12,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD64D5F),
+                      borderRadius: BorderRadius.circular(size),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
