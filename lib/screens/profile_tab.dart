@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import '../database/db_helper.dart';
 import '../models/user_model.dart';
+import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/piggy_avatar.dart';
 
 class ProfileTab extends StatefulWidget {
   final UserModel currentUser;
   final String selectedAvatarKey;
+  final String selectedLanguage;
   final Function(UserModel updatedUser) onUserUpdated;
   final Function(String newAvatarKey) onAvatarChanged;
+  final Function(String newLanguage) onLanguageChanged;
   final VoidCallback onLogout;
 
   const ProfileTab({
     super.key,
     required this.currentUser,
     required this.selectedAvatarKey,
+    required this.selectedLanguage,
     required this.onUserUpdated,
     required this.onAvatarChanged,
+    required this.onLanguageChanged,
     required this.onLogout,
   });
 
@@ -28,7 +33,6 @@ class _ProfileTabState extends State<ProfileTab> {
   // Profile Settings state
   String _selectedLedger = 'Sổ cá nhân 1';
   final List<String> _ledgers = ['Sổ cá nhân 1', 'Sổ gia đình', 'Sổ công việc'];
-  String _selectedLanguage = 'Tiếng Việt';
   bool _showBalanceInTransactions = true;
   bool _dailyReminderEnabled = true;
 
@@ -37,6 +41,7 @@ class _ProfileTabState extends State<ProfileTab> {
   static const Color accentGreen = Color(0xFF2E7D32);
 
   void _showAvatarPickerSheet(StateSetter setDialogState) {
+    final lang = widget.selectedLanguage;
     final avatars = [
       {'key': 'piggy', 'name': 'Piggy Smart 🐷'},
       {'key': 'cat', 'name': 'Mochi Cat 🐱'},
@@ -69,9 +74,9 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Chọn Avatar đại diện',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                AppTranslations.tr(lang, 'choose_avatar'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               SizedBox(
@@ -85,12 +90,15 @@ class _ProfileTabState extends State<ProfileTab> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   icon: const Icon(Icons.add_photo_alternate_outlined),
-                  label: const Text('Tải ảnh từ máy / Thư viện', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  label: Text(
+                    AppTranslations.tr(lang, 'upload_from_device'),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
                   onPressed: () {
                     Navigator.pop(ctx);
                     showAppAlertDialog(
                       context: context,
-                      title: 'Đổi Avatar từ thiết bị',
+                      title: AppTranslations.tr(lang, 'choose_avatar'),
                       message: 'Đã cập nhật ảnh đại diện từ thiết bị thành công!',
                       isSuccess: true,
                     );
@@ -161,6 +169,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showEditProfileDialog() {
+    final lang = widget.selectedLanguage;
     final nameController = TextEditingController(text: widget.currentUser.name);
     final emailController = TextEditingController(text: widget.currentUser.email);
     final formKey = GlobalKey<FormState>();
@@ -171,13 +180,13 @@ class _ProfileTabState extends State<ProfileTab> {
         builder: (dialogCtx, setDialogState) {
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.person_outline_rounded, color: accentGreen, size: 28),
-                SizedBox(width: 8),
+                const Icon(Icons.person_outline_rounded, color: accentGreen, size: 28),
+                const SizedBox(width: 8),
                 Text(
-                  'Thông tin cá nhân',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  AppTranslations.tr(lang, 'personal_info'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -222,7 +231,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       enableSuggestions: false,
                       textCapitalization: TextCapitalization.none,
                       decoration: InputDecoration(
-                        labelText: 'Họ và tên',
+                        labelText: AppTranslations.tr(lang, 'full_name'),
                         prefixIcon: const Icon(Icons.person, color: accentGreen),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -237,7 +246,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       enableSuggestions: false,
                       textCapitalization: TextCapitalization.none,
                       decoration: InputDecoration(
-                        labelText: 'Email / Số điện thoại',
+                        labelText: AppTranslations.tr(lang, 'email_or_phone'),
                         prefixIcon: const Icon(Icons.email, color: accentGreen),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -286,7 +295,10 @@ class _ProfileTabState extends State<ProfileTab> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                child: Text(
+                  AppTranslations.tr(lang, 'cancel'),
+                  style: const TextStyle(color: Colors.grey),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -341,7 +353,10 @@ class _ProfileTabState extends State<ProfileTab> {
                     );
                   }
                 },
-                child: const Text('LƯU THAY ĐỔI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text(
+                  AppTranslations.tr(lang, 'save_changes'),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           );
@@ -351,6 +366,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showLedgerPickerSheet() {
+    final lang = widget.selectedLanguage;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -373,25 +389,25 @@ class _ProfileTabState extends State<ProfileTab> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Cài đặt Sổ sách',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    AppTranslations.tr(lang, 'ledger_settings_title'),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   ..._ledgers.map((ledger) {
                     final isSel = _selectedLedger == ledger;
                     return ListTile(
                       leading: const Icon(Icons.menu_book_rounded, color: accentGreen),
-                      title: Text(ledger, style: const TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: isSel ? const Text('Đang dùng', style: TextStyle(color: accentGreen, fontSize: 12, fontWeight: FontWeight.bold)) : null,
+                      title: Text(AppTranslations.trLedger(lang, ledger), style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: isSel ? Text(AppTranslations.tr(lang, 'in_use'), style: const TextStyle(color: accentGreen, fontSize: 12, fontWeight: FontWeight.bold)) : null,
                       trailing: isSel ? const Icon(Icons.check_circle, color: accentGreen) : null,
                       onTap: () {
                         setState(() => _selectedLedger = ledger);
                         Navigator.pop(ctx);
                         showAppAlertDialog(
                           context: context,
-                          title: 'Đã đổi Sổ sách',
-                          message: 'Đã chuyển sang sử dụng "$ledger"!',
+                          title: AppTranslations.tr(lang, 'ledger_book'),
+                          message: '${AppTranslations.tr(lang, 'ledger_book')}: ${AppTranslations.trLedger(lang, ledger)}',
                           isSuccess: true,
                         );
                       },
@@ -409,7 +425,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.add_rounded),
-                      label: const Text('Thêm sổ mới (Nâng cấp PRO)', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(AppTranslations.tr(lang, 'add_new_ledger'), style: const TextStyle(fontWeight: FontWeight.bold)),
                       onPressed: () {
                         Navigator.pop(ctx);
                         showAppAlertDialog(
@@ -431,6 +447,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showCategoriesManagerSheet() {
+    final lang = widget.selectedLanguage;
     final expenseCategories = [
       'Ăn uống', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí', 'Sức khoẻ', 'Làm đẹp',
       'Quần áo', 'Học tập', 'Thú cưng', 'Con cái', 'Hỗ trợ gia đình', 'Bảo hiểm', 'Thuế', 'Công việc', 'Nhà ở', 'Tiền nợ', 'Khác'
@@ -462,15 +479,15 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text('Danh mục Thu & Chi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(AppTranslations.tr(lang, 'income_expense_categories'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                const TabBar(
+                TabBar(
                   labelColor: accentGreen,
                   indicatorColor: accentGreen,
                   unselectedLabelColor: Colors.grey,
                   tabs: [
-                    Tab(text: 'Chi tiêu (18)'),
-                    Tab(text: 'Thu nhập (5)'),
+                    Tab(text: '${AppTranslations.tr(lang, 'expense')} (18)'),
+                    Tab(text: '${AppTranslations.tr(lang, 'income')} (5)'),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -483,7 +500,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           final cat = expenseCategories[i];
                           return ListTile(
                             leading: Icon(_getCategoryIconData(cat), color: accentGreen),
-                            title: Text(cat, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            title: Text(AppTranslations.trCategory(lang, cat), style: const TextStyle(fontWeight: FontWeight.w600)),
                             trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
                           );
                         },
@@ -494,7 +511,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           final cat = incomeCategories[i];
                           return ListTile(
                             leading: Icon(_getCategoryIconData(cat), color: accentGreen),
-                            title: Text(cat, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            title: Text(AppTranslations.trCategory(lang, cat), style: const TextStyle(fontWeight: FontWeight.w600)),
                             trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
                           );
                         },
@@ -561,30 +578,31 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showExportFileDialog() {
+    final lang = widget.selectedLanguage;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.file_download_outlined, color: accentGreen, size: 28),
-            SizedBox(width: 8),
-            Text('Xuất file báo cáo (Pro)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Icon(Icons.file_download_outlined, color: accentGreen, size: 28),
+            const SizedBox(width: 8),
+            Text(AppTranslations.tr(lang, 'export_report_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Chọn định dạng file xuất dữ liệu thu chi cá nhân:',
-              style: TextStyle(fontSize: 14, color: Colors.black87),
+            Text(
+              AppTranslations.tr(lang, 'export_report_subtitle'),
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
             ),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.description_outlined, color: Color(0xFF1E88E5)),
-              title: const Text('Xuất file CSV (.csv)', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('Phù hợp cho Google Sheets & hệ thống dữ liệu'),
+              title: Text(AppTranslations.tr(lang, 'export_csv_title'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(AppTranslations.tr(lang, 'export_csv_sub')),
               onTap: () {
                 Navigator.pop(ctx);
                 showAppAlertDialog(
@@ -598,8 +616,8 @@ class _ProfileTabState extends State<ProfileTab> {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.table_chart_outlined, color: Color(0xFF43A047)),
-              title: const Text('Xuất file Excel (.xlsx)', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('Đầy đủ định dạng & công thức Microsoft Excel'),
+              title: Text(AppTranslations.tr(lang, 'export_excel_title'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(AppTranslations.tr(lang, 'export_excel_sub')),
               onTap: () {
                 Navigator.pop(ctx);
                 showAppAlertDialog(
@@ -617,11 +635,12 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showLanguagePickerSheet() {
+    final lang = widget.selectedLanguage;
     final languages = [
       'English',
-      'Tiếng Nhật (日本語)',
-      'Tiếng Trung (中文)',
-      'Tiếng Hàn (한국어)',
+      '日本語',
+      '中文',
+      '한국어',
       'Tiếng Việt',
     ];
 
@@ -645,15 +664,18 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Chọn ngôn ngữ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                AppTranslations.tr(lang, 'language'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
-              ...languages.map((lang) {
-                final isSel = _selectedLanguage == lang;
+              ...languages.map((l) {
+                final isSel = widget.selectedLanguage == l;
                 return ListTile(
-                  title: Text(lang, style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
+                  title: Text(l, style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
                   trailing: isSel ? const Icon(Icons.check_circle, color: accentGreen) : null,
                   onTap: () {
-                    setState(() => _selectedLanguage = lang);
+                    widget.onLanguageChanged(l);
                     Navigator.pop(ctx);
                   },
                 );
@@ -666,25 +688,29 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showRatingDialog() {
+    final lang = widget.selectedLanguage;
     showAppAlertDialog(
       context: context,
-      title: 'Đánh giá PiggySmart',
-      message: 'Cảm ơn bạn đã sử dụng PiggySmart! Hãy để lại đánh giá 5 sao trên cửa hàng ứng dụng nhé ⭐⭐⭐⭐⭐',
+      title: AppTranslations.tr(lang, 'rate_app'),
+      message: AppTranslations.tr(lang, 'rate_message'),
       isSuccess: true,
     );
   }
 
   void _showSupportDialog() {
+    final lang = widget.selectedLanguage;
     showAppAlertDialog(
       context: context,
-      title: 'Liên hệ hỗ trợ',
-      message: 'Hỗ trợ khách hàng PiggySmart:\n• Email: support@piggysmart.com\n• Hotline: 1900-PIGGY\n• Giờ làm việc: 8:00 - 20:00 (T2 - T7)',
+      title: AppTranslations.tr(lang, 'contact_support'),
+      message: AppTranslations.tr(lang, 'support_message'),
       isSuccess: true,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final lang = widget.selectedLanguage;
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
@@ -719,7 +745,7 @@ class _ProfileTabState extends State<ProfileTab> {
                             Expanded(
                               child: Text(
                                 widget.currentUser.name,
-                                style: const TextStyle(
+                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF222222),
@@ -763,7 +789,7 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 20),
 
           // GROUP 0: TÀI KHOẢN CÁ NHÂN
-          const _SectionHeaderTitle('TÀI KHOẢN CÁ NHÂN'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'personal_account')),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
@@ -773,8 +799,8 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
             child: ListTile(
               leading: const Icon(Icons.person_outline_rounded, color: accentGreen),
-              title: const Text('Thông tin cá nhân', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-              subtitle: Text('Xem & chỉnh sửa họ tên, email, avatar (${widget.currentUser.name})', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              title: Text(AppTranslations.tr(lang, 'personal_info'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+              subtitle: Text('(${widget.currentUser.name})', style: const TextStyle(fontSize: 12, color: Colors.grey)),
               trailing: const Icon(Icons.edit_outlined, color: accentGreen),
               onTap: _showEditProfileDialog,
             ),
@@ -783,7 +809,7 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 24),
 
           // GROUP 1: CÀI ĐẶT SỔ
-          const _SectionHeaderTitle('CÀI ĐẶT SỔ'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'ledger_settings')),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
@@ -795,16 +821,16 @@ class _ProfileTabState extends State<ProfileTab> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.menu_book_rounded, color: accentGreen),
-                  title: const Text('Sổ sách', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  subtitle: Text('Đang dùng: $_selectedLedger', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: Text(AppTranslations.tr(lang, 'ledger_book'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  subtitle: Text(AppTranslations.trLedger(lang, _selectedLedger), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showLedgerPickerSheet,
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
                   leading: const Icon(Icons.category_outlined, color: accentGreen),
-                  title: const Text('Danh mục chi tiêu / thu nhập', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  subtitle: const Text('23 danh mục mặc định', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: Text(AppTranslations.tr(lang, 'categories_manager'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  subtitle: Text(AppTranslations.tr(lang, 'categories_count_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showCategoriesManagerSheet,
                 ),
@@ -813,7 +839,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   leading: const Icon(Icons.file_download_outlined, color: accentGreen),
                   title: Row(
                     children: [
-                      const Text('Xuất file CSV, XLSX ', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      Text(AppTranslations.tr(lang, 'export_files'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
@@ -824,7 +851,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       ),
                     ],
                   ),
-                  subtitle: const Text('Xuất báo cáo dữ liệu định dạng .csv & .xlsx', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  subtitle: const Text('.csv & .xlsx', style: TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showExportFileDialog,
                 ),
@@ -835,7 +862,7 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 24),
 
           // GROUP 2: CÀI ĐẶT ỨNG DỤNG
-          const _SectionHeaderTitle('CÀI ĐẶT ỨNG DỤNG'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'app_settings')),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
@@ -847,16 +874,16 @@ class _ProfileTabState extends State<ProfileTab> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.language_rounded, color: accentGreen),
-                  title: const Text('Ngôn ngữ', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  subtitle: Text(_selectedLanguage, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: Text(AppTranslations.tr(lang, 'language'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  subtitle: Text(widget.selectedLanguage, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showLanguagePickerSheet,
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 SwitchListTile(
                   secondary: const Icon(Icons.account_balance_wallet_outlined, color: accentGreen),
-                  title: const Text('Số dư', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  subtitle: const Text('Hiển thị số dư sau mỗi lần giao dịch', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: Text(AppTranslations.tr(lang, 'balance_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  subtitle: Text(AppTranslations.tr(lang, 'balance_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   value: _showBalanceInTransactions,
                   activeThumbColor: accentGreen,
                   onChanged: (val) {
@@ -866,8 +893,8 @@ class _ProfileTabState extends State<ProfileTab> {
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 SwitchListTile(
                   secondary: const Icon(Icons.notifications_active_outlined, color: accentGreen),
-                  title: const Text('Nhắc nhở hằng ngày', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  subtitle: const Text('Lời nhắc từ Piggy khi bạn quên ghi chép', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  subtitle: Text(AppTranslations.tr(lang, 'reminder_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   value: _dailyReminderEnabled,
                   activeThumbColor: accentGreen,
                   onChanged: (val) {
@@ -881,7 +908,7 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 24),
 
           // GROUP 3: GIỚI THIỆU
-          const _SectionHeaderTitle('GIỚI THIỆU'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'about')),
           const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
@@ -893,21 +920,21 @@ class _ProfileTabState extends State<ProfileTab> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.star_rate_rounded, color: accentGreen),
-                  title: const Text('Đánh giá PiggySmart', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(AppTranslations.tr(lang, 'rate_app'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showRatingDialog,
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
                   leading: const Icon(Icons.headset_mic_outlined, color: accentGreen),
-                  title: const Text('Liên hệ hỗ trợ', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showSupportDialog,
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
                   leading: const Icon(Icons.info_outline_rounded, color: accentGreen),
-                  title: const Text('Phiên bản', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   trailing: const Text('v1.0.0 (Pro Ready)', style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
                 ),
               ],
@@ -926,7 +953,10 @@ class _ProfileTabState extends State<ProfileTab> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text('Đăng xuất tài khoản', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 15)),
+              label: Text(
+                AppTranslations.tr(lang, 'logout'),
+                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 15),
+              ),
               onPressed: widget.onLogout,
             ),
           ),

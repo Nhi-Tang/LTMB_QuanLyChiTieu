@@ -1,11 +1,18 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/transaction_model.dart';
+import '../utils/app_translations.dart';
+import '../widgets/piggy_avatar.dart';
 
 class ReportsTab extends StatefulWidget {
   final List<TransactionItem> transactions;
+  final String selectedLanguage;
 
-  const ReportsTab({super.key, required this.transactions});
+  const ReportsTab({
+    super.key,
+    required this.transactions,
+    this.selectedLanguage = 'Tiếng Việt',
+  });
 
   @override
   State<ReportsTab> createState() => _ReportsTabState();
@@ -13,7 +20,7 @@ class ReportsTab extends StatefulWidget {
 
 class _ReportsTabState extends State<ReportsTab> {
   int _reportTypeIndex = 0; // 0: Chi tiêu, 1: Thu nhập, 2: Số dư
-  String _timeRange = 'Toàn bộ thời gian';
+  String _timeRange = 'all_time';
   String _selectedCategoryFilter = 'Tất cả';
   bool _showAllCategories = false;
   int _trendMonthRange = 6; // 3t, 6t, 12t, 24t
@@ -200,28 +207,43 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   String get _aiInsightQuote {
+    final lang = widget.selectedLanguage;
     final categories = _dynamicCategories;
     if (categories.isEmpty || _totalReportAmount == 0) {
       if (_reportTypeIndex == 1) {
-        return '"Chưa có dữ liệu thu nhập. Hãy ghi nhận khoản thu đầu tiên để Piggy giúp bạn theo dõi tài chính nhé!"';
+        return AppTranslations.tr(lang, 'piggy_quote_no_income');
       }
-      return '"Chưa có dữ liệu phân tích chi tiêu. Hãy ghi chép giao dịch đầu tiên để Piggy giúp bạn theo dõi tài chính nhé!"';
+      return AppTranslations.tr(lang, 'piggy_quote_no_expense');
     }
     final top = categories.first;
-    if (_reportTypeIndex == 1) {
-      return '"${top['name']} gánh team dữ lắm, chiếm ${(top['percentage'] as double).toStringAsFixed(0)}%. Làm tốt lắm. Đã ghi nhận, không sao đâu."';
-    }
-    return '"${top['name']} là một trong những khoản chi lớn nhất của bạn, chiếm ${(top['percentage'] as double).toStringAsFixed(0)}%. Cùng Piggy duy trì quản lý tài chính thông minh nhé!"';
+    final translatedCategory = AppTranslations.trCategory(lang, top['name'] as String);
+    return '"$translatedCategory ${(top['percentage'] as double).toStringAsFixed(0)}%."';
   }
 
   @override
   Widget build(BuildContext context) {
+    final lang = widget.selectedLanguage;
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 1. Title for Balance Tab
+          if (_reportTypeIndex == 2) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+              child: Text(
+                AppTranslations.tr(lang, 'net_income'),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1E1E1E),
+                ),
+              ),
+            ),
+          ],
 
           // 2. Segmented Selector Tabs (Chi tiêu | Thu nhập | Số dư)
           Container(
@@ -232,9 +254,9 @@ class _ReportsTabState extends State<ReportsTab> {
             ),
             child: Row(
               children: [
-                _buildSegmentTab(0, 'Chi tiêu'),
-                _buildSegmentTab(1, 'Thu nhập'),
-                _buildSegmentTab(2, 'Số dư'),
+                _buildSegmentTab(0, AppTranslations.tr(lang, 'expense')),
+                _buildSegmentTab(1, AppTranslations.tr(lang, 'income')),
+                _buildSegmentTab(2, AppTranslations.tr(lang, 'balance_toggle')),
               ],
             ),
           ),
@@ -259,7 +281,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       const Icon(Icons.calendar_month_outlined, size: 18, color: Color(0xFF4A463D)),
                       const SizedBox(width: 6),
                       Text(
-                        _timeRange,
+                        AppTranslations.tr(lang, _timeRange),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -290,7 +312,9 @@ class _ReportsTabState extends State<ReportsTab> {
                       const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF4A463D)),
                       const SizedBox(width: 6),
                       Text(
-                        _selectedCategoryFilter != 'Tất cả' ? _selectedCategoryFilter : 'Bộ lọc',
+                        _selectedCategoryFilter != 'Tất cả'
+                            ? AppTranslations.trCategory(lang, _selectedCategoryFilter)
+                            : AppTranslations.tr(lang, 'filter'),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -318,6 +342,7 @@ class _ReportsTabState extends State<ReportsTab> {
 
   // --- EXPENSE / INCOME TAB VIEW ---
   Widget _buildExpenseOrIncomeView() {
+    final lang = widget.selectedLanguage;
     final categories = _dynamicCategories;
     final displayedCategories = _showAllCategories
         ? categories
@@ -342,8 +367,8 @@ class _ReportsTabState extends State<ReportsTab> {
                 children: [
                   Text(
                     _reportTypeIndex == 0
-                        ? 'TỔNG ĐÃ CHI · TOÀN BỘ THỜI GIAN'
-                        : 'TỔNG ĐÃ KIẾM · TOÀN BỘ THỜI GIAN',
+                        ? '${AppTranslations.tr(lang, 'total_spent')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}'
+                        : '${AppTranslations.tr(lang, 'total_earned')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}',
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -385,9 +410,9 @@ class _ReportsTabState extends State<ReportsTab> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      '— Piggy, Người bạn ngân sách thân thiện của bạn',
-                      style: TextStyle(
+                    Text(
+                      '— ${AppTranslations.tr(lang, 'piggy_friend')}',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF706C66),
                         fontWeight: FontWeight.w500,
@@ -404,7 +429,7 @@ class _ReportsTabState extends State<ReportsTab> {
 
         // Section: CHI TIẾT / NGUỒN THU
         Text(
-          _reportTypeIndex == 1 ? 'NGUỒN THU' : 'CHI TIẾT',
+          _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'income_sources') : AppTranslations.tr(lang, 'details'),
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
@@ -436,7 +461,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      _reportTypeIndex == 1 ? 'Chưa có nguồn thu nào' : 'Chưa có dữ liệu báo cáo',
+                      _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'no_income_data') : AppTranslations.tr(lang, 'no_report_data'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -446,8 +471,8 @@ class _ReportsTabState extends State<ReportsTab> {
                     const SizedBox(height: 6),
                     Text(
                       _reportTypeIndex == 1
-                          ? 'Thêm giao dịch thu nhập mới để xem phân tích nguồn thu nhé!'
-                          : 'Thêm giao dịch mới để xem phân tích chi tiết theo danh mục nhé!',
+                          ? AppTranslations.tr(lang, 'add_income_for_analysis')
+                          : AppTranslations.tr(lang, 'add_transaction_for_analysis'),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
@@ -495,7 +520,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          cat['name'] as String,
+                                          AppTranslations.trCategory(lang, cat['name'] as String),
                                           style: const TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w600,
@@ -560,7 +585,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     ),
                                     const SizedBox(width: 12),
                                     Text(
-                                      cat['name'] as String,
+                                      AppTranslations.trCategory(lang, cat['name'] as String),
                                       style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
@@ -647,9 +672,9 @@ class _ReportsTabState extends State<ReportsTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'XU HƯỚNG',
-              style: TextStyle(
+            Text(
+              AppTranslations.tr(lang, 'trend'),
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
@@ -706,7 +731,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'TB / tháng · $_trendMonthRange gần nhất',
+                        '${AppTranslations.tr(lang, 'avg_per_month')} · $_trendMonthRange ${AppTranslations.tr(lang, 'recent_months')}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF888480),
@@ -764,6 +789,7 @@ class _ReportsTabState extends State<ReportsTab> {
 
   // --- BALANCE TAB VIEW ("Số dư") ---
   Widget _buildBalanceView() {
+    final lang = widget.selectedLanguage;
     final net = _netBalance;
     final isPositive = net >= 0;
     final monthlyTableData = _getMonthlyTableData();
@@ -775,7 +801,7 @@ class _ReportsTabState extends State<ReportsTab> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFF7F3),
+            color: const Color(0xFFF4F7F2),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: const Color(0xFFE2E9E0)),
           ),
@@ -783,7 +809,7 @@ class _ReportsTabState extends State<ReportsTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SỐ DƯ · TOÀN BỘ THỜI GIAN',
+                '${AppTranslations.tr(lang, 'balance_toggle').toUpperCase()} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}',
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -801,14 +827,14 @@ class _ReportsTabState extends State<ReportsTab> {
                     style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      color: isPositive ? const Color(0xFF2A835F) : Colors.red[700],
+                      color: isPositive ? const Color(0xFF2E7D32) : Colors.red[700],
                       letterSpacing: -0.5,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'đã tiết kiệm',
-                    style: TextStyle(
+                  Text(
+                    AppTranslations.tr(lang, 'saved_amount'),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF555048),
@@ -819,8 +845,8 @@ class _ReportsTabState extends State<ReportsTab> {
               const SizedBox(height: 10),
               Text(
                 _totalIncomeAll > 0
-                    ? 'Bạn đã giữ lại ${_savingsPercentage.toStringAsFixed(0)}% so với thu nhập. Đừng xài hết nhé.'
-                    : 'Chưa có dữ liệu số dư. Bắt đầu tích lũy tài chính ngay hôm nay nhé!',
+                    ? 'Bạn đã giữ lại ${_savingsPercentage.toStringAsFixed(0)}% so với thu nhập.'
+                    : AppTranslations.tr(lang, 'no_balance_data'),
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF666666),
@@ -837,9 +863,9 @@ class _ReportsTabState extends State<ReportsTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'THU NHẬP & CHI TIÊU',
-              style: TextStyle(
+            Text(
+              '${AppTranslations.tr(lang, 'income').toUpperCase()} & ${AppTranslations.tr(lang, 'expense').toUpperCase()}',
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
@@ -885,12 +911,12 @@ class _ReportsTabState extends State<ReportsTab> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    children: const [
-                      _LegendLineDot('Thu nhập', Color(0xFF2E7D32)),
-                      SizedBox(width: 12),
-                      _LegendLineDot('Chi tiêu', Color(0xFFE53935)),
-                      SizedBox(width: 12),
-                      _LegendLineDot('Số dư', Color(0xFFFB8C00)),
+                    children: [
+                      _LegendLineDot(AppTranslations.tr(lang, 'income'), const Color(0xFF2E7D32)),
+                      const SizedBox(width: 12),
+                      _LegendLineDot(AppTranslations.tr(lang, 'expense'), const Color(0xFFE53935)),
+                      const SizedBox(width: 12),
+                      _LegendLineDot(AppTranslations.tr(lang, 'balance_toggle'), const Color(0xFFFB8C00)),
                     ],
                   ),
                   Row(
@@ -940,21 +966,21 @@ class _ReportsTabState extends State<ReportsTab> {
 
               // Monthly Breakdown Table
               Row(
-                children: const [
-                  Expanded(flex: 2, child: Text('KỲ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                  Expanded(flex: 3, child: Text('THU NHẬP', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                  Expanded(flex: 3, child: Text('CHI TIÊU', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                  Expanded(flex: 3, child: Text('SỐ DƯ', textAlign: TextAlign.right, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                children: [
+                  const Expanded(flex: 2, child: Text('KỲ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                  Expanded(flex: 3, child: Text(AppTranslations.tr(lang, 'income').toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                  Expanded(flex: 3, child: Text(AppTranslations.tr(lang, 'expense').toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
+                  Expanded(flex: 3, child: Text(AppTranslations.tr(lang, 'balance_toggle').toUpperCase(), textAlign: TextAlign.right, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
                 ],
               ),
 
               const SizedBox(height: 12),
 
               if (monthlyTableData.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
                   child: Center(
-                    child: Text('Chưa có dữ liệu kỳ tài chính', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                    child: Text(AppTranslations.tr(lang, 'no_financial_period_data'), style: const TextStyle(fontSize: 13, color: Colors.grey)),
                   ),
                 )
               else
@@ -1044,11 +1070,12 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   List<String> _getRecent6MonthsLabels() {
+    final lang = widget.selectedLanguage;
     final now = DateTime.now();
     final List<String> labels = [];
     for (int i = 5; i >= 0; i--) {
       final m = DateTime(now.year, now.month - i, 1);
-      labels.add('Thg ${m.month}');
+      labels.add(AppTranslations.formatMonthYear(lang, m).split(' ')[0]);
     }
     return labels;
   }
@@ -1092,19 +1119,21 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   void _showTimeRangePicker() {
+    final lang = widget.selectedLanguage;
+    final options = [
+      'all_time',
+      'this_month',
+      'last_month',
+      'last_3_months',
+      'this_year',
+    ];
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        final options = [
-          'Toàn bộ thời gian',
-          'Tháng này',
-          'Tháng trước',
-          '3 tháng gần nhất',
-          'Năm nay',
-        ];
         return Container(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -1119,21 +1148,25 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Chọn khoảng thời gian',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                AppTranslations.tr(lang, 'filter'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              ...options.map((opt) => ListTile(
-                    title: Text(opt, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: _timeRange == opt
-                        ? const Icon(Icons.check_circle, color: Color(0xFF2E7D32))
-                        : null,
-                    onTap: () {
-                      setState(() => _timeRange = opt);
-                      Navigator.pop(ctx);
-                    },
-                  )),
+              ...options.map((key) {
+                final isSel = _timeRange == key;
+                return ListTile(
+                  title: Text(
+                    AppTranslations.tr(lang, key),
+                    style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
+                  ),
+                  trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF2E7D32)) : null,
+                  onTap: () {
+                    setState(() => _timeRange = key);
+                    Navigator.pop(ctx);
+                  },
+                );
+              }),
             ],
           ),
         );
@@ -1142,6 +1175,7 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   void _showCategoryFilterPicker() {
+    final lang = widget.selectedLanguage;
     final expenseCategories = [
       'Tất cả',
       'Ăn uống',
@@ -1199,9 +1233,9 @@ class _ReportsTabState extends State<ReportsTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Lọc theo danh mục',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                AppTranslations.tr(lang, 'filter_categories'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -1217,7 +1251,7 @@ class _ReportsTabState extends State<ReportsTab> {
                         style: const TextStyle(fontSize: 20),
                       ),
                       title: Text(
-                        cat,
+                        AppTranslations.trCategory(lang, cat),
                         style: TextStyle(
                           fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
                           color: isSel ? const Color(0xFF2E7D32) : Colors.black87,
@@ -1537,114 +1571,6 @@ class _SmallPillText extends StatelessWidget {
           fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
           color: isActive ? const Color(0xFF222222) : const Color(0xFF888480),
         ),
-      ),
-    );
-  }
-}
-
-class PiggyAvatar extends StatelessWidget {
-  final double size;
-
-  const PiggyAvatar({super.key, this.size = 50});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFD6D6),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFFFB2B2), width: size * 0.04),
-            ),
-          ),
-          Positioned(
-            top: size * 0.05,
-            left: size * 0.1,
-            child: Container(
-              width: size * 0.25,
-              height: size * 0.25,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF8A8A),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: size * 0.05,
-            right: size * 0.1,
-            child: Container(
-              width: size * 0.25,
-              height: size * 0.25,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF8A8A),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: size * 0.35,
-            left: size * 0.28,
-            child: Container(
-              width: size * 0.1,
-              height: size * 0.12,
-              decoration: const BoxDecoration(
-                color: Color(0xFF222222),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: size * 0.35,
-            right: size * 0.28,
-            child: Container(
-              width: size * 0.1,
-              height: size * 0.12,
-              decoration: const BoxDecoration(
-                color: Color(0xFF222222),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: size * 0.22,
-            child: Container(
-              width: size * 0.36,
-              height: size * 0.24,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF6F80),
-                borderRadius: BorderRadius.circular(size * 0.12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    width: size * 0.07,
-                    height: size * 0.12,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD64D5F),
-                      borderRadius: BorderRadius.circular(size),
-                    ),
-                  ),
-                  Container(
-                    width: size * 0.07,
-                    height: size * 0.12,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD64D5F),
-                      borderRadius: BorderRadius.circular(size),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

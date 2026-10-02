@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/transaction_model.dart';
 import '../models/user_model.dart';
+import '../utils/app_translations.dart';
 import '../widgets/piggy_avatar.dart';
 
 class HomeTab extends StatelessWidget {
   final UserModel currentUser;
   final String selectedAvatarKey;
+  final String selectedLanguage;
   final DateTime selectedMonth;
   final double totalIncome;
   final double totalExpense;
@@ -24,6 +26,7 @@ class HomeTab extends StatelessWidget {
     super.key,
     required this.currentUser,
     required this.selectedAvatarKey,
+    required this.selectedLanguage,
     required this.selectedMonth,
     required this.totalIncome,
     required this.totalExpense,
@@ -46,11 +49,11 @@ class HomeTab extends StatelessWidget {
   }
 
   String _formatMonthYear(DateTime date) {
-    return 'Tháng ${date.month}, ${date.year}';
+    return AppTranslations.formatMonthYear(selectedLanguage, date);
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day} Tháng ${date.month}, ${date.year}';
+    return AppTranslations.formatDate(selectedLanguage, date);
   }
 
   IconData _getCategoryIconData(String category) {
@@ -105,6 +108,8 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lang = selectedLanguage;
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 110),
@@ -201,9 +206,9 @@ class HomeTab extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Total Balance
-                const Text(
-                  'Tổng số dư',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.tr(lang, 'total_balance'),
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.white70,
                     fontWeight: FontWeight.w500,
@@ -227,7 +232,7 @@ class HomeTab extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _buildHeaderSummaryCard(
-                        title: 'Thu nhập',
+                        title: AppTranslations.tr(lang, 'income'),
                         amount: '+${_formatCurrency(totalIncome)}',
                         isIncome: true,
                         onTap: onAddIncome,
@@ -236,7 +241,7 @@ class HomeTab extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildHeaderSummaryCard(
-                        title: 'Chi tiêu',
+                        title: AppTranslations.tr(lang, 'expense'),
                         amount: '-${_formatCurrency(totalExpense)}',
                         isIncome: false,
                         onTap: onAddExpense,
@@ -256,9 +261,9 @@ class HomeTab extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Giao dịch gần đây',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.tr(lang, 'recent_transactions'),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF212121),
@@ -266,9 +271,9 @@ class HomeTab extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {},
-                  child: const Text(
-                    'Xem tất cả',
-                    style: TextStyle(
+                  child: Text(
+                    AppTranslations.tr(lang, 'view_all'),
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: accentGreen,
@@ -295,22 +300,22 @@ class HomeTab extends StatelessWidget {
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.receipt_long_outlined, size: 48, color: primaryGreen),
-                        SizedBox(height: 12),
+                      children: [
+                        const Icon(Icons.receipt_long_outlined, size: 48, color: primaryGreen),
+                        const SizedBox(height: 12),
                         Text(
-                          'Chưa có giao dịch nào trong tháng này',
-                          style: TextStyle(
+                          AppTranslations.tr(lang, 'no_transactions'),
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF424242),
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 6),
+                        const SizedBox(height: 6),
                         Text(
-                          'Nhấn vào nút Thu nhập/Chi tiêu ở trên hoặc nút (+) bên dưới để thêm giao dịch đầu tiên nhé!',
-                          style: TextStyle(
+                          AppTranslations.tr(lang, 'add_first_transaction'),
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Colors.grey,
                           ),

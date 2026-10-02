@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/transaction_model.dart';
 import '../models/user_model.dart';
+import '../utils/app_translations.dart';
 import '../widgets/add_transaction_modal.dart';
 import 'auth_screen.dart';
 import 'home_tab.dart';
@@ -22,10 +23,11 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime _selectedMonth;
   late UserModel _currentUser;
   String _selectedAvatarKey = 'piggy';
+  String _selectedLanguage = 'Tiếng Việt';
 
   // Theme Colors
-  static const Color primaryGreen = Color(0xFFEEEEEE);
-  static const Color darkGreen = Color(0xFF285A48);
+  static const Color primaryGreen = Color(0xFF2A835F);
+  static const Color darkGreen = Color(0xFF6FCF97);
 
   // Initial transactions list
   final List<TransactionItem> _transactions = [];
@@ -106,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) {
         return AddTransactionModal(
           defaultExpense: defaultExpense,
+          selectedLanguage: _selectedLanguage,
           onSave: (newItem) {
             setState(() {
               _transactions.insert(0, newItem);
@@ -130,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 HomeTab(
                   currentUser: _currentUser,
                   selectedAvatarKey: _selectedAvatarKey,
+                  selectedLanguage: _selectedLanguage,
                   selectedMonth: _selectedMonth,
                   totalIncome: _totalIncome,
                   totalExpense: _totalExpense,
@@ -155,11 +159,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 SavingsTab(
                   selectedAvatarKey: _selectedAvatarKey,
                   userName: _currentUser.name,
+                  selectedLanguage: _selectedLanguage,
                 ),
-                ReportsTab(transactions: _transactions),
+                ReportsTab(
+                  transactions: _transactions,
+                  selectedLanguage: _selectedLanguage,
+                ),
                 ProfileTab(
                   currentUser: _currentUser,
                   selectedAvatarKey: _selectedAvatarKey,
+                  selectedLanguage: _selectedLanguage,
                   onUserUpdated: (updatedUser) {
                     setState(() {
                       _currentUser = updatedUser;
@@ -168,6 +177,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   onAvatarChanged: (newAvatarKey) {
                     setState(() {
                       _selectedAvatarKey = newAvatarKey;
+                    });
+                  },
+                  onLanguageChanged: (newLanguage) {
+                    setState(() {
+                      _selectedLanguage = newLanguage;
                     });
                   },
                   onLogout: () => _logout(context),
@@ -187,6 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFloatingBottomTabBar() {
+    final lang = _selectedLanguage;
+
     return Container(
       height: 66,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -207,12 +223,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildFloatingNavItem(
             index: 0,
             icon: Icons.home_rounded,
-            label: 'Trang chủ',
+            label: AppTranslations.tr(lang, 'home'),
           ),
           _buildFloatingNavItem(
             index: 1,
             icon: Icons.savings_rounded,
-            label: 'Tiết kiệm',
+            label: AppTranslations.tr(lang, 'savings'),
           ),
           GestureDetector(
             onTap: () => _showAddTransactionModal(defaultExpense: true),
@@ -235,12 +251,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildFloatingNavItem(
             index: 2,
             icon: Icons.pie_chart_rounded,
-            label: 'Báo cáo',
+            label: AppTranslations.tr(lang, 'reports'),
           ),
           _buildFloatingNavItem(
             index: 3,
             icon: Icons.person_rounded,
-            label: 'Cá nhân',
+            label: AppTranslations.tr(lang, 'profile'),
           ),
         ],
       ),

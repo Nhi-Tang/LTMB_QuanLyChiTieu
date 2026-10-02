@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/transaction_model.dart';
+import '../utils/app_translations.dart';
 import 'app_alert_dialog.dart';
 
 class AddTransactionModal extends StatefulWidget {
   final bool defaultExpense;
+  final String selectedLanguage;
   final Function(TransactionItem item) onSave;
 
   const AddTransactionModal({
     super.key,
     required this.defaultExpense,
+    this.selectedLanguage = 'Tiếng Việt',
     required this.onSave,
   });
 
@@ -41,6 +44,8 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = widget.selectedLanguage;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
@@ -67,7 +72,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isExpense ? 'Nhập khoản chi tiêu' : 'Nhập khoản thu nhập',
+                isExpense ? AppTranslations.tr(lang, 'add_expense') : AppTranslations.tr(lang, 'add_income'),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -81,7 +86,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             children: [
               Expanded(
                 child: ChoiceChip(
-                  label: const Center(child: Text('Chi tiêu')),
+                  label: Center(child: Text(AppTranslations.tr(lang, 'expense'))),
                   selected: isExpense,
                   selectedColor: const Color(0xFFE57373),
                   labelStyle: TextStyle(
@@ -99,7 +104,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
               const SizedBox(width: 12),
               Expanded(
                 child: ChoiceChip(
-                  label: const Center(child: Text('Thu nhập')),
+                  label: Center(child: Text(AppTranslations.tr(lang, 'income'))),
                   selected: !isExpense,
                   selectedColor: accentGreen,
                   labelStyle: TextStyle(
@@ -122,7 +127,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             keyboardType: TextInputType.text,
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
-              labelText: isExpense ? 'Ghi chú / Tên chi tiêu' : 'Nguồn thu nhập / Ghi chú',
+              labelText: AppTranslations.tr(lang, 'transaction_title'),
               hintText: isExpense ? 'VD: Ăn sáng, Mua sắm...' : 'VD: Lương tháng, Tiền thưởng...',
               prefixIcon: const Icon(Icons.edit_note, color: accentGreen),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
@@ -136,7 +141,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
             ],
             decoration: InputDecoration(
-              labelText: 'Số tiền (đ)',
+              labelText: AppTranslations.tr(lang, 'amount'),
               hintText: 'VD: 500000',
               prefixIcon: const Icon(Icons.attach_money, color: accentGreen),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
@@ -146,14 +151,14 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
           DropdownButtonFormField<String>(
             initialValue: category,
             decoration: InputDecoration(
-              labelText: 'Danh mục',
+              labelText: AppTranslations.tr(lang, 'category'),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
             items: (isExpense
                     ? ['Ăn uống', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí', 'Sức khoẻ', 'Làm đẹp',
                     'Quần áo','Học tập','Thú cưng','Con cái','Hỗ trợ gia đình','Bảo hiểm','Thuế','Công việc','Nhà ở','Tiền nợ','Khác']
                     : ['Lương', 'Thưởng', 'Bán hàng', 'Đầu tư', 'Khác'])
-                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                .map((c) => DropdownMenuItem(value: c, child: Text(AppTranslations.trCategory(lang, c))))
                 .toList(),
             onChanged: (val) {
               if (val != null) setState(() => category = val);
@@ -175,7 +180,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                 if (title.isEmpty || amount == null || amount <= 0) {
                   showAppAlertDialog(
                     context: context,
-                    title: 'Thông báo',
+                    title: AppTranslations.tr(lang, 'language'),
                     message: 'Vui lòng nhập đầy đủ thông tin hợp lệ!',
                     isSuccess: false,
                   );
@@ -196,7 +201,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
 
                 showAppAlertDialog(
                   context: context,
-                  title: 'Thành công',
+                  title: AppTranslations.tr(lang, 'save_transaction'),
                   message: isExpense
                       ? 'Đã ghi nhận khoản chi tiêu mới! 💸'
                       : 'Đã ghi nhận khoản thu nhập mới! 💰',
@@ -204,7 +209,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                 );
               },
               child: Text(
-                isExpense ? 'LƯU KHOẢN CHI TIÊU' : 'LƯU KHOẢN THU NHẬP',
+                AppTranslations.tr(lang, 'save_transaction'),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),

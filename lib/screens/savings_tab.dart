@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/piggy_avatar.dart';
 
 class SavingsTab extends StatelessWidget {
   final String selectedAvatarKey;
   final String userName;
+  final String selectedLanguage;
 
   static const Color primaryGreen = Color(0xFFA5D6A7);
   static const Color darkGreen = Color(0xFF1B5E20);
@@ -14,10 +16,13 @@ class SavingsTab extends StatelessWidget {
     super.key,
     required this.selectedAvatarKey,
     required this.userName,
+    this.selectedLanguage = 'Tiếng Việt',
   });
 
   @override
   Widget build(BuildContext context) {
+    final lang = selectedLanguage;
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
@@ -52,9 +57,9 @@ class SavingsTab extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'HEO ĐẤT TIẾT KIỆM · PIGGY',
-                      style: TextStyle(
+                    Text(
+                      AppTranslations.tr(lang, 'piggy_savings_badge'),
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
@@ -69,9 +74,9 @@ class SavingsTab extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Quản lý Tiết kiệm',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.tr(lang, 'savings_management'),
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
@@ -84,13 +89,13 @@ class SavingsTab extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Text('🐖 ', style: TextStyle(fontSize: 20)),
+                      const Text('🐖 ', style: TextStyle(fontSize: 20)),
                       Expanded(
                         child: Text(
-                          '"Tích tiểu thành đại! Hãy tạo các mục tiêu tiết kiệm để Piggy giúp bạn chạm tới ước mơ nhé!"',
-                          style: TextStyle(
+                          AppTranslations.tr(lang, 'piggy_quote_home'),
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF222222),
@@ -111,9 +116,9 @@ class SavingsTab extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'MỤC TIÊU TIẾT KIỆM',
-                style: TextStyle(
+              Text(
+                AppTranslations.tr(lang, 'savings_goals'),
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
@@ -135,13 +140,16 @@ class SavingsTab extends StatelessWidget {
                 onPressed: () {
                   showAppAlertDialog(
                     context: context,
-                    title: 'Thêm mục tiêu tiết kiệm',
-                    message: 'Tính năng Tạo mục tiêu tiết kiệm mới (Mua xe, Du lịch, Mua nhà,...) đang được cập nhật!',
+                    title: AppTranslations.tr(lang, 'create_goal'),
+                    message: 'Tính năng Tạo mục tiêu tiết kiệm mới đang được cập nhật!',
                     isSuccess: true,
                   );
                 },
                 icon: const Icon(Icons.add_rounded, size: 16),
-                label: const Text('Tạo mục tiêu', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                label: Text(
+                  AppTranslations.tr(lang, 'create_goal'),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -159,22 +167,22 @@ class SavingsTab extends StatelessWidget {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.savings_outlined, size: 56, color: primaryGreen),
-                SizedBox(height: 14),
+              children: [
+                const Icon(Icons.savings_outlined, size: 56, color: primaryGreen),
+                const SizedBox(height: 14),
                 Text(
-                  'Chưa có mục tiêu tiết kiệm nào',
-                  style: TextStyle(
+                  AppTranslations.tr(lang, 'no_savings_goals'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF222222),
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Bấm nút (+ Tạo mục tiêu) ở trên để bắt đầu tích lũy heo đất cùng Piggy Smart ngay hôm nay!',
+                  AppTranslations.tr(lang, 'add_first_transaction'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
