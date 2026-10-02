@@ -24,9 +24,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
 
+  late UserModel _currentAdmin;
+
   @override
   void initState() {
     super.initState();
+    _currentAdmin = widget.currentAdmin;
     _loadUsers();
   }
 
@@ -303,9 +306,46 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   if (formKey.currentState!.validate()) {
                     try {
                       if (isEditing) {
+                        final oldName = userToEdit.name;
+                        final oldEmail = userToEdit.email;
+                        final oldRole = userToEdit.role;
+                        final newName = nameController.text.trim();
+                        final newEmail = emailController.text.trim().toLowerCase();
+                        final userId = userToEdit.id ?? 0;
+
+                        if (oldName != newName) {
+                          await _dbHelper.logUserChange(
+                            userId: userId,
+                            userEmail: userToEdit.email,
+                            changedField: 'Họ và tên',
+                            oldValue: oldName,
+                            newValue: newName,
+                          );
+                        }
+
+                        if (oldEmail != newEmail) {
+                          await _dbHelper.logUserChange(
+                            userId: userId,
+                            userEmail: userToEdit.email,
+                            changedField: 'Email / SĐT',
+                            oldValue: oldEmail,
+                            newValue: newEmail,
+                          );
+                        }
+
+                        if (oldRole != selectedRole) {
+                          await _dbHelper.logUserChange(
+                            userId: userId,
+                            userEmail: userToEdit.email,
+                            changedField: 'Quyền hạn (Role)',
+                            oldValue: oldRole,
+                            newValue: selectedRole,
+                          );
+                        }
+
                         final updatedUser = userToEdit.copyWith(
-                          name: nameController.text.trim(),
-                          email: emailController.text.trim().toLowerCase(),
+                          name: newName,
+                          email: newEmail,
                           password: passwordController.text,
                           role: selectedRole,
                           isActive: isActive,
@@ -356,6 +396,138 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     );
   }
 
+  void _showAdminProfileDialog() {
+    final nameController = TextEditingController(text: _currentAdmin.name);
+    final emailController = TextEditingController(text: _currentAdmin.email);
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.admin_panel_settings_outlined, color: Color(0xFF2E7D32), size: 28),
+            SizedBox(width: 8),
+            Text(
+              'Thông tin cá nhân Admin',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Xem và chỉnh sửa thông tin tài khoản Quản trị viên:',
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: nameController,
+                  keyboardType: TextInputType.text,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textCapitalization: TextCapitalization.none,
+                  decoration: InputDecoration(
+                    labelText: 'Họ và tên',
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFF2E7D32)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ và tên' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textCapitalization: TextCapitalization.none,
+                  decoration: InputDecoration(
+                    labelText: 'Email / Số điện thoại',
+                    prefixIcon: const Icon(Icons.email, color: Color(0xFF2E7D32)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email / SĐT' : null,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E7D32),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                final oldName = _currentAdmin.name;
+                final oldEmail = _currentAdmin.email;
+                final newName = nameController.text.trim();
+                final newEmail = emailController.text.trim().toLowerCase();
+                final userId = _currentAdmin.id ?? 0;
+
+                if (oldName != newName) {
+                  await _dbHelper.logUserChange(
+                    userId: userId,
+                    userEmail: _currentAdmin.email,
+                    changedField: 'Họ và tên',
+                    oldValue: oldName,
+                    newValue: newName,
+                  );
+                }
+
+                if (oldEmail != newEmail) {
+                  await _dbHelper.logUserChange(
+                    userId: userId,
+                    userEmail: _currentAdmin.email,
+                    changedField: 'Email / SĐT',
+                    oldValue: oldEmail,
+                    newValue: newEmail,
+                  );
+                }
+
+                final updatedAdmin = _currentAdmin.copyWith(
+                  name: newName,
+                  email: newEmail,
+                );
+
+                await _dbHelper.updateUser(updatedAdmin);
+
+                setState(() {
+                  _currentAdmin = updatedAdmin;
+                });
+
+                if (!ctx.mounted) return;
+                Navigator.pop(ctx);
+                _loadUsers();
+
+                _showAlertDialog(
+                  title: 'Thành công',
+                  message: 'Đã cập nhật thông tin tài khoản Admin thành công!',
+                  isSuccess: true,
+                );
+              }
+            },
+            child: const Text('LƯU THAY ĐỔI', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _logout() {
     Navigator.pushReplacement(
       context,
@@ -365,7 +537,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = Color(0xFF6FCF97);
+    const themeColor = Color(0xFF2E7D32);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -383,6 +555,11 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         backgroundColor: themeColor,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline, color: Colors.white),
+            tooltip: 'Thông tin cá nhân Admin',
+            onPressed: _showAdminProfileDialog,
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             tooltip: 'Đăng xuất',

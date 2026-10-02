@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../models/transaction_model.dart';
 
 class ReportsTab extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -222,20 +222,6 @@ class _ReportsTabState extends State<ReportsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // // 1. Title for Balance Tab ("Thu nhập ròng")
-          // if (_reportTypeIndex == 2) ...[
-          //   const Padding(
-          //     padding: EdgeInsets.only(bottom: 8.0, left: 4.0),
-          //     child: Text(
-          //       'Thu nhập ròng',
-          //       style: TextStyle(
-          //         fontSize: 28,
-          //         fontWeight: FontWeight.w900,
-          //         color: Color(0xFF1E1E1E),
-          //       ),
-          //     ),
-          //   ),
-          // ],
 
           // 2. Segmented Selector Tabs (Chi tiêu | Thu nhập | Số dư)
           Container(
@@ -344,15 +330,9 @@ class _ReportsTabState extends State<ReportsTab> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF6FCF97),
+            color: const Color(0xFFF4F7F2),
             borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0xFF6FCF97),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: const Color(0xFFE2E9E0)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,7 +348,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
-                      color: Colors.black,
+                      color: Color(0xFF706C66),
                     ),
                   ),
                   const PiggyAvatar(size: 48),
@@ -377,10 +357,10 @@ class _ReportsTabState extends State<ReportsTab> {
               const SizedBox(height: 4),
               Text(
                 _formatCurrency(_totalReportAmount),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: _reportTypeIndex == 1 ? const Color(0xFF2E7D32) : const Color(0xFF222222),
                   letterSpacing: -0.5,
                 ),
               ),
@@ -388,9 +368,9 @@ class _ReportsTabState extends State<ReportsTab> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  border: Border.all(color: const Color(0xFFE5E0D3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +380,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       style: const TextStyle(
                         fontSize: 13,
                         fontStyle: FontStyle.italic,
-                        color: Colors.black,
+                        color: Color(0xFF222222),
                         height: 1.4,
                       ),
                     ),
@@ -409,7 +389,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       '— Piggy, Người bạn ngân sách thân thiện của bạn',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.black,
+                        color: Color(0xFF706C66),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -795,7 +775,7 @@ class _ReportsTabState extends State<ReportsTab> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFF4F7F2),
+            color: const Color(0xFFFFF7F3),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: const Color(0xFFE2E9E0)),
           ),
@@ -821,7 +801,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      color: isPositive ? const Color(0xFF2E7D32) : Colors.red[700],
+                      color: isPositive ? const Color(0xFF2A835F) : Colors.red[700],
                       letterSpacing: -0.5,
                     ),
                   ),

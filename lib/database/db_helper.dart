@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import '../models/user_change_model.dart';
 import '../models/user_model.dart';
 
 class DatabaseHelper {
@@ -28,8 +29,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -43,6 +45,18 @@ class DatabaseHelper {
         role TEXT NOT NULL DEFAULT 'user',
         isActive INTEGER NOT NULL DEFAULT 1,
         createdAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS user_change (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        user_email TEXT NOT NULL,
+        changed_field TEXT NOT NULL,
+        old_value TEXT,
+        new_value TEXT,
+        changed_at TEXT NOT NULL
       )
     ''');
 
@@ -66,6 +80,22 @@ class DatabaseHelper {
       'isActive': 1,
       'createdAt': now,
     });
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS user_change (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          user_email TEXT NOT NULL,
+          changed_field TEXT NOT NULL,
+          old_value TEXT,
+          new_value TEXT,
+          changed_at TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   // --- USER AUTHENTICATION & REGISTRATION ---
@@ -175,5 +205,46 @@ class DatabaseHelper {
       'admins': admins,
       'active': activeUsers,
     };
+  }
+
+  // --- USER CHANGE AUDIT LOG METHODS ---
+
+  Future<int> logUserChange({
+    required int userId,
+    required String userEmail,
+    required String changedField,
+    required String oldValue,
+    required String newValue,
+  }) async {
+    final db = await instance.database;
+    final change = UserChangeModel(
+      userId: userId,
+      userEmail: userEmail,
+      changedField: changedField,
+      oldValue: oldValue,
+      newValue: newValue,
+      changedAt: DateTime.now().toIso8601String(),
+    );
+    return await db.insert('user_change', change.toMap());
+  }
+
+  Future<List<UserChangeModel>> getUserChanges(int userId) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'user_change',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: 'id DESC',
+    );
+    return result.map((map) => UserChangeModel.fromMap(map)).toList();
+  }
+
+  Future<List<UserChangeModel>> getAllUserChanges() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'user_change',
+      orderBy: 'id DESC',
+    );
+    return result.map((map) => UserChangeModel.fromMap(map)).toList();
   }
 }
