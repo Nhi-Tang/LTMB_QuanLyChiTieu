@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import '../models/savings_goal_model.dart';
+import '../models/savings_transaction_model.dart';
 import '../models/user_change_model.dart';
 import '../models/user_model.dart';
 
@@ -29,7 +31,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -57,6 +59,31 @@ class DatabaseHelper {
         old_value TEXT,
         new_value TEXT,
         changed_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS savings_goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        target_amount REAL NOT NULL,
+        current_amount REAL NOT NULL,
+        deadline TEXT,
+        icon TEXT NOT NULL,
+        color TEXT NOT NULL,
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS savings_transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        goal_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        is_deposit INTEGER NOT NULL DEFAULT 1,
+        note TEXT,
+        date TEXT NOT NULL
       )
     ''');
 
@@ -93,6 +120,31 @@ class DatabaseHelper {
           old_value TEXT,
           new_value TEXT,
           changed_at TEXT NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS savings_goals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          target_amount REAL NOT NULL,
+          current_amount REAL NOT NULL,
+          deadline TEXT,
+          icon TEXT NOT NULL,
+          color TEXT NOT NULL,
+          is_completed INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS savings_transactions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          goal_id INTEGER NOT NULL,
+          amount REAL NOT NULL,
+          is_deposit INTEGER NOT NULL DEFAULT 1,
+          note TEXT,
+          date TEXT NOT NULL
         )
       ''');
     }
@@ -246,5 +298,71 @@ class DatabaseHelper {
       orderBy: 'id DESC',
     );
     return result.map((map) => UserChangeModel.fromMap(map)).toList();
+  }
+
+  // --- SAVINGS GOALS & TRANSACTIONS CRUD ---
+
+  Future<List<SavingsGoalModel>> getSavingsGoals() async {
+    final db = await instance.database;
+    final result = await db.query('savings_goals', orderBy: 'id DESC');
+    return result.map((map) => SavingsGoalModel.fromMap(map)).toList();
+  }
+
+  Future<int> insertSavingsGoal(SavingsGoalModel goal) async {
+    final db = await instance.database;
+    return await db.insert('savings_goals', goal.toMap());
+  }
+
+  Future<int> updateSavingsGoal(SavingsGoalModel goal) async {
+    final db = await instance.database;
+    return await db.update(
+      'savings_goals',
+      goal.toMap(),
+      where: 'id = ?',
+      whereArgs: [goal.id],
+    );
+  }
+
+  Future<int> deleteSavingsGoal(int goalId) async {
+    final db = await instance.database;
+    await db.delete('savings_transactions', where: 'goal_id = ?', whereArgs: [goalId]);
+    return await db.delete('savings_goals', where: 'id = ?', whereArgs: [goalId]);
+  }
+
+  Future<List<SavingsTransactionModel>> getSavingsTransactions(int goalId) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'savings_transactions',
+      where: 'goal_id = ?',
+      whereArgs: [goalId],
+      orderBy: 'id DESC',
+    );
+    return result.map((map) => SavingsTransactionModel.fromMap(map)).toList();
+  }
+
+  Future<int> addSavingsTransaction(SavingsTransactionModel tx) async {
+    final db = await instance.database;
+    final txId = await db.insert('savings_transactions', tx.toMap());
+
+    // Update goal current amount (do NOT auto-complete)
+    final goalRes = await db.query('savings_goals', where: 'id = ?', whereArgs: [tx.goalId]);
+    if (goalRes.isNotEmpty) {
+      final goal = SavingsGoalModel.fromMap(goalRes.first);
+      double newAmount = tx.isDeposit
+          ? goal.currentAmount + tx.amount
+          : goal.currentAmount - tx.amount;
+      if (newAmount < 0) newAmount = 0;
+
+      await db.update(
+        'savings_goals',
+        {
+          'current_amount': newAmount,
+        },
+        where: 'id = ?',
+        whereArgs: [tx.goalId],
+      );
+    }
+
+    return txId;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../database/db_helper.dart';
 import '../models/user_model.dart';
 import '../utils/app_translations.dart';
@@ -56,116 +57,137 @@ class _ProfileTabState extends State<ProfileTab> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppTranslations.tr(lang, 'choose_avatar'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
-                    foregroundColor: darkGreen,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                const SizedBox(height: 16),
+                Text(
+                  AppTranslations.tr(lang, 'choose_avatar'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryGreen,
+                      foregroundColor: darkGreen,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    label: Text(
+                      AppTranslations.tr(lang, 'upload_from_device'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _showDeviceImagePicker(setDialogState);
+                    },
                   ),
-                  icon: const Icon(Icons.add_photo_alternate_outlined),
-                  label: Text(
-                    AppTranslations.tr(lang, 'upload_from_device'),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.1,
                   ),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    showAppAlertDialog(
-                      context: context,
-                      title: AppTranslations.tr(lang, 'choose_avatar'),
-                      message: 'Đã cập nhật ảnh đại diện từ thiết bị thành công!',
-                      isSuccess: true,
+                  itemCount: avatars.length,
+                  itemBuilder: (ctx, i) {
+                    final item = avatars[i];
+                    final key = item['key'] as String;
+                    final isSel = widget.selectedAvatarKey == key;
+
+                    return InkWell(
+                      onTap: () {
+                        widget.onAvatarChanged(key);
+                        setDialogState(() {});
+                        Navigator.pop(ctx);
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSel ? primaryGreen.withValues(alpha: 0.3) : const Color(0xFFFAF7EE),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSel ? accentGreen : const Color(0xFFE8E2D5),
+                            width: isSel ? 2 : 1,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            buildUserAvatar(
+                              avatarKey: key,
+                              userName: widget.currentUser.name,
+                              size: 38,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              item['name'] as String,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                                color: isSel ? darkGreen : Colors.black87,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),
-              ),
-              const SizedBox(height: 16),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.1,
-                ),
-                itemCount: avatars.length,
-                itemBuilder: (ctx, i) {
-                  final item = avatars[i];
-                  final key = item['key'] as String;
-                  final isSel = widget.selectedAvatarKey == key;
-
-                  return InkWell(
-                    onTap: () {
-                      widget.onAvatarChanged(key);
-                      setDialogState(() {});
-                      Navigator.pop(ctx);
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSel ? primaryGreen.withValues(alpha: 0.3) : const Color(0xFFFAF7EE),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSel ? accentGreen : const Color(0xFFE8E2D5),
-                          width: isSel ? 2 : 1,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          buildUserAvatar(
-                            avatarKey: key,
-                            userName: widget.currentUser.name,
-                            size: 38,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            item['name'] as String,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                              color: isSel ? darkGreen : Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
+  }
+
+  Future<void> _showDeviceImagePicker(StateSetter setDialogState) async {
+    final lang = widget.selectedLanguage;
+    Navigator.pop(context); // Close bottom sheet
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        widget.onAvatarChanged(pickedFile.path);
+        setDialogState(() {});
+        if (!mounted) return;
+        showAppAlertDialog(
+          context: context,
+          title: AppTranslations.tr(lang, 'choose_avatar'),
+          message: 'Đã cập nhật ảnh đại diện từ thiết bị thành công!',
+          isSuccess: true,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
   }
 
   void _showEditProfileDialog() {

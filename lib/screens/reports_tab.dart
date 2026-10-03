@@ -442,6 +442,7 @@ class _ReportsTabState extends State<ReportsTab> {
 
         // Detail Card Container
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -449,35 +450,40 @@ class _ReportsTabState extends State<ReportsTab> {
             border: Border.all(color: const Color(0xFFECE7DB)),
           ),
           child: categories.isEmpty
-              ? Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Icon(
-                      _reportTypeIndex == 1
-                          ? Icons.account_balance_wallet_outlined
-                          : Icons.pie_chart_outline_rounded,
-                      size: 52,
-                      color: const Color(0xFFA5D6A7),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'no_income_data') : AppTranslations.tr(lang, 'no_report_data'),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF222222),
+              ? SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 16),
+                      Icon(
+                        _reportTypeIndex == 1
+                            ? Icons.account_balance_wallet_outlined
+                            : Icons.pie_chart_outline_rounded,
+                        size: 52,
+                        color: const Color(0xFFA5D6A7),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _reportTypeIndex == 1
-                          ? AppTranslations.tr(lang, 'add_income_for_analysis')
-                          : AppTranslations.tr(lang, 'add_transaction_for_analysis'),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                      const SizedBox(height: 12),
+                      Text(
+                        _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'no_income_data') : AppTranslations.tr(lang, 'no_report_data'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF222222),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _reportTypeIndex == 1
+                            ? AppTranslations.tr(lang, 'add_income_for_analysis')
+                            : AppTranslations.tr(lang, 'add_transaction_for_analysis'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 )
               : Column(
                   children: [
