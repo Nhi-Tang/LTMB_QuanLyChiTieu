@@ -29,12 +29,17 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(
+    final db = await openDatabase(
       path,
       version: 3,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
+
+    // Ensure all users except admin are demoted to free ('user')
+    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
+
+    return db;
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -98,7 +103,7 @@ class DatabaseHelper {
       'createdAt': now,
     });
 
-    // Seed default Demo User account
+    // Seed default Demo User account (Free)
     await db.insert('users', {
       'name': 'Nguyễn Văn A',
       'email': 'user@piggysmart.com',
@@ -110,6 +115,7 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS user_change (
@@ -155,7 +161,9 @@ class DatabaseHelper {
   Future<int> registerUser(UserModel user) async {
     final db = await instance.database;
     try {
-      return await db.insert('users', user.toMap());
+      // New registered users are always free ('user') unless specified as admin
+      final userToInsert = user.copyWith(role: user.email == 'admin@piggysmart.com' ? 'admin' : 'user');
+      return await db.insert('users', userToInsert.toMap());
     } catch (e) {
       if (e.toString().contains('UNIQUE constraint failed')) {
         throw Exception('Email hoặc số điện thoại này đã được đăng ký!');

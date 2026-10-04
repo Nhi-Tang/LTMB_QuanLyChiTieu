@@ -230,21 +230,6 @@ class _ReportsTabState extends State<ReportsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Title for Balance Tab
-          if (_reportTypeIndex == 2) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
-              child: Text(
-                AppTranslations.tr(lang, 'net_income'),
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1E1E1E),
-                ),
-              ),
-            ),
-          ],
-
           // 2. Segmented Selector Tabs (Chi tiêu | Thu nhập | Số dư)
           Container(
             padding: const EdgeInsets.all(4),
@@ -724,28 +709,34 @@ class _ReportsTabState extends State<ReportsTab> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _formatCurrency(_totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0),
-                        style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF222222),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _formatCurrency(_totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF222222),
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${AppTranslations.tr(lang, 'avg_per_month')} · $_trendMonthRange ${AppTranslations.tr(lang, 'recent_months')}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF888480),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${AppTranslations.tr(lang, 'avg_per_month')} · $_trendMonthRange ${AppTranslations.tr(lang, 'recent_months')}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF888480),
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 6),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [3, 6, 12, 24].map((range) {
                       final isSel = _trendMonthRange == range;
                       return GestureDetector(
@@ -753,16 +744,16 @@ class _ReportsTabState extends State<ReportsTab> {
                           setState(() => _trendMonthRange = range);
                         },
                         child: Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          margin: const EdgeInsets.only(left: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
                             color: isSel ? const Color(0xFF222222) : const Color(0xFFF2EEE5),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             '${range}t',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: isSel ? Colors.white : const Color(0xFF666666),
                             ),
@@ -916,31 +907,35 @@ class _ReportsTabState extends State<ReportsTab> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      _LegendLineDot(AppTranslations.tr(lang, 'income'), const Color(0xFF2E7D32)),
-                      const SizedBox(width: 12),
-                      _LegendLineDot(AppTranslations.tr(lang, 'expense'), const Color(0xFFE53935)),
-                      const SizedBox(width: 12),
-                      _LegendLineDot(AppTranslations.tr(lang, 'balance_toggle'), const Color(0xFFFB8C00)),
-                    ],
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        _LegendLineDot(AppTranslations.tr(lang, 'income'), const Color(0xFF2E7D32)),
+                        _LegendLineDot(AppTranslations.tr(lang, 'expense'), const Color(0xFFE53935)),
+                        _LegendLineDot(AppTranslations.tr(lang, 'balance_toggle'), const Color(0xFFFB8C00)),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 4),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [6, 12, 24].map((range) {
                       final isSel = _trendMonthRange == range;
                       return GestureDetector(
                         onTap: () => setState(() => _trendMonthRange = range),
                         child: Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          margin: const EdgeInsets.only(left: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
                             color: isSel ? const Color(0xFF222222) : const Color(0xFFF2EEE5),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             '${range}t',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: isSel ? Colors.white : const Color(0xFF666666),
                             ),
