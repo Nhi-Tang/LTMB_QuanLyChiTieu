@@ -31,7 +31,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -51,7 +51,13 @@ class DatabaseHelper {
         password TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'user',
         isActive INTEGER NOT NULL DEFAULT 1,
-        createdAt TEXT NOT NULL
+        createdAt TEXT NOT NULL,
+        uid TEXT,
+        photoUrl TEXT,
+        provider TEXT DEFAULT 'password',
+        plan TEXT DEFAULT 'free',
+        proExpiredAt TEXT,
+        lastLoginAt TEXT
       )
     ''');
 
@@ -101,6 +107,8 @@ class DatabaseHelper {
       'role': 'admin',
       'isActive': 1,
       'createdAt': now,
+      'provider': 'password',
+      'plan': 'pro',
     });
 
     // Seed default Demo User account (Free)
@@ -111,6 +119,8 @@ class DatabaseHelper {
       'role': 'user',
       'isActive': 1,
       'createdAt': now,
+      'provider': 'password',
+      'plan': 'free',
     });
   }
 
@@ -153,6 +163,26 @@ class DatabaseHelper {
           date TEXT NOT NULL
         )
       ''');
+    }
+    if (oldVersion < 4) {
+      try {
+        await db.execute("ALTER TABLE users ADD COLUMN uid TEXT;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE users ADD COLUMN photoUrl TEXT;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE users ADD COLUMN provider TEXT DEFAULT 'password';");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE users ADD COLUMN plan TEXT DEFAULT 'free';");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE users ADD COLUMN proExpiredAt TEXT;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE users ADD COLUMN lastLoginAt TEXT;");
+      } catch (_) {}
     }
   }
 
@@ -204,6 +234,35 @@ class DatabaseHelper {
       where: 'email = ?',
       whereArgs: [email.trim().toLowerCase()],
     );
+  }
+
+  // --- SOCIAL LOGIN & USER DAO METHODS ---
+
+  Future<int> insertOrUpdateUser(UserModel user) async {
+    final db = await instance.database;
+    return await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<UserModel?> getCurrentUser(String uid) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'uid = ?',
+      whereArgs: [uid],
+    );
+    if (result.isNotEmpty) {
+      return UserModel.fromMap(result.first);
+    }
+    return null;
+  }
+
+  Future<int> clearUserSession(String uid) async {
+    final db = await instance.database;
+    return await db.delete('users', where: 'uid = ?', whereArgs: [uid]);
   }
 
   // --- ADMIN ACCOUNT MANAGEMENT CRUD ---

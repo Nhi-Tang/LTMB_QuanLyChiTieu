@@ -3,6 +3,7 @@ import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../utils/app_translations.dart';
 import '../widgets/piggy_avatar.dart';
+import 'all_transactions_screen.dart';
 
 class HomeTab extends StatelessWidget {
   final UserModel currentUser;
@@ -270,7 +271,17 @@ class HomeTab extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AllTransactionsScreen(
+                          transactions: transactions,
+                          selectedLanguage: lang,
+                        ),
+                      ),
+                    );
+                  },
                   child: Text(
                     AppTranslations.tr(lang, 'view_all'),
                     style: const TextStyle(

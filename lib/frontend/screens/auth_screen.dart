@@ -312,12 +312,42 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  void _handleSocialLogin(String provider) {
-    _showAlertDialog(
-      title: 'Kết nối mạng xã hội',
-      message: 'Tính năng kết nối với $provider đang được cập nhật!',
-      isSuccess: true,
-    );
+  Future<void> _handleGoogleLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = await _authService.signInWithGoogle();
+      if (!mounted) return;
+
+      if (user != null) {
+        if (user.isAdmin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminManagementScreen(currentAdmin: user),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(currentUser: user),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showAlertDialog(
+          title: 'Đăng nhập Google thất bại',
+          message: e.toString().replaceAll('Exception: ', ''),
+          isSuccess: false,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   InputDecoration _inputDecoration({
@@ -636,7 +666,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
                         // Google
                         OutlinedButton(
-                          onPressed: () => _handleSocialLogin('Google'),
+                          onPressed: _isLoading ? null : _handleGoogleLogin,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             side: BorderSide(color: Colors.grey[300]!),
@@ -668,66 +698,6 @@ class _AuthScreenState extends State<AuthScreen> {
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black87,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // Facebook
-                        ElevatedButton(
-                          onPressed: () => _handleSocialLogin('Facebook'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1877F2),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.facebook, size: 22),
-                              const SizedBox(width: 12),
-                              Text(
-                                _isLogin ? 'Đăng nhập bằng Facebook' : 'Đăng ký bằng Facebook',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // Apple
-                        OutlinedButton(
-                          onPressed: () => _handleSocialLogin('Apple'),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.apple, size: 22, color: Colors.white),
-                              const SizedBox(width: 12),
-                              Text(
-                                _isLogin ? 'Đăng nhập bằng Apple' : 'Đăng ký bằng Apple',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
                                 ),
                               ),
                             ],

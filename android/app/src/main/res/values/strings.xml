@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Piggy Smart</string>
+    <string name="facebook_app_id">1611569497649495</string>
+    <string name="facebook_client_token">1cc5a807a192f83795a066042932b9e6</string>
+    <string name="fb_login_protocol_scheme">fb1611569497649495</string>
+</resources>

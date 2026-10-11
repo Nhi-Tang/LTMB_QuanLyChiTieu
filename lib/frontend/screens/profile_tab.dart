@@ -211,13 +211,15 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ],
             ),
-            content: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
+            content: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                     // Interactive Avatar Selection
                     GestureDetector(
                       onTap: () => _showAvatarPickerSheet(setDialogState),
@@ -313,6 +315,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
               ),
             ),
+          ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
@@ -853,7 +856,13 @@ class _ProfileTabState extends State<ProfileTab> {
                   leading: const Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFA000)),
                   title: Row(
                     children: [
-                      Text(AppTranslations.tr(lang, 'upgrade_account'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      Expanded(
+                        child: Text(
+                          AppTranslations.tr(lang, 'upgrade_account'),
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -906,7 +915,13 @@ class _ProfileTabState extends State<ProfileTab> {
                   leading: const Icon(Icons.file_download_outlined, color: accentBeige),
                   title: Row(
                     children: [
-                      Text(AppTranslations.tr(lang, 'export_files'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      Expanded(
+                        child: Text(
+                          AppTranslations.tr(lang, 'export_files'),
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

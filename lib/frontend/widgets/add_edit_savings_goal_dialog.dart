@@ -67,19 +67,23 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
         children: [
           const Icon(Icons.savings_rounded, color: accentBeige, size: 28),
           const SizedBox(width: 8),
-          Text(
-            isEditing ? 'Sửa mục tiêu tiết kiệm' : 'Thêm mục tiêu tiết kiệm',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Expanded(
+            child: Text(
+              isEditing ? 'Sửa mục tiêu tiết kiệm' : 'Thêm mục tiêu tiết kiệm',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      content: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -142,20 +146,25 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedDeadline == null
-                                ? 'Hạn hoàn thành (Không bắt buộc)'
-                                : 'Hạn: ${_selectedDeadline!.day}/${_selectedDeadline!.month}/${_selectedDeadline!.year}',
-                            style: TextStyle(
-                              color: _selectedDeadline == null ? Colors.grey[600] : Colors.black87,
-                              fontWeight: _selectedDeadline != null ? FontWeight.bold : FontWeight.normal,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _selectedDeadline == null
+                                    ? 'Hạn hoàn thành (Tùy chọn)'
+                                    : 'Hạn: ${_selectedDeadline!.day}/${_selectedDeadline!.month}/${_selectedDeadline!.year}',
+                                style: TextStyle(
+                                  color: _selectedDeadline == null ? Colors.grey[600] : Colors.black87,
+                                  fontWeight: _selectedDeadline != null ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       if (_selectedDeadline != null)
                         InkWell(
@@ -193,6 +202,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
           ),
         ),
       ),
+    ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),

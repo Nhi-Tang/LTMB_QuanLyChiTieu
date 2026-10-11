@@ -201,12 +201,14 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               isEditing ? 'Chỉnh sửa tài khoản' : 'Thêm tài khoản mới',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            content: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+            content: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     TextFormField(
                       controller: nameController,
                       keyboardType: TextInputType.text,
@@ -292,7 +294,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                 ),
               ),
             ),
-            actions: [
+          ),
+          actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
                 child: const Text('Hủy'),
@@ -415,12 +418,14 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
             ),
           ],
         ),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        content: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+          child: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Xem và chỉnh sửa thông tin tài khoản Quản trị viên:',
@@ -460,6 +465,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
             ),
           ),
         ),
+      ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
