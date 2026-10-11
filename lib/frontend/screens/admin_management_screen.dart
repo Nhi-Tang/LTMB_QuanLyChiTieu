@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../database/db_helper.dart';
-import '../models/user_model.dart';
+import '../../backend/database/db_helper.dart';
+import '../../backend/models/user_model.dart';
 import 'auth_screen.dart';
 
 class AdminManagementScreen extends StatefulWidget {

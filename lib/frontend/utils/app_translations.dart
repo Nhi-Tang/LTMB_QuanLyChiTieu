@@ -593,28 +593,18 @@ class AppTranslations {
   static const Map<String, Map<String, String>> _ledgers = {
     'vi': {
       'Sổ cá nhân 1': 'Sổ cá nhân 1',
-      'Sổ gia đình': 'Sổ gia đình',
-      'Sổ công việc': 'Sổ công việc',
     },
     'en': {
       'Sổ cá nhân 1': 'Personal Ledger 1',
-      'Sổ gia đình': 'Family Ledger',
-      'Sổ công việc': 'Work Ledger',
     },
     'ja': {
       'Sổ cá nhân 1': '個人帳簿1',
-      'Sổ gia đình': '家族帳簿',
-      'Sổ công việc': '仕事帳簿',
     },
     'zh': {
       'Sổ cá nhân 1': '个人账本1',
-      'Sổ gia đình': '家庭账本',
-      'Sổ công việc': '工作账本',
     },
     'ko': {
       'Sổ cá nhân 1': '개인 가계부 1',
-      'Sổ gia đình': '가족 가계부',
-      'Sổ công việc': '업무 가계부',
     },
   };
 

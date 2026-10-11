@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/transaction_model.dart';
-import '../models/user_model.dart';
+import '../../backend/models/transaction_model.dart';
+import '../../backend/models/user_model.dart';
 import '../utils/app_translations.dart';
 import '../widgets/add_transaction_modal.dart';
 import 'auth_screen.dart';

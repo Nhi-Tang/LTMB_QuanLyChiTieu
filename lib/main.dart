@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/auth_screen.dart';
+import 'frontend/screens/auth_screen.dart';
 
 void main() {
   runApp(const PiggySmartApp());

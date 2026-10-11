@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../models/transaction_model.dart';
+import '../../backend/models/transaction_model.dart';
 import '../utils/app_translations.dart';
 import '../widgets/piggy_avatar.dart';
 

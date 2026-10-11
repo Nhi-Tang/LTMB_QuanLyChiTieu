@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/transaction_model.dart';
-import '../models/user_model.dart';
+import '../../backend/models/transaction_model.dart';
+import '../../backend/models/user_model.dart';
 import '../utils/app_translations.dart';
 import '../widgets/piggy_avatar.dart';
 
@@ -115,7 +115,7 @@ class HomeTab extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 110),
       child: Column(
         children: [
-          // 1. Header Gradient xanh lá (A5D6A7)
+          // 1. Header Gradient
           Container(
             margin: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),

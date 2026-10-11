@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../database/db_helper.dart';
-import '../models/user_model.dart';
+import '../../backend/database/db_helper.dart';
+import '../../backend/models/user_model.dart';
 import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/piggy_avatar.dart';

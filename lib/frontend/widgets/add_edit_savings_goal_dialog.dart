@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../database/db_helper.dart';
-import '../models/savings_goal_model.dart';
-import '../models/savings_transaction_model.dart';
+import '../../backend/database/db_helper.dart';
+import '../../backend/models/savings_goal_model.dart';
+import '../../backend/models/savings_transaction_model.dart';
 
 class AddEditSavingsGoalDialog extends StatefulWidget {
   final SavingsGoalModel? goalToEdit;

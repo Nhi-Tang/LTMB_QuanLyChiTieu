@@ -196,6 +196,16 @@ class DatabaseHelper {
     return result.isNotEmpty;
   }
 
+  Future<int> updatePasswordByEmail(String email, String newPassword) async {
+    final db = await instance.database;
+    return await db.update(
+      'users',
+      {'password': newPassword},
+      where: 'email = ?',
+      whereArgs: [email.trim().toLowerCase()],
+    );
+  }
+
   // --- ADMIN ACCOUNT MANAGEMENT CRUD ---
 
   Future<List<UserModel>> getAllUsers() async {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../database/db_helper.dart';
-import '../models/savings_goal_model.dart';
-import '../models/savings_transaction_model.dart';
+import '../../backend/database/db_helper.dart';
+import '../../backend/models/savings_goal_model.dart';
+import '../../backend/models/savings_transaction_model.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/app_alert_dialog.dart';
 
@@ -520,7 +520,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.insights_rounded, color: accentBeige, size: 24),
                   const SizedBox(width: 10),

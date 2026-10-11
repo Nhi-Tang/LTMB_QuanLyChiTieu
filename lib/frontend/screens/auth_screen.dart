@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../database/db_helper.dart';
-import '../models/user_model.dart';
+import '../../backend/models/user_model.dart';
+import '../../backend/services/auth_service.dart';
+import '../widgets/app_alert_dialog.dart';
 import 'admin_management_screen.dart';
 import 'home_screen.dart';
 
@@ -28,7 +29,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  final AuthService _authService = AuthService();
 
   // Regex dùng cho validator (kiểm tra khi bấm nút, KHÔNG chặn lúc đang gõ)
   static final RegExp _emailRegex =
@@ -50,40 +51,175 @@ class _AuthScreenState extends State<AuthScreen> {
     required String message,
     bool isSuccess = true,
   }) {
-    return showDialog<void>(
+    return showAppAlertDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(
-              isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-              color: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
-              size: 28,
+      title: title,
+      message: message,
+      isSuccess: isSuccess,
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    int step = 1; // 1: Enter email, 2: Enter new password
+    bool isLoading = false;
+    String verifiedEmail = '';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Row(
+              children: [
+                const Icon(Icons.lock_reset_rounded, color: primaryBeige, size: 28),
+                const SizedBox(width: 8),
+                Text(
+                  step == 1 ? 'Khôi phục mật khẩu' : 'Đặt lại mật khẩu mới',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (step == 1) ...[
+                    const Text(
+                      'Nhập email hoặc số điện thoại đã đăng ký tài khoản của bạn:',
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: 'Email / Số điện thoại',
+                        prefixIcon: const Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email hoặc SĐT' : null,
+                    ),
+                  ] else ...[
+                    Text(
+                      'Tài khoản: $verifiedEmail',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: newPasswordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Mật khẩu mới',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Vui lòng nhập mật khẩu mới';
+                        if (v.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: confirmPasswordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Xác nhận mật khẩu mới',
+                        prefixIcon: const Icon(Icons.lock_reset_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Vui lòng xác nhận mật khẩu';
+                        if (v != newPasswordController.text) return 'Mật khẩu xác nhận không khớp';
+                        return null;
+                      },
+                    ),
+                  ],
+                ],
               ),
             ),
-          ],
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(fontSize: 14, color: Colors.black87),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          ),
-        ],
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogCtx),
+                child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryBeige,
+                  foregroundColor: const Color(0xFF5D4222),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        if (formKey.currentState!.validate()) {
+                          setDialogState(() => isLoading = true);
+                          try {
+                            if (step == 1) {
+                              final email = emailController.text.trim().toLowerCase();
+                              final exists = await _authService.isEmailRegistered(email);
+                              if (!exists) {
+                                setDialogState(() => isLoading = false);
+                                if (!dialogCtx.mounted) return;
+                                showAppAlertDialog(
+                                  context: dialogCtx,
+                                  title: 'Không tìm thấy',
+                                  message: 'Email hoặc số điện thoại này chưa được đăng ký trong hệ thống!',
+                                  isSuccess: false,
+                                );
+                                return;
+                              }
+                              verifiedEmail = email;
+                              setDialogState(() {
+                                step = 2;
+                                isLoading = false;
+                              });
+                            } else {
+                              final newPass = newPasswordController.text;
+                              await _authService.updatePasswordByEmail(verifiedEmail, newPass);
+                              setDialogState(() => isLoading = false);
+                              if (!dialogCtx.mounted) return;
+                              Navigator.pop(dialogCtx);
+                              showAppAlertDialog(
+                                context: dialogCtx,
+                                title: 'Thành công',
+                                message: 'Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.',
+                                isSuccess: true,
+                              );
+                            }
+                          } catch (e) {
+                            setDialogState(() => isLoading = false);
+                            if (!dialogCtx.mounted) return;
+                            showAppAlertDialog(
+                              context: dialogCtx,
+                              title: 'Lỗi',
+                              message: e.toString(),
+                              isSuccess: false,
+                            );
+                          }
+                        }
+                      },
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF5D4222)),
+                      )
+                    : Text(
+                        step == 1 ? 'TIẾP TỤC' : 'CẬP NHẬT MẬT KHẨU',
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -99,7 +235,7 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       if (_isLogin) {
         // --- LOGIN LOGIC ---
-        final user = await _dbHelper.loginUser(email, password);
+        final user = await _authService.loginUser(email, password);
 
         if (!mounted) return;
 
@@ -145,7 +281,7 @@ class _AuthScreenState extends State<AuthScreen> {
           createdAt: DateTime.now().toIso8601String(),
         );
 
-        await _dbHelper.registerUser(newUser);
+        await _authService.registerUser(newUser);
 
         if (!mounted) return;
 
@@ -425,13 +561,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {
-                                _showAlertDialog(
-                                  title: 'Quên mật khẩu',
-                                  message: 'Chức năng Quên mật khẩu đang được phát triển.',
-                                  isSuccess: true,
-                                );
-                              },
+                              onPressed: _showForgotPasswordDialog,
                               child: const Text(
                                 'Quên mật khẩu?',
                                 style: TextStyle(
