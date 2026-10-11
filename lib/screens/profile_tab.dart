@@ -33,13 +33,12 @@ class ProfileTab extends StatefulWidget {
 class _ProfileTabState extends State<ProfileTab> {
   // Profile Settings state
   String _selectedLedger = 'Sổ cá nhân 1';
-  final List<String> _ledgers = ['Sổ cá nhân 1', 'Sổ gia đình', 'Sổ công việc'];
-  bool _showBalanceInTransactions = true;
+  final List<String> _ledgers = ['Sổ cá nhân 1'];
   bool _dailyReminderEnabled = true;
 
-  static const Color primaryGreen = Color(0xFFA5D6A7);
-  static const Color darkGreen = Color(0xFF1B5E20);
-  static const Color accentGreen = Color(0xFF2E7D32);
+  static const Color primaryBeige = Color(0xFFFCF1D0);
+  static const Color darkBeige = Color(0xFF5D4222);
+  static const Color accentBeige = Color(0xFFE5D3AF);
 
   void _showAvatarPickerSheet(StateSetter setDialogState) {
     final lang = widget.selectedLanguage;
@@ -87,8 +86,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   height: 48,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryGreen,
-                      foregroundColor: darkGreen,
+                      backgroundColor: primaryBeige,
+                      foregroundColor: darkBeige,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -128,10 +127,10 @@ class _ProfileTabState extends State<ProfileTab> {
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSel ? primaryGreen.withValues(alpha: 0.3) : const Color(0xFFFAF7EE),
+                          color: isSel ? primaryBeige.withValues(alpha: 0.3) : const Color(0xFFFAF7EE),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSel ? accentGreen : const Color(0xFFE8E2D5),
+                            color: isSel ? accentBeige : const Color(0xFFE8E2D5),
                             width: isSel ? 2 : 1,
                           ),
                         ),
@@ -149,7 +148,7 @@ class _ProfileTabState extends State<ProfileTab> {
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                                color: isSel ? darkGreen : Colors.black87,
+                                color: isSel ? darkBeige : Colors.black87,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -204,7 +203,7 @@ class _ProfileTabState extends State<ProfileTab> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
               children: [
-                const Icon(Icons.person_outline_rounded, color: accentGreen, size: 28),
+                const Icon(Icons.person_outline_rounded, color: accentBeige, size: 28),
                 const SizedBox(width: 8),
                 Text(
                   AppTranslations.tr(lang, 'personal_info'),
@@ -233,7 +232,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: const BoxDecoration(
-                              color: accentGreen,
+                              color: accentBeige,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -254,7 +253,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       textCapitalization: TextCapitalization.none,
                       decoration: InputDecoration(
                         labelText: AppTranslations.tr(lang, 'full_name'),
-                        prefixIcon: const Icon(Icons.person, color: accentGreen),
+                        prefixIcon: const Icon(Icons.person, color: accentBeige),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) =>
@@ -269,7 +268,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       textCapitalization: TextCapitalization.none,
                       decoration: InputDecoration(
                         labelText: AppTranslations.tr(lang, 'email_or_phone'),
-                        prefixIcon: const Icon(Icons.email, color: accentGreen),
+                        prefixIcon: const Icon(Icons.email, color: accentBeige),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) =>
@@ -280,7 +279,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF4F8F4),
+                          color: const Color(0xFFFFF7EB),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: const Color(0xFFE0EBE0)),
                         ),
@@ -324,7 +323,8 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: accentGreen,
+                  backgroundColor: accentBeige,
+                  foregroundColor: darkBeige,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: () async {
@@ -377,13 +377,22 @@ class _ProfileTabState extends State<ProfileTab> {
                 },
                 child: Text(
                   AppTranslations.tr(lang, 'save_changes'),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: darkBeige, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  void _showUpgradeAccountDialog() {
+    showAppAlertDialog(
+      context: context,
+      title: 'Nâng cấp PiggySmart PRO 👑',
+      message: 'Mở khóa tất cả tính năng cao cấp:\n• Thêm không giới hạn Sổ sách quản lý\n• Xuất báo cáo tài chính định dạng Excel (.xlsx) & CSV\n• Lời nhắc ghi chép thông minh khi có thông báo số dư ngân hàng \n• Sao lưu và đồng bộ dữ liệu an toàn',
+      isSuccess: true,
     );
   }
 
@@ -419,10 +428,10 @@ class _ProfileTabState extends State<ProfileTab> {
                   ..._ledgers.map((ledger) {
                     final isSel = _selectedLedger == ledger;
                     return ListTile(
-                      leading: const Icon(Icons.menu_book_rounded, color: accentGreen),
+                      leading: const Icon(Icons.menu_book_rounded, color: accentBeige),
                       title: Text(AppTranslations.trLedger(lang, ledger), style: const TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: isSel ? Text(AppTranslations.tr(lang, 'in_use'), style: const TextStyle(color: accentGreen, fontSize: 12, fontWeight: FontWeight.bold)) : null,
-                      trailing: isSel ? const Icon(Icons.check_circle, color: accentGreen) : null,
+                      subtitle: isSel ? Text(AppTranslations.tr(lang, 'in_use'), style: const TextStyle(color: accentBeige, fontSize: 12, fontWeight: FontWeight.bold)) : null,
+                      trailing: isSel ? const Icon(Icons.check_circle, color: accentBeige) : null,
                       onTap: () {
                         setState(() => _selectedLedger = ledger);
                         Navigator.pop(ctx);
@@ -441,8 +450,8 @@ class _ProfileTabState extends State<ProfileTab> {
                     height: 48,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryGreen,
-                        foregroundColor: darkGreen,
+                        backgroundColor: primaryBeige,
+                        foregroundColor: darkBeige,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -504,8 +513,8 @@ class _ProfileTabState extends State<ProfileTab> {
                 Text(AppTranslations.tr(lang, 'income_expense_categories'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 TabBar(
-                  labelColor: accentGreen,
-                  indicatorColor: accentGreen,
+                  labelColor: accentBeige,
+                  indicatorColor: accentBeige,
                   unselectedLabelColor: Colors.grey,
                   tabs: [
                     Tab(text: '${AppTranslations.tr(lang, 'expense')} (18)'),
@@ -521,7 +530,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         itemBuilder: (ctx, i) {
                           final cat = expenseCategories[i];
                           return ListTile(
-                            leading: Icon(_getCategoryIconData(cat), color: accentGreen),
+                            leading: Icon(_getCategoryIconData(cat), color: accentBeige),
                             title: Text(AppTranslations.trCategory(lang, cat), style: const TextStyle(fontWeight: FontWeight.w600)),
                             trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
                           );
@@ -532,7 +541,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         itemBuilder: (ctx, i) {
                           final cat = incomeCategories[i];
                           return ListTile(
-                            leading: Icon(_getCategoryIconData(cat), color: accentGreen),
+                            leading: Icon(_getCategoryIconData(cat), color: accentBeige),
                             title: Text(AppTranslations.trCategory(lang, cat), style: const TextStyle(fontWeight: FontWeight.w600)),
                             trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
                           );
@@ -601,13 +610,24 @@ class _ProfileTabState extends State<ProfileTab> {
 
   void _showExportFileDialog() {
     final lang = widget.selectedLanguage;
+
+    if (!widget.currentUser.isAdmin) {
+      showAppAlertDialog(
+        context: context,
+        title: 'Nâng cấp PiggySmart PRO 👑',
+        message: 'Tính năng Xuất file báo cáo CSV & Excel (.xlsx) khả dụng trên phiên bản PiggySmart PRO. Vui lòng nâng cấp tài khoản để sử dụng!',
+        isSuccess: false,
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.file_download_outlined, color: accentGreen, size: 28),
+            const Icon(Icons.file_download_outlined, color: accentBeige, size: 28),
             const SizedBox(width: 8),
             Text(AppTranslations.tr(lang, 'export_report_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
@@ -695,7 +715,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 final isSel = widget.selectedLanguage == l;
                 return ListTile(
                   title: Text(l, style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
-                  trailing: isSel ? const Icon(Icons.check_circle, color: accentGreen) : null,
+                  trailing: isSel ? const Icon(Icons.check_circle, color: accentBeige) : null,
                   onTap: () {
                     widget.onLanguageChanged(l);
                     Navigator.pop(ctx);
@@ -778,15 +798,15 @@ class _ProfileTabState extends State<ProfileTab> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: primaryGreen,
+                                color: widget.currentUser.isAdmin ? primaryBeige : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: const Text(
-                                'PRO',
+                              child: Text(
+                                widget.currentUser.isAdmin ? 'PRO' : 'FREE',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: darkGreen,
+                                  color: widget.currentUser.isAdmin ? darkBeige : Colors.grey[700],
                                 ),
                               ),
                             ),
@@ -819,12 +839,37 @@ class _ProfileTabState extends State<ProfileTab> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: const Color(0xFFECE7DB)),
             ),
-            child: ListTile(
-              leading: const Icon(Icons.person_outline_rounded, color: accentGreen),
-              title: Text(AppTranslations.tr(lang, 'personal_info'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-              subtitle: Text('(${widget.currentUser.name})', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              trailing: const Icon(Icons.edit_outlined, color: accentGreen),
-              onTap: _showEditProfileDialog,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person_outline_rounded, color: accentBeige),
+                  title: Text(AppTranslations.tr(lang, 'personal_info'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  subtitle: Text('(${widget.currentUser.name})', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  trailing: const Icon(Icons.edit_outlined, color: accentBeige),
+                  onTap: _showEditProfileDialog,
+                ),
+                const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+                ListTile(
+                  leading: const Icon(Icons.workspace_premium_rounded, color: Color(0xFFFFA000)),
+                  title: Row(
+                    children: [
+                      Text(AppTranslations.tr(lang, 'upgrade_account'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFECB3),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE65100))),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(AppTranslations.tr(lang, 'upgrade_account_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                  onTap: _showUpgradeAccountDialog,
+                ),
+              ],
             ),
           ),
 
@@ -842,7 +887,7 @@ class _ProfileTabState extends State<ProfileTab> {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.menu_book_rounded, color: accentGreen),
+                  leading: const Icon(Icons.menu_book_rounded, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'ledger_book'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(AppTranslations.trLedger(lang, _selectedLedger), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
@@ -850,7 +895,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
-                  leading: const Icon(Icons.category_outlined, color: accentGreen),
+                  leading: const Icon(Icons.category_outlined, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'categories_manager'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(AppTranslations.tr(lang, 'categories_count_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
@@ -858,7 +903,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
-                  leading: const Icon(Icons.file_download_outlined, color: accentGreen),
+                  leading: const Icon(Icons.file_download_outlined, color: accentBeige),
                   title: Row(
                     children: [
                       Text(AppTranslations.tr(lang, 'export_files'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -895,7 +940,7 @@ class _ProfileTabState extends State<ProfileTab> {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.language_rounded, color: accentGreen),
+                  leading: const Icon(Icons.language_rounded, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'language'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(widget.selectedLanguage, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
@@ -903,22 +948,11 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 SwitchListTile(
-                  secondary: const Icon(Icons.account_balance_wallet_outlined, color: accentGreen),
-                  title: Text(AppTranslations.tr(lang, 'balance_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  subtitle: Text(AppTranslations.tr(lang, 'balance_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  value: _showBalanceInTransactions,
-                  activeThumbColor: accentGreen,
-                  onChanged: (val) {
-                    setState(() => _showBalanceInTransactions = val);
-                  },
-                ),
-                const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
-                SwitchListTile(
-                  secondary: const Icon(Icons.notifications_active_outlined, color: accentGreen),
+                  secondary: const Icon(Icons.notifications_active_outlined, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   subtitle: Text(AppTranslations.tr(lang, 'reminder_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   value: _dailyReminderEnabled,
-                  activeThumbColor: accentGreen,
+                  activeThumbColor: accentBeige,
                   onChanged: (val) {
                     setState(() => _dailyReminderEnabled = val);
                   },
@@ -941,21 +975,21 @@ class _ProfileTabState extends State<ProfileTab> {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.star_rate_rounded, color: accentGreen),
+                  leading: const Icon(Icons.star_rate_rounded, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'rate_app'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showRatingDialog,
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
-                  leading: const Icon(Icons.headset_mic_outlined, color: accentGreen),
+                  leading: const Icon(Icons.headset_mic_outlined, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                   onTap: _showSupportDialog,
                 ),
                 const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
                 ListTile(
-                  leading: const Icon(Icons.info_outline_rounded, color: accentGreen),
+                  leading: const Icon(Icons.info_outline_rounded, color: accentBeige),
                   title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                   trailing: const Text('v1.0.0 (Pro Ready)', style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
                 ),

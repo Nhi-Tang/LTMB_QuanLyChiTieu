@@ -80,7 +80,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
           children: [
             Icon(
               isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-              color: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+              color: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
               size: 28,
             ),
             const SizedBox(width: 10),
@@ -99,7 +99,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+              backgroundColor: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
@@ -407,7 +407,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.admin_panel_settings_outlined, color: Color(0xFF2E7D32), size: 28),
+            Icon(Icons.admin_panel_settings_outlined, color: Color(0xFFE5D3AF), size: 28),
             SizedBox(width: 8),
             Text(
               'Thông tin cá nhân Admin',
@@ -435,7 +435,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: 'Họ và tên',
-                    prefixIcon: const Icon(Icons.person, color: Color(0xFF2E7D32)),
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFFE5D3AF)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -450,7 +450,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: 'Email / Số điện thoại',
-                    prefixIcon: const Icon(Icons.email, color: Color(0xFF2E7D32)),
+                    prefixIcon: const Icon(Icons.email, color: Color(0xFFE5D3AF)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -467,8 +467,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E7D32),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFE5D3AF),
+              foregroundColor: const Color(0xFF5D4222),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () async {
@@ -537,7 +537,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = Color(0xFF2E7D32);
+    const themeColor = Color(0xFFE5D3AF);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

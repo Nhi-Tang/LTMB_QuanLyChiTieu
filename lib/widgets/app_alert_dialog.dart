@@ -14,7 +14,7 @@ Future<void> showAppAlertDialog({
         children: [
           Icon(
             isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-            color: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+            color: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
             size: 28,
           ),
           const SizedBox(width: 10),
@@ -33,11 +33,12 @@ Future<void> showAppAlertDialog({
       actions: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+            backgroundColor: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
+            foregroundColor: isSuccess ? const Color(0xFF5D4222) : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('OK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          child: Text('OK', style: TextStyle(color: isSuccess ? const Color(0xFF5D4222) : Colors.white, fontWeight: FontWeight.bold)),
         ),
       ],
     ),

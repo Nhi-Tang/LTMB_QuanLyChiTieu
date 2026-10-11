@@ -26,9 +26,9 @@ class _SavingsTabState extends State<SavingsTab> {
   List<SavingsGoalModel> _goals = [];
   bool _isLoading = true;
 
-  static const Color primaryGreen = Color(0xFFA5D6A7);
-  static const Color darkGreen = Color(0xFF1B5E20);
-  static const Color accentGreen = Color(0xFF2E7D32);
+  static const Color primaryBeigy = Color(0xFFFCF1D0);
+  static const Color darkBeigy = Color(0xFF5D4222);
+  static const Color accentBeigy = Color(0xFFE5D3AF);
 
   @override
   void initState() {
@@ -91,15 +91,15 @@ class _SavingsTabState extends State<SavingsTab> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  primaryGreen,
-                  Color(0xFF81C784),
-                  accentGreen,
+                  primaryBeigy,
+                  Color(0xFFFCF1D0),
+                  accentBeigy,
                 ],
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: darkGreen.withValues(alpha: 0.12),
+                  color: darkBeigy.withValues(alpha: 0.12),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -117,7 +117,7 @@ class _SavingsTabState extends State<SavingsTab> {
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
-                        color: darkGreen,
+                        color: darkBeigy,
                       ),
                     ),
                     buildUserAvatar(
@@ -134,7 +134,7 @@ class _SavingsTabState extends State<SavingsTab> {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
-                    color: Colors.white70,
+                    color: darkBeigy,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -143,7 +143,7 @@ class _SavingsTabState extends State<SavingsTab> {
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: darkBeigy,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -192,7 +192,7 @@ class _SavingsTabState extends State<SavingsTab> {
               ),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: accentGreen,
+                  backgroundColor: accentBeigy,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -216,7 +216,7 @@ class _SavingsTabState extends State<SavingsTab> {
 
           // List of Goals or Empty State
           _isLoading
-              ? const Center(child: CircularProgressIndicator(color: accentGreen))
+              ? const Center(child: CircularProgressIndicator(color: accentBeigy))
               : _goals.isEmpty
                   ? Container(
                       width: double.infinity,
@@ -229,7 +229,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.savings_outlined, size: 56, color: primaryGreen),
+                          const Icon(Icons.savings_outlined, size: 56, color: primaryBeigy),
                           const SizedBox(height: 14),
                           Text(
                             AppTranslations.tr(lang, 'no_savings_goals'),
@@ -314,7 +314,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                       width: 44,
                                       height: 44,
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFFF4F8F4),
+                                        color: Color(0xFFFFF7EB),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
@@ -336,7 +336,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color: goal.isCompleted ? accentGreen : Colors.grey[600],
+                                              color: goal.isCompleted ? accentBeigy : Colors.grey[600],
                                             ),
                                           ),
                                         ],
@@ -344,7 +344,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     ),
                                     Text(
                                       '$percent%',
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: accentGreen),
+                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: accentBeigy),
                                     ),
                                   ],
                                 ),
@@ -369,7 +369,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     value: progress,
                                     minHeight: 10,
                                     backgroundColor: const Color(0xFFF2EFE6),
-                                    valueColor: const AlwaysStoppedAnimation<Color>(accentGreen),
+                                    valueColor: const AlwaysStoppedAnimation<Color>(accentBeigy),
                                   ),
                                 ),
                                 if (monthlySuggestionStr.isNotEmpty) ...[
@@ -377,17 +377,17 @@ class _SavingsTabState extends State<SavingsTab> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFF4F8F4),
+                                      color: const Color(0xFFFFF7EB),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.lightbulb_outline_rounded, size: 14, color: accentGreen),
+                                        const Icon(Icons.lightbulb_outline_rounded, size: 14, color: accentBeigy),
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(
                                             monthlySuggestionStr,
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: darkGreen),
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: darkBeigy),
                                           ),
                                         ),
                                       ],

@@ -26,8 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedLanguage = 'Tiếng Việt';
 
   // Theme Colors
-  static const Color primaryGreen = Color(0xFF2A835F);
-  static const Color darkGreen = Color(0xFF6FCF97);
+  static const Color primaryBeige = Color(0xFFE5D3AF);
+  static const Color darkBeige = Color(0xFF5D4222);
 
   // Initial transactions list
   final List<TransactionItem> _transactions = [];
@@ -54,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E7D32),
+              backgroundColor: const Color(0xFFE5D3AF),
+              foregroundColor: const Color(0xFF5D4222),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 MaterialPageRoute(builder: (context) => const AuthScreen()),
               );
             },
-            child: const Text('Đăng xuất', style: TextStyle(color: Colors.white)),
+            child: const Text('Đăng xuất', style: TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -122,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F8F4),
+      backgroundColor: const Color(0xFFFFF7EB),
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -207,11 +208,11 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 66,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: darkGreen,
+        color: darkBeige,
         borderRadius: BorderRadius.circular(33),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withValues(alpha: 0.35),
+            color: darkBeige.withValues(alpha: 0.35),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -236,13 +237,13 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 48,
               height: 48,
               decoration: const BoxDecoration(
-                color: primaryGreen,
+                color: primaryBeige,
                 shape: BoxShape.circle,
               ),
               child: const Center(
                 child: Icon(
                   Icons.add_rounded,
-                  color: darkGreen,
+                  color: darkBeige,
                   size: 30,
                 ),
               ),
@@ -284,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(
               icon,
               size: 22,
-              color: isSelected ? primaryGreen : Colors.white60,
+              color: isSelected ? primaryBeige : Colors.white60,
             ),
             const SizedBox(height: 2),
             Text(
@@ -292,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? primaryGreen : Colors.white60,
+                color: isSelected ? primaryBeige : Colors.white60,
               ),
             ),
           ],

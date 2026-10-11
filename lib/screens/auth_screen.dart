@@ -12,9 +12,9 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  static const Color primaryGreen = Color(0xFFA5D6A7);
-  static const Color accentGreen = Color(0xFF6FCF97);
-  static const Color themeColor = Color(0xFF2FA084);
+  static const Color primaryBeige = Color(0xFFE5D3AF);
+  static const Color accentBeige = Color(0xFFFFF7EB);
+  static const Color themeColor = Color(0xFFFCF1D0);
 
   bool _isLogin = true;
 
@@ -58,7 +58,7 @@ class _AuthScreenState extends State<AuthScreen> {
           children: [
             Icon(
               isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-              color: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+              color: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
               size: 28,
             ),
             const SizedBox(width: 10),
@@ -77,11 +77,11 @@ class _AuthScreenState extends State<AuthScreen> {
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isSuccess ? const Color(0xFF2E7D32) : Colors.red,
+              backgroundColor: isSuccess ? const Color(0xFFE5D3AF) : Colors.red,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text('OK', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -213,7 +213,7 @@ class _AuthScreenState extends State<AuthScreen> {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: selected ? Colors.white : Colors.grey[700],
+                color: selected ? Colors.grey[700] : Colors.black,
               ),
             ),
           ),
@@ -224,7 +224,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.grey[500],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -251,13 +251,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: primaryGreen.withValues(alpha: 0.35),
+                    color: primaryBeige.withValues(alpha: 0.35),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.savings_rounded,
                     size: 64,
-                    color: accentGreen,
+                    color: accentBeige,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -266,7 +266,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[900],
+                    color: Colors.grey[500],
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -275,7 +275,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   'Quản lý chi tiêu thông minh & hiệu quả',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Colors.grey[500],
                   ),
                 ),
 
@@ -435,7 +435,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: const Text(
                                 'Quên mật khẩu?',
                                 style: TextStyle(
-                                  color: themeColor,
+                                  color: primaryBeige,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -451,7 +451,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: themeColor,
-                            foregroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF5D4222),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -463,7 +463,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: Color(0xFF5D4222),
                               strokeWidth: 2,
                             ),
                           )
@@ -472,6 +472,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
+                              color: Color(0xFF5D4222),
                             ),
                           ),
                         ),

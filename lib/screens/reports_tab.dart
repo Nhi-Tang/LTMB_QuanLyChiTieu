@@ -286,10 +286,10 @@ class _ReportsTabState extends State<ReportsTab> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFE8F5E9) : Colors.white,
+                    color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFFFF7EB) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFF2E7D32) : const Color(0xFFE5E0D3),
+                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFE5D3AF) : const Color(0xFFE5E0D3),
                     ),
                   ),
                   child: Row(
@@ -370,7 +370,7 @@ class _ReportsTabState extends State<ReportsTab> {
                 style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
-                  color: _reportTypeIndex == 1 ? const Color(0xFF2E7D32) : const Color(0xFF222222),
+                  color: _reportTypeIndex == 1 ? const Color(0xFFE5D3AF) : const Color(0xFF222222),
                   letterSpacing: -0.5,
                 ),
               ),
@@ -446,7 +446,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             ? Icons.account_balance_wallet_outlined
                             : Icons.pie_chart_outline_rounded,
                         size: 52,
-                        color: const Color(0xFFA5D6A7),
+                        color: const Color(0xFFFCF1D0),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -824,7 +824,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
-                      color: isPositive ? const Color(0xFF2E7D32) : Colors.red[700],
+                      color: isPositive ? const Color(0xFFE5D3AF) : Colors.red[700],
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -912,7 +912,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       spacing: 8,
                       runSpacing: 4,
                       children: [
-                        _LegendLineDot(AppTranslations.tr(lang, 'income'), const Color(0xFF2E7D32)),
+                        _LegendLineDot(AppTranslations.tr(lang, 'income'), const Color(0xFFE5D3AF)),
                         _LegendLineDot(AppTranslations.tr(lang, 'expense'), const Color(0xFFE53935)),
                         _LegendLineDot(AppTranslations.tr(lang, 'balance_toggle'), const Color(0xFFFB8C00)),
                       ],
@@ -1010,7 +1010,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           child: Text(
                             _formatCurrency(inc),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32)),
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFFE5D3AF)),
                           ),
                         ),
                         Expanded(
@@ -1161,7 +1161,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     AppTranslations.tr(lang, key),
                     style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
                   ),
-                  trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF2E7D32)) : null,
+                  trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFFE5D3AF)) : null,
                   onTap: () {
                     setState(() => _timeRange = key);
                     Navigator.pop(ctx);
@@ -1255,10 +1255,10 @@ class _ReportsTabState extends State<ReportsTab> {
                         AppTranslations.trCategory(lang, cat),
                         style: TextStyle(
                           fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                          color: isSel ? const Color(0xFF2E7D32) : Colors.black87,
+                          color: isSel ? const Color(0xFFE5D3AF) : Colors.black87,
                         ),
                       ),
-                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF2E7D32)) : null,
+                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFFE5D3AF)) : null,
                       onTap: () {
                         setState(() {
                           _selectedCategoryFilter = cat;
@@ -1365,7 +1365,7 @@ class StackedBarChartPainter extends CustomPainter {
       final val = monthlyTotals[i];
       if (val > 0) {
         final segH = (val / maxVal) * chartHeight;
-        final segPaint = Paint()..color = const Color(0xFFA5D6A7);
+        final segPaint = Paint()..color = const Color(0xFFFCF1D0);
 
         final segRect = Rect.fromLTWH(x, chartHeight - segH, barWidth, segH);
         canvas.drawRect(segRect, segPaint);
@@ -1444,7 +1444,7 @@ class BalanceTrendChartPainter extends CustomPainter {
       final inc = monthlyIncomes[i];
       if (inc > 0) {
         final incH = (inc / maxVal) * (zeroY - 20);
-        final incPaint = Paint()..color = const Color(0xFF2E7D32);
+        final incPaint = Paint()..color = const Color(0xFFE5D3AF);
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             Rect.fromLTWH(x, zeroY - incH, barWidth, incH),

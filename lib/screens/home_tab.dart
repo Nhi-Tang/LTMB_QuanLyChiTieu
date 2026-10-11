@@ -18,9 +18,9 @@ class HomeTab extends StatelessWidget {
   final VoidCallback onAddIncome;
   final VoidCallback onAddExpense;
 
-  static const Color primaryGreen = Color(0xFFA5D6A7);
-  static const Color darkGreen = Color(0xFF1B5E20);
-  static const Color accentGreen = Color(0xFF2E7D32);
+  static const Color primaryBeige = Color(0xFFFCF1D0);
+  static const Color darkBeige = Color(0xFF5D4222);
+  static const Color accentBeige = Color(0xFFE5D3AF);
 
   const HomeTab({
     super.key,
@@ -124,15 +124,15 @@ class HomeTab extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  primaryGreen,
-                  Color(0xFF81C784),
-                  accentGreen,
+                  primaryBeige,
+                  Color(0xFFFCF1D0),
+                  accentBeige,
                 ],
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: darkGreen.withValues(alpha: 0.12),
+                  color: darkBeige.withValues(alpha: 0.12),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -180,11 +180,11 @@ class HomeTab extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: darkGreen,
+                                color: darkBeige,
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const Icon(Icons.keyboard_arrow_down, size: 18, color: darkGreen),
+                            const Icon(Icons.keyboard_arrow_down, size: 18, color: darkBeige),
                           ],
                         ),
                       ),
@@ -198,7 +198,7 @@ class HomeTab extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.85),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.notifications_none_rounded, color: darkGreen),
+                      child: const Icon(Icons.notifications_none_rounded, color: darkBeige),
                     ),
                   ],
                 ),
@@ -210,7 +210,7 @@ class HomeTab extends StatelessWidget {
                   AppTranslations.tr(lang, 'total_balance'),
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.white70,
+                    color: darkBeige,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -220,7 +220,7 @@ class HomeTab extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: darkBeige,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -276,7 +276,7 @@ class HomeTab extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: accentGreen,
+                      color: accentBeige,
                     ),
                   ),
                 ),
@@ -301,7 +301,7 @@ class HomeTab extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.receipt_long_outlined, size: 48, color: primaryGreen),
+                        const Icon(Icons.receipt_long_outlined, size: 48, color: primaryBeige),
                         const SizedBox(height: 12),
                         Text(
                           AppTranslations.tr(lang, 'no_transactions'),
@@ -344,13 +344,13 @@ class HomeTab extends StatelessWidget {
                               width: 44,
                               height: 44,
                               decoration: const BoxDecoration(
-                                color: Color(0xFFF4F8F4),
+                                color: Color(0xFFFFF7EB),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Icon(
                                   _getCategoryIconData(item.category),
-                                  color: accentGreen,
+                                  color: accentBeige,
                                   size: 22,
                                 ),
                               ),
@@ -384,7 +384,7 @@ class HomeTab extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: item.isExpense ? const Color(0xFFE57373) : accentGreen,
+                                color: item.isExpense ? const Color(0xFFE57373) : accentBeige,
                               ),
                             ),
                           ],
@@ -414,7 +414,7 @@ class HomeTab extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.25),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+            border: Border.all(color: darkBeige.withValues(alpha: 0.25)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,20 +426,20 @@ class HomeTab extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white70,
+                      color: darkBeige,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.25),
+                      color: darkBeige.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.add_rounded,
                       size: 14,
-                      color: Colors.white,
+                      color: darkBeige,
                     ),
                   ),
                 ],
@@ -450,7 +450,7 @@ class HomeTab extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: darkBeige,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

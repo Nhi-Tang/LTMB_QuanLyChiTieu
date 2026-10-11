@@ -59,13 +59,13 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.goalToEdit != null;
-    const accentGreen = Color(0xFF2E7D32);
+    const accentBeige = Color(0xFFE5D3AF);
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Row(
         children: [
-          const Icon(Icons.savings_rounded, color: accentGreen, size: 28),
+          const Icon(Icons.savings_rounded, color: accentBeige, size: 28),
           const SizedBox(width: 8),
           Text(
             isEditing ? 'Sửa mục tiêu tiết kiệm' : 'Thêm mục tiêu tiết kiệm',
@@ -180,9 +180,9 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: isSel ? accentGreen.withValues(alpha: 0.2) : Colors.grey[100],
+                        color: isSel ? accentBeige.withValues(alpha: 0.2) : Colors.grey[100],
                         shape: BoxShape.circle,
-                        border: Border.all(color: isSel ? accentGreen : Colors.transparent, width: 2),
+                        border: Border.all(color: isSel ? accentBeige : Colors.transparent, width: 2),
                       ),
                       child: Center(child: Text(ic, style: const TextStyle(fontSize: 20))),
                     ),
@@ -200,7 +200,8 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: accentGreen,
+            backgroundColor: accentBeige,
+            foregroundColor: const Color(0xFF5D4222),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: () async {
@@ -248,7 +249,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
               widget.onSaved();
             }
           },
-          child: Text(isEditing ? 'LƯU' : 'TẠO MỤC TIÊU', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          child: Text(isEditing ? 'LƯU' : 'TẠO MỤC TIÊU', style: const TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
         ),
       ],
     );

@@ -26,7 +26,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
 
-  static const Color accentGreen = Color(0xFF2E7D32);
+  static const Color accentBeige = Color(0xFFE5D3AF);
 
   @override
   void initState() {
@@ -106,7 +106,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                 child: ChoiceChip(
                   label: Center(child: Text(AppTranslations.tr(lang, 'income'))),
                   selected: !isExpense,
-                  selectedColor: accentGreen,
+                  selectedColor: accentBeige,
                   labelStyle: TextStyle(
                     color: !isExpense ? Colors.white : Colors.black87,
                     fontWeight: FontWeight.bold,
@@ -129,7 +129,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             decoration: InputDecoration(
               labelText: AppTranslations.tr(lang, 'transaction_title'),
               hintText: isExpense ? 'VD: Ăn sáng, Mua sắm...' : 'VD: Lương tháng, Tiền thưởng...',
-              prefixIcon: const Icon(Icons.edit_note, color: accentGreen),
+              prefixIcon: const Icon(Icons.edit_note, color: accentBeige),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
           ),
@@ -143,7 +143,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             decoration: InputDecoration(
               labelText: AppTranslations.tr(lang, 'amount'),
               hintText: 'VD: 500000',
-              prefixIcon: const Icon(Icons.attach_money, color: accentGreen),
+              prefixIcon: const Icon(Icons.attach_money, color: accentBeige),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
           ),
@@ -170,7 +170,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: accentGreen,
+                backgroundColor: accentBeige,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: () {

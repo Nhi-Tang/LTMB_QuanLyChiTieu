@@ -114,8 +114,8 @@ Widget buildUserAvatar({
   required String userName,
   double size = 50,
 }) {
-  const primaryGreen = Color(0xFFA5D6A7);
-  const darkGreen = Color(0xFF1B5E20);
+  const primaryBeige = Color(0xFFFCF1D0);
+  const darkBeige = Color(0xFFC8A96B);
 
   if (avatarKey.isNotEmpty &&
       (avatarKey.contains('/') || avatarKey.contains('\\')) &&
@@ -125,7 +125,7 @@ Widget buildUserAvatar({
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: primaryGreen, width: 2),
+        border: Border.all(color: primaryBeige, width: 2),
       ),
       child: ClipOval(
         child: Image.file(
@@ -160,7 +160,7 @@ Widget buildUserAvatar({
         width: size,
         height: size,
         decoration: const BoxDecoration(
-          color: primaryGreen,
+          color: primaryBeige,
           shape: BoxShape.circle,
         ),
         child: Center(
@@ -169,7 +169,7 @@ Widget buildUserAvatar({
             style: TextStyle(
               fontSize: size * 0.45,
               fontWeight: FontWeight.bold,
-              color: darkGreen,
+              color: darkBeige,
             ),
           ),
         ),
