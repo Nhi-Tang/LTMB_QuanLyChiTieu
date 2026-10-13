@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
+import '../../backend/services/auth_service.dart';
+import '../../backend/services/transaction_service.dart';
 import '../utils/app_translations.dart';
-import '../widgets/add_transaction_modal.dart';
-import 'auth_screen.dart';
+import '../widgets/transaction_sheet/new_transaction_sheet.dart';
 import 'home_tab.dart';
 import 'profile_tab.dart';
 import 'reports_tab.dart';
@@ -29,8 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
   static const Color primaryBeige = Color(0xFFE5D3AF);
   static const Color darkBeige = Color(0xFF5D4222);
 
-  // Initial transactions list
+  // Transactions list
   final List<TransactionItem> _transactions = [];
+  final TransactionService _transactionService = TransactionService();
 
   @override
   void initState() {
@@ -38,6 +40,16 @@ class _HomeScreenState extends State<HomeScreen> {
     _currentUser = widget.currentUser;
     final now = DateTime.now();
     _selectedMonth = DateTime(now.year, now.month, 1);
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final txs = await _transactionService.getTransactions();
+    if (!mounted) return;
+    setState(() {
+      _transactions.clear();
+      _transactions.addAll(txs);
+    });
   }
 
   void _logout(BuildContext context) {
@@ -46,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Xác nhận đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi PiggySmart?'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi Mousey?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -58,12 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
               foregroundColor: const Color(0xFF5D4222),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const AuthScreen()),
-              );
+              await AuthService().signOut();
             },
             child: const Text('Đăng xuất', style: TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
           ),
@@ -99,23 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get _totalBalance => _totalIncome - _totalExpense;
 
-  void _showAddTransactionModal({bool defaultExpense = true}) {
-    showModalBottomSheet(
+  void _showAddTransactionModal({bool defaultExpense = true, TransactionItem? editingTransaction}) {
+    NewTransactionSheet.show(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) {
-        return AddTransactionModal(
-          defaultExpense: defaultExpense,
-          selectedLanguage: _selectedLanguage,
-          onSave: (newItem) {
-            setState(() {
-              _transactions.insert(0, newItem);
-            });
-          },
-        );
+      editingTransaction: editingTransaction,
+      onSave: (newItem) async {
+        await _transactionService.addTransaction(newItem);
+        _loadTransactions();
       },
     );
   }
@@ -228,7 +227,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildFloatingNavItem(
             index: 1,
-            icon: Icons.savings_rounded,
+            customIcon: ClipOval(
+              child: Image.asset(
+                'assets/icon/tietkiem.png',
+                width: 22,
+                height: 22,
+                fit: BoxFit.cover,
+              ),
+            ),
             label: AppTranslations.tr(lang, 'savings'),
           ),
           GestureDetector(
@@ -266,7 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildFloatingNavItem({
     required int index,
-    required IconData icon,
+    IconData? icon,
+    Widget? customIcon,
     required String label,
   }) {
     final isSelected = _currentTabIndex == index;
@@ -282,11 +289,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: isSelected ? primaryBeige : Colors.white60,
-            ),
+            customIcon ??
+                Icon(
+                  icon!,
+                  size: 22,
+                  color: isSelected ? primaryBeige : Colors.white60,
+                ),
             const SizedBox(height: 2),
             Text(
               label,

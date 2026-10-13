@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
 import '../widgets/app_alert_dialog.dart';
-import 'admin_management_screen.dart';
-import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -14,7 +11,6 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   static const Color primaryBeige = Color(0xFFE5D3AF);
-  static const Color accentBeige = Color(0xFFFFF7EB);
   static const Color themeColor = Color(0xFFFCF1D0);
 
   bool _isLogin = true;
@@ -252,42 +248,19 @@ class _AuthScreenState extends State<AuthScreen> {
             isSuccess: false,
           );
         } else {
-          if (user.isAdmin) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AdminManagementScreen(currentAdmin: user),
-              ),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(currentUser: user),
-              ),
-            );
-          }
+          // AuthGate will automatically handle navigation via authStateChanges()
         }
       } else {
         // --- REGISTER LOGIC ---
         final name = _nameController.text.trim();
 
-        final newUser = UserModel(
-          name: name,
-          email: email,
-          password: password,
-          role: 'user', // Default registered users are 'user'
-          isActive: true,
-          createdAt: DateTime.now().toIso8601String(),
-        );
-
-        await _authService.registerUser(newUser);
+        await _authService.registerWithEmail(name, email, password);
 
         if (!mounted) return;
 
         await _showAlertDialog(
           title: 'Đăng ký thành công',
-          message: 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.',
+          message: 'Đăng ký tài khoản thành công!',
           isSuccess: true,
         );
 
@@ -315,26 +288,8 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _handleGoogleLogin() async {
     setState(() => _isLoading = true);
     try {
-      final user = await _authService.signInWithGoogle();
-      if (!mounted) return;
-
-      if (user != null) {
-        if (user.isAdmin) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AdminManagementScreen(currentAdmin: user),
-            ),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeScreen(currentUser: user),
-            ),
-          );
-        }
-      }
+      await _authService.signInWithGoogle();
+      // AuthGate will automatically handle navigation via authStateChanges()
     } catch (e) {
       if (mounted) {
         _showAlertDialog(
@@ -415,20 +370,31 @@ class _AuthScreenState extends State<AuthScreen> {
               children: [
                 // App Branding Header
                 Container(
-                  padding: const EdgeInsets.all(18),
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
-                    color: primaryBeige.withValues(alpha: 0.35),
                     shape: BoxShape.circle,
+                    border: Border.all(color: primaryBeige, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.savings_rounded,
-                    size: 64,
-                    color: accentBeige,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/avatar/avatar.jpg',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'PiggySmart',
+                  'Mousey',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -711,7 +677,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Bằng việc tiếp tục, bạn đồng ý với Điều khoản & Chính sách của PiggySmart.',
+                  'Bằng việc tiếp tục, bạn đồng ý với Điều khoản & Chính sách của Mousey.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,

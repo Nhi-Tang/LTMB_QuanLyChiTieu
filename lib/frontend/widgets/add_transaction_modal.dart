@@ -128,7 +128,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               labelText: AppTranslations.tr(lang, 'transaction_title'),
-              hintText: isExpense ? 'VD: Ăn sáng, Mua sắm...' : 'VD: Lương tháng, Tiền thưởng...',
+              hintText: category,
               prefixIcon: const Icon(Icons.edit_note, color: accentBeige),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
@@ -174,14 +174,15 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: () {
-                final title = titleController.text.trim();
+                final titleInput = titleController.text.trim();
+                final finalTitle = titleInput.isEmpty ? category : titleInput;
                 final amount = double.tryParse(amountController.text.trim());
 
-                if (title.isEmpty || amount == null || amount <= 0) {
+                if (amount == null || amount <= 0) {
                   showAppAlertDialog(
                     context: context,
                     title: AppTranslations.tr(lang, 'language'),
-                    message: 'Vui lòng nhập đầy đủ thông tin hợp lệ!',
+                    message: 'Vui lòng nhập số tiền hợp lệ!',
                     isSuccess: false,
                   );
                   return;
@@ -189,7 +190,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
 
                 final newItem = TransactionItem(
                   id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  title: title,
+                  title: finalTitle,
                   category: category,
                   amount: amount,
                   isExpense: isExpense,

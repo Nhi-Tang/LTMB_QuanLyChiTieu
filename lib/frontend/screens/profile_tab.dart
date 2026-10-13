@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
+import '../../backend/services/export_service.dart';
 import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
-import '../widgets/piggy_avatar.dart';
+import '../widgets/category_link/linked_categories_screen.dart';
+import '../widgets/mousey_avatar.dart';
 
 class ProfileTab extends StatefulWidget {
   final UserModel currentUser;
@@ -43,15 +45,14 @@ class _ProfileTabState extends State<ProfileTab> {
   void _showAvatarPickerSheet(StateSetter setDialogState) {
     final lang = widget.selectedLanguage;
     final avatars = [
-      {'key': 'piggy', 'name': 'Piggy Smart 🐷'},
-      {'key': 'cat', 'name': 'Mochi Cat 🐱'},
-      {'key': 'dog', 'name': 'Cún con 🐶'},
-      {'key': 'fox', 'name': 'Cáo nhỏ 🦊'},
-      {'key': 'rabbit', 'name': 'Thỏ con 🐰'},
-      {'key': 'panda', 'name': 'Gấu trúc 🐼'},
-      {'key': 'lion', 'name': 'Sư tử 🦁'},
-      {'key': 'bear', 'name': 'Gấu bông 🐻'},
-      {'key': 'initials', 'name': 'Chữ cái đầu 👤'},
+      {'key': 'cat', 'name': 'Mochi Cat'},
+      {'key': 'dog', 'name': 'Cún con'},
+      {'key': 'fox', 'name': 'Cáo nhỏ'},
+      {'key': 'rabbit', 'name': 'Thỏ con'},
+      {'key': 'panda', 'name': 'Gấu trúc'},
+      {'key': 'lion', 'name': 'Sư tử'},
+      {'key': 'bear', 'name': 'Gấu bông'},
+      {'key': 'initials', 'name': 'Mousey'},
     ];
 
     showModalBottomSheet(
@@ -393,7 +394,7 @@ class _ProfileTabState extends State<ProfileTab> {
   void _showUpgradeAccountDialog() {
     showAppAlertDialog(
       context: context,
-      title: 'Nâng cấp PiggySmart PRO 👑',
+      title: 'Nâng cấp Mousey PRO 👑',
       message: 'Mở khóa tất cả tính năng cao cấp:\n• Thêm không giới hạn Sổ sách quản lý\n• Xuất báo cáo tài chính định dạng Excel (.xlsx) & CSV\n• Lời nhắc ghi chép thông minh khi có thông báo số dư ngân hàng \n• Sao lưu và đồng bộ dữ liệu an toàn',
       isSuccess: true,
     );
@@ -464,8 +465,8 @@ class _ProfileTabState extends State<ProfileTab> {
                         Navigator.pop(ctx);
                         showAppAlertDialog(
                           context: context,
-                          title: 'Nâng cấp PiggySmart PRO',
-                          message: 'Tính năng quản lý nhiều Sổ sách khả dụng trên phiên bản PiggySmart PRO!',
+                          title: 'Nâng cấp Mousey PRO',
+                          message: 'Tính năng quản lý nhiều Sổ sách khả dụng trên phiên bản Mousey PRO!',
                           isSuccess: true,
                         );
                       },
@@ -481,134 +482,12 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showCategoriesManagerSheet() {
-    final lang = widget.selectedLanguage;
-    final expenseCategories = [
-      'Ăn uống', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí', 'Sức khoẻ', 'Làm đẹp',
-      'Quần áo', 'Học tập', 'Thú cưng', 'Con cái', 'Hỗ trợ gia đình', 'Bảo hiểm', 'Thuế', 'Công việc', 'Nhà ở', 'Tiền nợ', 'Khác'
-    ];
-    final incomeCategories = ['Lương', 'Thưởng', 'Đầu tư', 'Bán hàng', 'Khác'];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LinkedCategoriesScreen(ledgerId: 'default_ledger'),
       ),
-      builder: (ctx) {
-        return DefaultTabController(
-          length: 2,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.75,
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(AppTranslations.tr(lang, 'income_expense_categories'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                TabBar(
-                  labelColor: accentBeige,
-                  indicatorColor: accentBeige,
-                  unselectedLabelColor: Colors.grey,
-                  tabs: [
-                    Tab(text: '${AppTranslations.tr(lang, 'expense')} (18)'),
-                    Tab(text: '${AppTranslations.tr(lang, 'income')} (5)'),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      ListView.builder(
-                        itemCount: expenseCategories.length,
-                        itemBuilder: (ctx, i) {
-                          final cat = expenseCategories[i];
-                          return ListTile(
-                            leading: Icon(_getCategoryIconData(cat), color: accentBeige),
-                            title: Text(AppTranslations.trCategory(lang, cat), style: const TextStyle(fontWeight: FontWeight.w600)),
-                            trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
-                          );
-                        },
-                      ),
-                      ListView.builder(
-                        itemCount: incomeCategories.length,
-                        itemBuilder: (ctx, i) {
-                          final cat = incomeCategories[i];
-                          return ListTile(
-                            leading: Icon(_getCategoryIconData(cat), color: accentBeige),
-                            title: Text(AppTranslations.trCategory(lang, cat), style: const TextStyle(fontWeight: FontWeight.w600)),
-                            trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
-  }
-
-  IconData _getCategoryIconData(String category) {
-    switch (category) {
-      case 'Ăn uống':
-        return Icons.fastfood_rounded;
-      case 'Hóa đơn':
-        return Icons.receipt_rounded;
-      case 'Di chuyển':
-        return Icons.directions_bus_rounded;
-      case 'Mua sắm':
-        return Icons.shopping_bag_rounded;
-      case 'Giải trí':
-        return Icons.sports_esports_rounded;
-      case 'Sức khoẻ':
-        return Icons.medical_services_rounded;
-      case 'Làm đẹp':
-        return Icons.content_cut_rounded;
-      case 'Quần áo':
-        return Icons.checkroom_rounded;
-      case 'Học tập':
-        return Icons.school_rounded;
-      case 'Thú cưng':
-        return Icons.pets_rounded;
-      case 'Con cái':
-        return Icons.child_care_rounded;
-      case 'Hỗ trợ gia đình':
-        return Icons.family_restroom_rounded;
-      case 'Bảo hiểm':
-        return Icons.security_rounded;
-      case 'Thuế':
-        return Icons.account_balance_rounded;
-      case 'Công việc':
-        return Icons.work_rounded;
-      case 'Nhà ở':
-        return Icons.home_rounded;
-      case 'Tiền nợ':
-      case 'Tiền Nợ':
-        return Icons.money_off_rounded;
-      case 'Lương':
-        return Icons.account_balance_wallet_rounded;
-      case 'Thưởng':
-        return Icons.card_giftcard_rounded;
-      case 'Đầu tư':
-        return Icons.trending_up_rounded;
-      case 'Bán hàng':
-        return Icons.storefront_rounded;
-      default:
-        return Icons.category_rounded;
-    }
   }
 
   void _showExportFileDialog() {
@@ -617,8 +496,8 @@ class _ProfileTabState extends State<ProfileTab> {
     if (!widget.currentUser.isAdmin) {
       showAppAlertDialog(
         context: context,
-        title: 'Nâng cấp PiggySmart PRO 👑',
-        message: 'Tính năng Xuất file báo cáo CSV & Excel (.xlsx) khả dụng trên phiên bản PiggySmart PRO. Vui lòng nâng cấp tài khoản để sử dụng!',
+        title: 'Nâng cấp Mousey PRO 👑',
+        message: 'Tính năng Xuất file báo cáo CSV & Excel (.xlsx) khả dụng trên phiên bản Mousey PRO. Vui lòng nâng cấp tài khoản để sử dụng!',
         isSuccess: false,
       );
       return;
@@ -648,14 +527,26 @@ class _ProfileTabState extends State<ProfileTab> {
               leading: const Icon(Icons.description_outlined, color: Color(0xFF1E88E5)),
               title: Text(AppTranslations.tr(lang, 'export_csv_title'), style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text(AppTranslations.tr(lang, 'export_csv_sub')),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(ctx);
-                showAppAlertDialog(
-                  context: context,
-                  title: 'Xuất file thành công',
-                  message: 'Đã xuất file PiggySmart_Report.csv vào thư mục Tải về!',
-                  isSuccess: true,
-                );
+                try {
+                  final filePath = await ExportService.exportToCsv();
+                  if (!ctx.mounted) return;
+                  showAppAlertDialog(
+                    context: ctx,
+                    title: 'Xuất file thành công',
+                    message: 'Đã lưu file CSV tại:\n$filePath',
+                    isSuccess: true,
+                  );
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  showAppAlertDialog(
+                    context: ctx,
+                    title: 'Lỗi xuất file',
+                    message: e.toString(),
+                    isSuccess: false,
+                  );
+                }
               },
             ),
             const Divider(),
@@ -663,14 +554,26 @@ class _ProfileTabState extends State<ProfileTab> {
               leading: const Icon(Icons.table_chart_outlined, color: Color(0xFF43A047)),
               title: Text(AppTranslations.tr(lang, 'export_excel_title'), style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text(AppTranslations.tr(lang, 'export_excel_sub')),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(ctx);
-                showAppAlertDialog(
-                  context: context,
-                  title: 'Xuất file thành công',
-                  message: 'Đã xuất file PiggySmart_Report.xlsx vào thư mục Tải về!',
-                  isSuccess: true,
-                );
+                try {
+                  final filePath = await ExportService.exportToExcel();
+                  if (!ctx.mounted) return;
+                  showAppAlertDialog(
+                    context: ctx,
+                    title: 'Xuất file thành công',
+                    message: 'Đã lưu file Excel tại:\n$filePath',
+                    isSuccess: true,
+                  );
+                } catch (e) {
+                  if (!ctx.mounted) return;
+                  showAppAlertDialog(
+                    context: ctx,
+                    title: 'Lỗi xuất file',
+                    message: e.toString(),
+                    isSuccess: false,
+                  );
+                }
               },
             ),
           ],

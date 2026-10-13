@@ -3,7 +3,7 @@ import '../../backend/database/db_helper.dart';
 import '../../backend/models/savings_goal_model.dart';
 import '../utils/app_translations.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
-import '../widgets/piggy_avatar.dart';
+import '../widgets/mousey_avatar.dart';
 import 'savings_goal_detail_screen.dart';
 
 class SavingsTab extends StatefulWidget {
@@ -156,7 +156,15 @@ class _SavingsTabState extends State<SavingsTab> {
                   ),
                   child: Row(
                     children: [
-                      const Text('🐖 ', style: TextStyle(fontSize: 20)),
+                      ClipOval(
+                        child: Image.asset(
+                          'assets/avatar/avatar.jpg',
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           AppTranslations.tr(lang, 'piggy_quote_home'),
@@ -193,9 +201,9 @@ class _SavingsTabState extends State<SavingsTab> {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accentBeigy,
-                  foregroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF5D4222),
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   shape: RoundedRectangleBorder(
@@ -203,10 +211,17 @@ class _SavingsTabState extends State<SavingsTab> {
                   ),
                 ),
                 onPressed: _showAddGoalDialog,
-                icon: const Icon(Icons.add_rounded, size: 16),
+                icon: ClipOval(
+                  child: Image.asset(
+                    'assets/icon/tietkiem.png',
+                    width: 16,
+                    height: 16,
+                    fit: BoxFit.cover,
+                  ),
+                ),
                 label: Text(
                   AppTranslations.tr(lang, 'create_goal'),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
                 ),
               ),
             ],
@@ -229,7 +244,14 @@ class _SavingsTabState extends State<SavingsTab> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.savings_outlined, size: 56, color: primaryBeigy),
+                          ClipOval(
+                            child: Image.asset(
+                              'assets/avatar/avatar.jpg',
+                              width: 56,
+                              height: 56,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                           const SizedBox(height: 14),
                           Text(
                             AppTranslations.tr(lang, 'no_savings_goals'),
@@ -318,7 +340,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
-                                        child: Text(goal.icon, style: const TextStyle(fontSize: 22)),
+                                        child: buildGoalIcon(goal.icon, size: 26),
                                       ),
                                     ),
                                     const SizedBox(width: 12),

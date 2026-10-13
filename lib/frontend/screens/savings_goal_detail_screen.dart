@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/savings_goal_model.dart';
 import '../../backend/models/savings_transaction_model.dart';
+import '../../core/utils/money_input_formatter.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/app_alert_dialog.dart';
+import '../widgets/mousey_avatar.dart';
 
 class SavingsGoalDetailScreen extends StatefulWidget {
   final SavingsGoalModel goal;
@@ -110,8 +111,8 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                keyboardType: TextInputType.number,
+                inputFormatters: [MoneyInputFormatter()],
                 decoration: InputDecoration(
                   labelText: 'Số tiền (đ)',
                   prefixIcon: Icon(Icons.attach_money, color: isDeposit ? accentBeige : Colors.red),
@@ -138,12 +139,12 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: () async {
-                    final amount = double.tryParse(amountController.text.trim());
-                    if (amount == null || amount <= 0) {
+                    final amount = parseMoney(amountController.text).toDouble();
+                    if (amount <= 0) {
                       showAppAlertDialog(
                         context: context,
                         title: 'Thông báo',
-                        message: 'Vui lòng nhập số tiền hợp lệ!',
+                        message: 'Vui lòng nhập số tiền hợp lệ lớn hơn 0!',
                         isSuccess: false,
                       );
                       return;
@@ -375,7 +376,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: Center(
-                          child: Text(_goal.icon, style: const TextStyle(fontSize: 28)),
+                          child: buildGoalIcon(_goal.icon, size: 32),
                         ),
                       ),
                       const SizedBox(width: 16),

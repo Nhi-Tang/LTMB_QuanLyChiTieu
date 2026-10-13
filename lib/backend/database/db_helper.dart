@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../models/savings_goal_model.dart';
 import '../models/savings_transaction_model.dart';
+import '../models/transaction_model.dart';
 import '../models/user_change_model.dart';
 import '../models/user_model.dart';
 
@@ -31,7 +33,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 4,
+      version: 6,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -97,6 +99,43 @@ class DatabaseHelper {
         date TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS transactions (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        category TEXT NOT NULL,
+        amount REAL NOT NULL,
+        is_expense INTEGER NOT NULL,
+        date TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid TEXT,
+        name TEXT NOT NULL,
+        iconKey TEXT NOT NULL,
+        type TEXT NOT NULL,
+        sortOrder INTEGER NOT NULL,
+        isDefault INTEGER NOT NULL DEFAULT 0,
+        isArchived INTEGER NOT NULL DEFAULT 0,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ledger_categories (
+        ledgerId TEXT NOT NULL,
+        categoryId INTEGER NOT NULL,
+        uid TEXT,
+        PRIMARY KEY(ledgerId, categoryId)
+      )
+    ''');
+
+    await _seedDefaultCategories(db);
 
     // Seed default Admin account
     final now = DateTime.now().toIso8601String();
@@ -184,6 +223,148 @@ class DatabaseHelper {
         await db.execute("ALTER TABLE users ADD COLUMN lastLoginAt TEXT;");
       } catch (_) {}
     }
+    if (oldVersion < 5) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS transactions (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          category TEXT NOT NULL,
+          amount REAL NOT NULL,
+          is_expense INTEGER NOT NULL,
+          date TEXT NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          uid TEXT,
+          name TEXT NOT NULL,
+          iconKey TEXT NOT NULL,
+          type TEXT NOT NULL,
+          sortOrder INTEGER NOT NULL,
+          isDefault INTEGER NOT NULL DEFAULT 0,
+          isArchived INTEGER NOT NULL DEFAULT 0,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ledger_categories (
+          ledgerId TEXT NOT NULL,
+          categoryId INTEGER NOT NULL,
+          uid TEXT,
+          PRIMARY KEY(ledgerId, categoryId)
+        )
+      ''');
+      final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM categories')) ?? 0;
+      if (count == 0) {
+        await _seedDefaultCategories(db);
+      }
+    }
+  }
+
+  Future<void> _seedDefaultCategories(Database db) async {
+    final now = DateTime.now().toIso8601String();
+    final expenseCats = [
+      {'name': 'Ăn uống', 'iconKey': 'fastfood_rounded'},
+      {'name': 'Hóa đơn', 'iconKey': 'receipt_rounded'},
+      {'name': 'Di chuyển', 'iconKey': 'directions_bus_rounded'},
+      {'name': 'Mua sắm', 'iconKey': 'shopping_bag_rounded'},
+      {'name': 'Giải trí', 'iconKey': 'sports_esports_rounded'},
+      {'name': 'Sức khoẻ', 'iconKey': 'medical_services_rounded'},
+      {'name': 'Làm đẹp', 'iconKey': 'content_cut_rounded'},
+      {'name': 'Quần áo', 'iconKey': 'checkroom_rounded'},
+      {'name': 'Học tập', 'iconKey': 'school_rounded'},
+      {'name': 'Thú cưng', 'iconKey': 'pets_rounded'},
+      {'name': 'Con cái', 'iconKey': 'child_care_rounded'},
+      {'name': 'Hỗ trợ gia đình', 'iconKey': 'family_restroom_rounded'},
+      {'name': 'Bảo hiểm', 'iconKey': 'security_rounded'},
+      {'name': 'Thuế', 'iconKey': 'account_balance_rounded'},
+      {'name': 'Công việc', 'iconKey': 'work_rounded'},
+      {'name': 'Nhà ở', 'iconKey': 'home_rounded'},
+      {'name': 'Tiền nợ', 'iconKey': 'money_off_rounded'},
+      {'name': 'Khác', 'iconKey': 'category_rounded'},
+    ];
+
+    final incomeCats = [
+      {'name': 'Lương', 'iconKey': 'account_balance_wallet_rounded'},
+      {'name': 'Thưởng', 'iconKey': 'card_giftcard_rounded'},
+      {'name': 'Bán hàng', 'iconKey': 'storefront_rounded'},
+      {'name': 'Đầu tư', 'iconKey': 'trending_up_rounded'},
+      {'name': 'Khác', 'iconKey': 'category_rounded'},
+    ];
+
+    const defaultLedgerId = 'default_ledger';
+    const alternativeLedgerId = 'Sổ cá nhân 1';
+
+    int sortOrder = 0;
+    for (var cat in expenseCats) {
+      final categoryId = await db.insert('categories', {
+        'name': cat['name'],
+        'iconKey': cat['iconKey'],
+        'type': 'expense',
+        'sortOrder': sortOrder++,
+        'isDefault': 1,
+        'isArchived': 0,
+        'createdAt': now,
+        'updatedAt': now,
+      });
+      await db.insert('ledger_categories', {
+        'ledgerId': defaultLedgerId,
+        'categoryId': categoryId,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      await db.insert('ledger_categories', {
+        'ledgerId': alternativeLedgerId,
+        'categoryId': categoryId,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+
+    sortOrder = 0;
+    for (var cat in incomeCats) {
+      final categoryId = await db.insert('categories', {
+        'name': cat['name'],
+        'iconKey': cat['iconKey'],
+        'type': 'income',
+        'sortOrder': sortOrder++,
+        'isDefault': 1,
+        'isArchived': 0,
+        'createdAt': now,
+        'updatedAt': now,
+      });
+      await db.insert('ledger_categories', {
+        'ledgerId': defaultLedgerId,
+        'categoryId': categoryId,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      await db.insert('ledger_categories', {
+        'ledgerId': alternativeLedgerId,
+        'categoryId': categoryId,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+  }
+
+  // --- TRANSACTIONS DAO METHODS ---
+
+  Future<List<TransactionItem>> getTransactions() async {
+    final db = await instance.database;
+    final result = await db.query('transactions', orderBy: 'date DESC');
+    return result.map((map) => TransactionItem.fromMap(map)).toList();
+  }
+
+  Future<int> insertTransaction(TransactionItem item) async {
+    final db = await instance.database;
+    return await db.insert('transactions', item.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> deleteTransaction(String id) async {
+    final db = await instance.database;
+    return await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> clearTransactions() async {
+    final db = await instance.database;
+    return await db.delete('transactions');
   }
 
   // --- USER AUTHENTICATION & REGISTRATION ---

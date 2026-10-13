@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +28,6 @@ class AuthService {
 
   Future<UserModel?> signInWithGoogle() async {
     try {
-      // Quan trọng trên Android: Phải truyền serverClientId (Web client ID từ Firebase Console)
       await _googleSignIn.initialize(
         serverClientId: '252576636037-b0ron8cb2g4u6fo6rqja33om5cop4tl9.apps.googleusercontent.com',
       );
@@ -54,11 +52,7 @@ class AuthService {
       if (firebaseUser == null) throw Exception('Đăng nhập Firebase thất bại.');
 
       final idToken = await getIdToken(forceRefresh: true);
-      developer.log(
-        '🔥 FIREBASE_ID_TOKEN: $idToken',
-        name: 'PiggySmartAuth',
-      );
-      debugPrint('🔥 FIREBASE_ID_TOKEN: $idToken');
+      developer.log('🔥 FIREBASE_ID_TOKEN: $idToken', name: 'MouseyAuth');
       UserModel localUser = await _syncWithBackendOrLocal(firebaseUser, idToken, 'google.com');
       return localUser;
     } catch (e) {
@@ -66,16 +60,115 @@ class AuthService {
     }
   }
 
+  Future<UserModel?> signInWithEmail(String emailOrPhone, String password) async {
+    try {
+      String email = emailOrPhone.trim();
+      if (!email.contains('@')) {
+        final allUsers = await _dbHelper.getAllUsers();
+        final match = allUsers.where((u) => u.email == emailOrPhone || u.email == '$emailOrPhone@mousey.local' || u.email == '$emailOrPhone@piggysmart.local').toList();
+        if (match.isNotEmpty) {
+          email = match.first.email;
+          if (!email.contains('@')) {
+            email = '$email@mousey.local';
+          }
+        } else {
+          email = '$email@mousey.local';
+        }
+      }
+
+      UserCredential credential;
+      try {
+        credential = await _firebaseAuth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } catch (authErr) {
+        // Auto-create Firebase Auth user if missing (for seamless SQLite migration)
+        try {
+          credential = await _firebaseAuth.createUserWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+        } catch (_) {
+          rethrow;
+        }
+      }
+
+      final user = credential.user;
+      if (user == null) throw Exception('Đăng nhập thất bại.');
+
+      final idToken = await getIdToken(forceRefresh: true);
+      return await _syncWithBackendOrLocal(user, idToken, 'password');
+    } catch (e) {
+      throw Exception(_mapFirebaseErrorToVietnamese(e.toString()));
+    }
+  }
+
+  Future<UserModel?> registerWithEmail(String name, String emailOrPhone, String password) async {
+    try {
+      String email = emailOrPhone.trim();
+      if (!email.contains('@')) {
+        email = '$email@mousey.local';
+      }
+
+      UserCredential credential;
+      try {
+        credential = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'email-already-in-use') {
+          // If already in firebase auth, try signing in or updating
+          credential = await _firebaseAuth.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+        } else {
+          rethrow;
+        }
+      }
+
+      final user = credential.user;
+      if (user == null) throw Exception('Đăng ký thất bại.');
+
+      await user.updateDisplayName(name);
+
+      final idToken = await getIdToken(forceRefresh: true);
+      final localUser = await _syncWithBackendOrLocal(user, idToken, 'password');
+      
+      final newUserModel = localUser.copyWith(name: name, password: password);
+      await _dbHelper.insertOrUpdateUser(newUserModel);
+
+      return newUserModel;
+    } catch (e) {
+      throw Exception(_mapFirebaseErrorToVietnamese(e.toString()));
+    }
+  }
+
+  Future<void> syncSessionInBackground(User firebaseUser) async {
+    try {
+      final idToken = await getIdToken(forceRefresh: true);
+      final provider = firebaseUser.providerData.isNotEmpty 
+          ? firebaseUser.providerData.first.providerId 
+          : 'password';
+      await _syncWithBackendOrLocal(firebaseUser, idToken, provider);
+    } catch (_) {}
+  }
+
   Future<UserModel> _syncWithBackendOrLocal(User firebaseUser, String? idToken, String provider) async {
     final now = DateTime.now().toIso8601String();
-    UserModel userModel = UserModel(
+    
+    final existingLocal = await _dbHelper.getCurrentUser(firebaseUser.uid);
+
+    UserModel userModel = existingLocal ?? UserModel(
       uid: firebaseUser.uid,
-      name: firebaseUser.displayName ?? 'Người dùng',
+      name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? 'Người dùng',
       email: firebaseUser.email ?? '',
       password: '',
       photoUrl: firebaseUser.photoURL,
       provider: provider,
-      role: firebaseUser.email == 'admin@piggysmart.com' ? 'admin' : 'user',
+      role: firebaseUser.email == 'admin@mousey.com' || firebaseUser.email == 'admin@piggysmart.com' ? 'admin' : 'user',
       plan: 'free',
       lastLoginAt: now,
       createdAt: now,
@@ -94,7 +187,7 @@ class AuthService {
           'displayName': firebaseUser.displayName,
           'photoUrl': firebaseUser.photoURL,
         }),
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -117,7 +210,9 @@ class AuthService {
     if (uid != null) {
       await _dbHelper.clearUserSession(uid);
     }
-    await _googleSignIn.signOut();
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {}
     await _firebaseAuth.signOut();
   }
 
@@ -132,6 +227,10 @@ class AuthService {
       return 'Bạn đã hủy quá trình đăng nhập.';
     } else if (error.contains('user-disabled')) {
       return 'Tài khoản này đã bị vô hiệu hóa.';
+    } else if (error.contains('invalid-credential') || error.contains('wrong-password') || error.contains('user-not-found') || error.contains('invalid-email')) {
+      return 'Email/SĐT hoặc mật khẩu không chính xác.';
+    } else if (error.contains('email-already-in-use')) {
+      return 'Email này đã được sử dụng bởi tài khoản khác.';
     }
     return error.replaceAll('Exception: ', '');
   }
@@ -142,7 +241,7 @@ class AuthService {
   }
 
   Future<UserModel?> loginUser(String emailOrPhone, String password) async {
-    return await _dbHelper.loginUser(emailOrPhone, password);
+    return await signInWithEmail(emailOrPhone, password);
   }
 
   Future<bool> isEmailRegistered(String email) async {

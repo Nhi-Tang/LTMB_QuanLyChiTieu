@@ -1,5 +1,5 @@
 name: quanlychitieu
-description: "PiggySmart - Personal expense & account management application."
+description: "Mousey - Personal expense & account management application."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -21,6 +21,8 @@ dependencies:
   cloud_firestore: ^6.10.0
   google_sign_in: ^7.2.0
   http: ^1.2.0
+  shared_preferences: ^2.2.3
+  path_provider: ^2.1.2
 
 dev_dependencies:
   flutter_test:
@@ -31,6 +33,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/avatar/
+    - assets/icon/
 
 flutter_launcher_icons:
   android: true

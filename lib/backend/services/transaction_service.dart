@@ -1,21 +1,22 @@
+import '../database/db_helper.dart';
 import '../models/transaction_model.dart';
 
 class TransactionService {
-  final List<TransactionItem> _transactions = [];
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  List<TransactionItem> getTransactions() {
-    return List.unmodifiable(_transactions);
+  Future<List<TransactionItem>> getTransactions() async {
+    return await _dbHelper.getTransactions();
   }
 
-  void addTransaction(TransactionItem item) {
-    _transactions.insert(0, item);
+  Future<int> addTransaction(TransactionItem item) async {
+    return await _dbHelper.insertTransaction(item);
   }
 
-  void removeTransaction(String id) {
-    _transactions.removeWhere((tx) => tx.id == id);
+  Future<int> removeTransaction(String id) async {
+    return await _dbHelper.deleteTransaction(id);
   }
 
-  void clear() {
-    _transactions.clear();
+  Future<int> clear() async {
+    return await _dbHelper.clearTransactions();
   }
 }

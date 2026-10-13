@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
 import '../utils/app_translations.dart';
-import '../widgets/piggy_avatar.dart';
+import '../widgets/mousey_avatar.dart';
 
 class ReportsTab extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -361,7 +361,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       color: Color(0xFF706C66),
                     ),
                   ),
-                  const PiggyAvatar(size: 48),
+                  const MouseyAvatar(size: 48),
                 ],
               ),
               const SizedBox(height: 4),

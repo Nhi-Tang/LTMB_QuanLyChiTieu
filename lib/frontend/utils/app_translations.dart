@@ -42,7 +42,7 @@ class AppTranslations {
       'balance_toggle': 'Số dư',
       'daily_reminder': 'Nhắc nhở hằng ngày',
       'about': 'GIỚI THIỆU',
-      'rate_app': 'Đánh giá PiggySmart',
+      'rate_app': 'Đánh giá Mousey',
       'contact_support': 'Liên hệ hỗ trợ',
       'version': 'Phiên bản',
       'logout': 'Đăng xuất tài khoản',
@@ -65,11 +65,11 @@ class AppTranslations {
       'saved_amount': 'đã tiết kiệm',
       'no_balance_data': 'Chưa có dữ liệu số dư. Bắt đầu tích lũy tài chính ngay hôm nay nhé!',
       'no_financial_period_data': 'Chưa có dữ liệu kỳ tài chính',
-      'piggy_savings_badge': 'HEO ĐẤT TIẾT KIỆM · PIGGY',
-      'piggy_friend': 'Piggy, Người bạn ngân sách thân thiện của bạn',
-      'piggy_quote_home': '"Tích tiểu thành đại! Hãy tạo các mục tiêu tiết kiệm để Piggy giúp bạn chạm tới ước mơ nhé!"',
-      'piggy_quote_no_expense': '"Chưa có dữ liệu phân tích chi tiêu. Hãy ghi chép giao dịch đầu tiên để Piggy giúp bạn theo dõi tài chính nhé!"',
-      'piggy_quote_no_income': '"Chưa có dữ liệu thu nhập. Hãy ghi nhận khoản thu đầu tiên để Piggy giúp bạn theo dõi tài chính nhé!"',
+      'piggy_savings_badge': 'MỤC TIÊU TIẾT KIỆM · MOUSEY',
+      'piggy_friend': 'Mousey, Người bạn ngân sách thân thiện của bạn',
+      'piggy_quote_home': '"Tích tiểu thành đại! Hãy tạo các mục tiêu tiết kiệm để Mousey giúp bạn chạm tới ước mơ nhé!"',
+      'piggy_quote_no_expense': '"Chưa có dữ liệu phân tích chi tiêu. Hãy ghi chép giao dịch đầu tiên để Mousey giúp bạn theo dõi tài chính nhé!"',
+      'piggy_quote_no_income': '"Chưa có dữ liệu thu nhập. Hãy ghi nhận khoản thu đầu tiên để Mousey giúp bạn theo dõi tài chính nhé!"',
       'full_name': 'Họ và tên',
       'email_or_phone': 'Email / Số điện thoại',
       'choose_avatar': 'Chọn Avatar đại diện',
@@ -84,12 +84,12 @@ class AppTranslations {
       'export_csv_sub': 'Phù hợp cho Google Sheets & hệ thống dữ liệu',
       'export_excel_title': 'Xuất file Excel (.xlsx)',
       'export_excel_sub': 'Đầy đủ định dạng & công thức Microsoft Excel',
-      'rate_message': 'Cảm ơn bạn đã sử dụng PiggySmart! Hãy để lại đánh giá 5 sao trên cửa hàng ứng dụng nhé ⭐⭐⭐⭐⭐',
-      'support_message': 'Hỗ trợ khách hàng PiggySmart:\n• Email: support@piggysmart.com\n• Hotline: 1900-PIGGY\n• Giờ làm việc: 8:00 - 20:00 (T2 - T7)',
-      'export_csv_success': 'Đã xuất file PiggySmart_Report.csv vào thư mục Tải về!',
-      'export_excel_success': 'Đã xuất file PiggySmart_Report.xlsx vào thư mục Tải về!',
+      'rate_message': 'Cảm ơn bạn đã sử dụng Mousey! Hãy để lại đánh giá 5 sao trên cửa hàng ứng dụng nhé ⭐⭐⭐⭐⭐',
+      'support_message': 'Hỗ trợ khách hàng Mousey:\n• Email: support@mousey.com\n• Hotline: 1900-MOUSEY\n• Giờ làm việc: 8:00 - 20:00 (T2 - T7)',
+      'export_csv_success': 'Đã xuất file Mousey_Report.csv vào thư mục Tải về!',
+      'export_excel_success': 'Đã xuất file Mousey_Report.xlsx vào thư mục Tải về!',
       'balance_subtitle': 'Hiển thị số dư sau mỗi lần giao dịch',
-      'reminder_subtitle': 'Lời nhắc từ Piggy khi bạn quên ghi chép',
+      'reminder_subtitle': 'Lời nhắc từ Mousey khi bạn quên ghi chép',
       'categories_count_subtitle': '23 danh mục mặc định',
     },
     'en': {
@@ -134,7 +134,7 @@ class AppTranslations {
       'balance_toggle': 'Balance',
       'daily_reminder': 'Daily Reminder',
       'about': 'ABOUT',
-      'rate_app': 'Rate PiggySmart',
+      'rate_app': 'Rate Mousey',
       'contact_support': 'Contact Support',
       'version': 'Version',
       'logout': 'Log Out',
@@ -157,11 +157,11 @@ class AppTranslations {
       'saved_amount': 'saved',
       'no_balance_data': 'No balance data yet. Start building your savings today!',
       'no_financial_period_data': 'No financial period data yet',
-      'piggy_savings_badge': 'PIGGY SAVINGS · PIGGY',
-      'piggy_friend': 'Piggy, Your friendly budget companion',
-      'piggy_quote_home': '"Many a little makes a mickle! Create savings goals and let Piggy help you reach your dreams!"',
-      'piggy_quote_no_expense': '"No expense data yet. Record your first transaction to let Piggy help track your finances!"',
-      'piggy_quote_no_income': '"No income data yet. Record your first income to let Piggy help track your finances!"',
+      'piggy_savings_badge': 'MOUSEY SAVINGS · MOUSEY',
+      'piggy_friend': 'Mousey, Your friendly budget companion',
+      'piggy_quote_home': '"Many a little makes a mickle! Create savings goals and let Mousey help you reach your dreams!"',
+      'piggy_quote_no_expense': '"No expense data yet. Record your first transaction to let Mousey help track your finances!"',
+      'piggy_quote_no_income': '"No income data yet. Record your first income to let Mousey help track your finances!"',
       'full_name': 'Full Name',
       'email_or_phone': 'Email / Phone Number',
       'choose_avatar': 'Choose Avatar',
@@ -176,12 +176,12 @@ class AppTranslations {
       'export_csv_sub': 'Suitable for Google Sheets & data systems',
       'export_excel_title': 'Export Excel (.xlsx)',
       'export_excel_sub': 'Full formatting & formulas for Microsoft Excel',
-      'rate_message': 'Thank you for using PiggySmart! Please leave a 5-star rating on the app store ⭐⭐⭐⭐⭐',
-      'support_message': 'PiggySmart Customer Support:\n• Email: support@piggysmart.com\n• Hotline: 1900-PIGGY\n• Working Hours: 8:00 AM - 8:00 PM (Mon - Sat)',
-      'export_csv_success': 'Exported PiggySmart_Report.csv to Downloads folder successfully!',
-      'export_excel_success': 'Exported PiggySmart_Report.xlsx to Downloads folder successfully!',
+      'rate_message': 'Thank you for using Mousey! Please leave a 5-star rating on the app store ⭐⭐⭐⭐⭐',
+      'support_message': 'Mousey Customer Support:\n• Email: support@mousey.com\n• Hotline: 1900-MOUSEY\n• Working Hours: 8:00 AM - 8:00 PM (Mon - Sat)',
+      'export_csv_success': 'Exported Mousey_Report.csv to Downloads folder successfully!',
+      'export_excel_success': 'Exported Mousey_Report.xlsx to Downloads folder successfully!',
       'balance_subtitle': 'Display balance after transactions',
-      'reminder_subtitle': 'Daily reminder from Piggy',
+      'reminder_subtitle': 'Daily reminder from Mousey',
       'categories_count_subtitle': '23 default categories',
     },
     'ja': {
@@ -226,7 +226,7 @@ class AppTranslations {
       'balance_toggle': '残高表示',
       'daily_reminder': '毎日のリマインダー',
       'about': 'アプリについて',
-      'rate_app': 'PiggySmartを評価',
+      'rate_app': 'Mouseyを評価',
       'contact_support': 'サポートへ連絡',
       'version': 'バージョン',
       'logout': 'ログアウト',
@@ -249,10 +249,10 @@ class AppTranslations {
       'saved_amount': '貯金済み',
       'no_balance_data': '残高データがまだありません。今日から貯金を始めましょう！',
       'no_financial_period_data': '財務期間データがありません',
-      'piggy_savings_badge': 'ピギー貯金箱 · PIGGY',
-      'piggy_friend': 'Piggy, あなたのフレンドリーな予算の友達',
-      'piggy_quote_home': '「塵も積もれば山となる！Piggyと一緒に貯金目標を設定して夢を叶えましょう！」',
-      'piggy_quote_no_expense': '「支出データはまだありません。Piggyと一緒に最初の取引を記録しましょう！」',
+      'piggy_savings_badge': 'MOUSEY SAVINGS · MOUSEY',
+      'piggy_friend': 'Mousey, あなたのフレンドリーな予算の友達',
+      'piggy_quote_home': '「塵も積もれば山となる！Mouseyと一緒に貯金目標を設定して夢を叶えましょう！」',
+      'piggy_quote_no_expense': '「支出データはまだありません。Mouseyと一緒に最初の取引を記録しましょう！」',
       'piggy_quote_no_income': '「収入データはまだありません。最初の収入を記録しましょう！」',
       'full_name': '氏名',
       'email_or_phone': 'メール / 電話番号',
@@ -268,12 +268,12 @@ class AppTranslations {
       'export_csv_sub': 'Googleスプレッドシートやデータシステムに最適',
       'export_excel_title': 'Excel出力 (.xlsx)',
       'export_excel_sub': 'Microsoft Excelの完全なフォーマットと数式',
-      'rate_message': 'PiggySmartをご利用いただきありがとうございます！ストアで5つ星の評価をお願いします ⭐⭐⭐⭐⭐',
-      'support_message': 'PiggySmartカスタマーサポート：\n• メール: support@piggysmart.com\n• ホットライン: 1900-PIGGY\n• 営業時間: 8:00 - 20:00 (月〜土)',
-      'export_csv_success': 'PiggySmart_Report.csv をダウンロードフォルダーに正常に出力しました！',
-      'export_excel_success': 'PiggySmart_Report.xlsx をダウンロードフォルダーに正常に出力しました！',
+      'rate_message': 'Mouseyをご利用いただきありがとうございます！ストアで5つ星の評価をお願いします ⭐⭐⭐⭐⭐',
+      'support_message': 'Mouseyカスタマーサポート：\n• メール: support@mousey.com\n• ホットライン: 1900-MOUSEY\n• 営業時間: 8:00 - 20:00 (月〜土)',
+      'export_csv_success': 'Mousey_Report.csv をダウンロードフォルダーに正常に出力しました！',
+      'export_excel_success': 'Mousey_Report.xlsx をダウンロードフォルダーに正常に出力しました！',
       'balance_subtitle': '取引後に残高を表示する',
-      'reminder_subtitle': 'ピギーからの毎日のリマインダー',
+      'reminder_subtitle': 'Mouseyからの毎日のリマインダー',
       'categories_count_subtitle': 'デフォルト23カテゴリ',
     },
     'zh': {
@@ -318,7 +318,7 @@ class AppTranslations {
       'balance_toggle': '余额显示',
       'daily_reminder': '每日提醒',
       'about': '关于',
-      'rate_app': '评价 PiggySmart',
+      'rate_app': '评价 Mousey',
       'contact_support': '联系客服',
       'version': '版本',
       'logout': '退出登录',
@@ -341,11 +341,11 @@ class AppTranslations {
       'saved_amount': '已储蓄',
       'no_balance_data': '暂无余额数据。从今天开始积累财富吧！',
       'no_financial_period_data': '暂无财务周期数据',
-      'piggy_savings_badge': '小猪存钱罐 · PIGGY',
-      'piggy_friend': 'Piggy，您亲切的预算伙伴',
-      'piggy_quote_home': '“积少成多！创建储蓄目标，让Piggy助你实现梦想！”',
-      'piggy_quote_no_expense': '“暂无支出数据。记录第一笔交易，让Piggy帮您管理财务吧！”',
-      'piggy_quote_no_income': '“暂无收入数据。记录第一笔收入，让Piggy帮您管理财务吧！”',
+      'piggy_savings_badge': 'MOUSEY SAVINGS · MOUSEY',
+      'piggy_friend': 'Mousey，您亲切的预算伙伴',
+      'piggy_quote_home': '“积少成多！创建储蓄目标，让Mousey助你实现梦想！”',
+      'piggy_quote_no_expense': '“暂无支出数据。记录第一笔交易，让Mousey帮您管理财务吧！”',
+      'piggy_quote_no_income': '“暂无收入数据。记录第一笔收入，让Mousey帮您管理财务吧！”',
       'full_name': '姓名',
       'email_or_phone': '邮箱 / 手机号',
       'choose_avatar': '选择头像',
@@ -360,12 +360,12 @@ class AppTranslations {
       'export_csv_sub': '适合 Google 表格和数据系统',
       'export_excel_title': '导出 Excel (.xlsx)',
       'export_excel_sub': '包含完整的 Microsoft Excel 格式和公式',
-      'rate_message': '感谢您使用 PiggySmart！请在应用商店留下5星好评 ⭐⭐⭐⭐⭐',
-      'support_message': 'PiggySmart 客户支持：\n• 邮箱: support@piggysmart.com\n• 热线: 1900-PIGGY\n• 工作时间: 8:00 - 20:00 (周一至周六)',
-      'export_csv_success': '成功将 PiggySmart_Report.csv 导出到下载文件夹！',
-      'export_excel_success': '成功将 PiggySmart_Report.xlsx 导出到下载文件夹！',
+      'rate_message': '感谢您使用 Mousey！请在应用商店留下5星好评 ⭐⭐⭐⭐⭐',
+      'support_message': 'Mousey 客户支持：\n• 邮箱: support@mousey.com\n• 热线: 1900-MOUSEY\n• 工作时间: 8:00 - 20:00 (周一至周六)',
+      'export_csv_success': '成功将 Mousey_Report.csv 导出到下载文件夹！',
+      'export_excel_success': '成功将 Mousey_Report.xlsx 导出到下载文件夹！',
       'balance_subtitle': '交易后显示余额',
-      'reminder_subtitle': '来自 Piggy 的每日提醒',
+      'reminder_subtitle': '来自 Mousey 的每日提醒',
       'categories_count_subtitle': '23个默认分类',
     },
     'ko': {
@@ -410,7 +410,7 @@ class AppTranslations {
       'balance_toggle': '잔액 표시',
       'daily_reminder': '매일 알림',
       'about': '앱 정보',
-      'rate_app': 'PiggySmart 평가하기',
+      'rate_app': 'Mousey 평가하기',
       'contact_support': '고객 지원 문의',
       'version': '버전',
       'logout': '로그아웃',
@@ -433,10 +433,10 @@ class AppTranslations {
       'saved_amount': '저축됨',
       'no_balance_data': '잔액 데이터가 없습니다. 오늘부터 저축을 시작해 보세요!',
       'no_financial_period_data': '재정 기간 데이터가 없습니다',
-      'piggy_savings_badge': '피기 저금통 · PIGGY',
-      'piggy_friend': 'Piggy, 당신의 친근한 예산 친구',
-      'piggy_quote_home': '"티끌 모아 태산! 저축 목표를 세우고 Piggy와 함께 꿈을 이뤄보세요!"',
-      'piggy_quote_no_expense': '"지출 데이터가 없습니다. 첫 거래를 기록하여 Piggy가 재정을 추적하도록 도와주세요!"',
+      'piggy_savings_badge': 'MOUSEY SAVINGS · MOUSEY',
+      'piggy_friend': 'Mousey, 당신의 친근한 예산 친구',
+      'piggy_quote_home': '"티끌 모아 태산! 저축 목표를 세우고 Mousey와 함께 꿈을 이뤄보세요!"',
+      'piggy_quote_no_expense': '"지출 데이터가 없습니다. 첫 거래를 기록하여 Mousey가 재정을 추적하도록 도와주세요!"',
       'piggy_quote_no_income': '"수입 데이터가 없습니다. 첫 수입을 기록해 보세요!"',
       'full_name': '성명',
       'email_or_phone': '이메일 / 전화번호',
@@ -452,12 +452,12 @@ class AppTranslations {
       'export_csv_sub': 'Google 스프레드시트 및 데이터 시스템에 적합',
       'export_excel_title': 'Excel 내보내기 (.xlsx)',
       'export_excel_sub': 'Microsoft Excel 서식 및 수식 포함',
-      'rate_message': 'PiggySmart를 이용해 주셔서 감사합니다! 앱스토어에 5점 만점 평가를 남겨주세요 ⭐⭐⭐⭐⭐',
-      'support_message': 'PiggySmart 고객 지원:\n• 이메일: support@piggysmart.com\n• 핫라인: 1900-PIGGY\n• 운영 시간: 08:00 - 20:00 (월~토)',
-      'export_csv_success': 'PiggySmart_Report.csv를 다운로드 폴더에 성공적으로 내보냈습니다!',
-      'export_excel_success': 'PiggySmart_Report.xlsx를 다운로드 폴더에 성공적으로 내보냈습니다!',
+      'rate_message': 'Mousey를 이용해 주셔서 감사합니다! 앱스토어에 5점 만점 평가를 남겨주세요 ⭐⭐⭐⭐⭐',
+      'support_message': 'Mousey 고객 지원:\n• 이메일: support@mousey.com\n• 핫라인: 1900-MOUSEY\n• 운영 시간: 08:00 - 20:00 (월~토)',
+      'export_csv_success': 'Mousey_Report.csv를 다운로드 폴더에 성공적으로 내보냈습니다!',
+      'export_excel_success': 'Mousey_Report.xlsx를 다운로드 폴더에 성공적으로 내보냈습니다!',
       'balance_subtitle': '거래 후 잔액 표시',
-      'reminder_subtitle': 'Piggy의 매일 알림',
+      'reminder_subtitle': 'Mousey의 매일 알림',
       'categories_count_subtitle': '기본 23개 카테고리',
     },
   };
@@ -481,205 +481,46 @@ class AppTranslations {
       'Công việc': 'Công việc',
       'Nhà ở': 'Nhà ở',
       'Tiền nợ': 'Tiền nợ',
+      'Khác': 'Khác',
       'Lương': 'Lương',
       'Thưởng': 'Thưởng',
-      'Đầu tư': 'Đầu tư',
       'Bán hàng': 'Bán hàng',
-      'Khác': 'Khác',
-      'Tất cả': 'Tất cả',
-    },
-    'en': {
-      'Ăn uống': 'Food & Dining',
-      'Hóa đơn': 'Bills & Utilities',
-      'Di chuyển': 'Transport',
-      'Mua sắm': 'Shopping',
-      'Giải trí': 'Entertainment',
-      'Sức khoẻ': 'Health',
-      'Làm đẹp': 'Beauty',
-      'Quần áo': 'Clothing',
-      'Học tập': 'Education',
-      'Thú cưng': 'Pets',
-      'Con cái': 'Children',
-      'Hỗ trợ gia đình': 'Family Support',
-      'Bảo hiểm': 'Insurance',
-      'Thuế': 'Taxes',
-      'Công việc': 'Work',
-      'Nhà ở': 'Housing',
-      'Tiền nợ': 'Debt',
-      'Lương': 'Salary',
-      'Thưởng': 'Bonus',
-      'Đầu tư': 'Investment',
-      'Bán hàng': 'Sales',
-      'Khác': 'Other',
-      'Tất cả': 'All Categories',
-    },
-    'ja': {
-      'Ăn uống': '食費',
-      'Hóa đơn': '光熱費',
-      'Di chuyển': '交通費',
-      'Mua sắm': '買い物',
-      'Giải trí': '娯楽',
-      'Sức khoẻ': '医療・健康',
-      'Làm đẹp': '美容',
-      'Quần áo': '衣類',
-      'Học tập': '教育',
-      'Thú cưng': 'ペット',
-      'Con cái': '育児',
-      'Hỗ trợ gia đình': '家族仕送り',
-      'Bảo hiểm': '保険',
-      'Thuế': '税金',
-      'Công việc': '仕事',
-      'Nhà ở': '住居費',
-      'Tiền nợ': '借金',
-      'Lương': '給料',
-      'Thưởng': 'ボーナス',
-      'Đầu tư': '投資',
-      'Bán hàng': '売上',
-      'Khác': 'その他',
-      'Tất cả': 'すべて',
-    },
-    'zh': {
-      'Ăn uống': '餐饮',
-      'Hóa đơn': '账单',
-      'Di chuyển': '交通',
-      'Mua sắm': '购物',
-      'Giải trí': '娱乐',
-      'Sức khoẻ': '医疗健康',
-      'Làm đẹp': '美容',
-      'Quần áo': '服饰',
-      'Học tập': '教育',
-      'Thú cưng': '宠物',
-      'Con cái': '育儿',
-      'Hỗ trợ gia đình': '家庭支持',
-      'Bảo hiểm': '保险',
-      'Thuế': '税费',
-      'Công việc': '工作',
-      'Nhà ở': '住房',
-      'Tiền nợ': '债务',
-      'Lương': '工资',
-      'Thưởng': '奖金',
-      'Đầu tư': '投资',
-      'Bán hàng': '销售',
-      'Khác': '其他',
-      'Tất cả': '全部',
-    },
-    'ko': {
-      'Ăn uống': '식비',
-      'Hóa đơn': '공과금',
-      'Di chuyển': '교통비',
-      'Mua sắm': '쇼핑',
-      'Giải trí': '문화/유흥',
-      'Sức khoẻ': '건강/의료',
-      'Làm đẹp': '뷰티',
-      'Quần áo': '의류',
-      'Học tập': '교육',
-      'Thú cưng': '반려동물',
-      'Con cái': '육아',
-      'Hỗ trợ gia đình': '가족 지원',
-      'Bảo hiểm': '보험',
-      'Thuế': '세금',
-      'Công việc': '업무',
-      'Nhà ở': '주거비',
-      'Tiền nợ': '대출/부채',
-      'Lương': '급여',
-      'Thưởng': '보너스',
-      'Đầu tư': '투자',
-      'Bán hàng': '매출',
-      'Khác': '기타',
-      'Tất cả': '전체',
+      'Đầu tư': 'Đầu tư',
     },
   };
-
-  static const Map<String, Map<String, String>> _ledgers = {
-    'vi': {
-      'Sổ cá nhân 1': 'Sổ cá nhân 1',
-    },
-    'en': {
-      'Sổ cá nhân 1': 'Personal Ledger 1',
-    },
-    'ja': {
-      'Sổ cá nhân 1': '個人帳簿1',
-    },
-    'zh': {
-      'Sổ cá nhân 1': '个人账本1',
-    },
-    'ko': {
-      'Sổ cá nhân 1': '개인 가계부 1',
-    },
-  };
-
-  static String trLedger(String langCode, String ledger) {
-    final code = _mapLanguageToCode(langCode);
-    final map = _ledgers[code] ?? _ledgers['vi']!;
-    return map[ledger] ?? ledger;
-  }
-
-  static const List<List<String>> _months = [
-    ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-    ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-    ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-    ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-    ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-  ];
-
-  static String formatMonthYear(String langCode, DateTime date) {
-    final code = _mapLanguageToCode(langCode);
-    int idx = 0;
-    if (code == 'en') {
-      idx = 1;
-    } else if (code == 'ja') {
-      idx = 2;
-    } else if (code == 'zh') {
-      idx = 3;
-    } else if (code == 'ko') {
-      idx = 4;
-    }
-
-    final monthName = _months[idx][date.month - 1];
-    if (code == 'ja' || code == 'zh') {
-      return '${date.year}年$monthName';
-    } else if (code == 'ko') {
-      return '${date.year}년 $monthName';
-    } else if (code == 'en') {
-      return '$monthName ${date.year}';
-    }
-    return '$monthName, ${date.year}';
-  }
-
-  static String formatDate(String langCode, DateTime date) {
-    final code = _mapLanguageToCode(langCode);
-    int idx = 0;
-    if (code == 'en') {
-      idx = 1;
-    } else if (code == 'ja') {
-      idx = 2;
-    } else if (code == 'zh') {
-      idx = 3;
-    } else if (code == 'ko') {
-      idx = 4;
-    }
-
-    final monthName = _months[idx][date.month - 1];
-    if (code == 'ja' || code == 'zh') {
-      return '${date.year}年$monthName${date.day}日';
-    } else if (code == 'ko') {
-      return '${date.year}년 $monthName ${date.day}일';
-    } else if (code == 'en') {
-      return '$monthName ${date.day}, ${date.year}';
-    }
-    return '${date.day} $monthName, ${date.year}';
-  }
 
   static String tr(String langCode, String key) {
     final code = _mapLanguageToCode(langCode);
-    final langMap = _keys[code] ?? _keys['vi']!;
-    return langMap[key] ?? _keys['vi']![key] ?? key;
+    final map = _keys[code] ?? _keys['vi']!;
+    return map[key] ?? key;
   }
 
   static String trCategory(String langCode, String category) {
     final code = _mapLanguageToCode(langCode);
     final catMap = _categories[code] ?? _categories['vi']!;
     return catMap[category] ?? category;
+  }
+
+  static String formatDate(String langCode, DateTime date) {
+    final code = _mapLanguageToCode(langCode);
+    if (code == 'en') {
+      return '${date.month}/${date.day}/${date.year}';
+    } else if (code == 'ja') {
+      return '${date.year}年${date.month}月${date.day}日';
+    } else if (code == 'zh') {
+      return '${date.year}年${date.month}月${date.day}日';
+    } else if (date.year == DateTime.now().year) {
+      return 'Ngày ${date.day} tháng ${date.month}';
+    }
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  static String formatMonthYear(String langCode, DateTime date) {
+    return 'Tháng ${date.month}/${date.year}';
+  }
+
+  static String trLedger(String langCode, String ledger) {
+    return ledger;
   }
 
   static String _mapLanguageToCode(String lang) {

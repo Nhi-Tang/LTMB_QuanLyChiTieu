@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../utils/app_translations.dart';
-import '../widgets/piggy_avatar.dart';
+import '../widgets/mousey_avatar.dart';
 import 'all_transactions_screen.dart';
 
 class HomeTab extends StatelessWidget {
@@ -395,7 +395,7 @@ class HomeTab extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: item.isExpense ? const Color(0xFFE57373) : accentBeige,
+                                color: item.isExpense ? const Color(0xFFE57373) : const Color(0xFF4A943E),
                               ),
                             ),
                           ],
