@@ -9,6 +9,7 @@ class TransactionItem {
   final bool isDeleted;
   final bool isSynced;
   final String? uid;
+  final String? ledgerId;
 
   TransactionItem({
     required this.id,
@@ -21,6 +22,7 @@ class TransactionItem {
     this.isDeleted = false,
     this.isSynced = false,
     this.uid,
+    this.ledgerId = 'Sổ cá nhân 1',
   }) : updatedAt = updatedAt ?? DateTime.now().millisecondsSinceEpoch;
 
   Map<String, dynamic> toMap() {
@@ -35,6 +37,7 @@ class TransactionItem {
       'isDeleted': isDeleted ? 1 : 0,
       'isSynced': isSynced ? 1 : 0,
       'uid': uid,
+      'ledgerId': ledgerId ?? 'Sổ cá nhân 1',
     };
   }
 
@@ -50,6 +53,7 @@ class TransactionItem {
       isDeleted: (map['isDeleted'] as int? ?? 0) == 1,
       isSynced: (map['isSynced'] as int? ?? 0) == 1,
       uid: map['uid'] as String?,
+      ledgerId: map['ledgerId'] as String? ?? 'Sổ cá nhân 1',
     );
   }
 
@@ -64,6 +68,7 @@ class TransactionItem {
     bool? isDeleted,
     bool? isSynced,
     String? uid,
+    String? ledgerId,
   }) {
     return TransactionItem(
       id: id ?? this.id,
@@ -76,6 +81,7 @@ class TransactionItem {
       isDeleted: isDeleted ?? this.isDeleted,
       isSynced: isSynced ?? this.isSynced,
       uid: uid ?? this.uid,
+      ledgerId: ledgerId ?? this.ledgerId,
     );
   }
 }

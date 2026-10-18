@@ -3,6 +3,7 @@ import '../../backend/models/budget_model.dart';
 import '../../backend/models/category_model.dart';
 import '../../backend/services/category_repository.dart';
 import '../../core/utils/money_input_formatter.dart';
+import '../../core/widgets/category_icon.dart';
 
 class BudgetFormSheet extends StatefulWidget {
   final String ledgerId;
@@ -84,6 +85,25 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
     if (mounted) {
       setState(() {
         _availableCategories = categories.where((c) => !existingCategoriesForMonth.contains(c.name)).toList();
+        // Nếu đang sửa và danh mục hiện tại chưa có trong _availableCategories thì chèn vào
+        if (widget.editingBudget?.categoryId != null) {
+          final currentCatName = widget.editingBudget!.categoryId!;
+          if (!_availableCategories.any((c) => c.name == currentCatName)) {
+            _availableCategories.insert(
+              0,
+              CategoryModel(
+                name: currentCatName,
+                iconKey: 'category_rounded',
+                type: 'expense',
+                sortOrder: 0,
+                isDefault: false,
+                isArchived: false,
+                createdAt: '',
+                updatedAt: '',
+              ),
+            );
+          }
+        }
         _isLoadingCategories = false;
       });
     }
@@ -179,52 +199,121 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
               ),
               const SizedBox(height: 20),
 
-              // Category Selection
-              const Text(
-                'Danh mục ngân sách',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+              // Category Selection Grid
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Chọn danh mục ngân sách',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                  ),
+                  Text(
+                    _selectedCategory ?? 'Tổng ngân sách',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFD9B97A)),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
+
               _isLoadingCategories
                   ? const Center(child: CircularProgressIndicator())
-                  : DropdownButtonFormField<String?>(
-                      isExpanded: true,
-                      initialValue: _selectedCategory,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      hint: const Text('Chọn danh mục (hoặc Tổng ngân sách)', overflow: TextOverflow.ellipsis),
-                      items: [
-                        if (!hasTotalBudget || _selectedCategory == null)
-                          const DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text(
-                              'Tổng ngân sách tháng (Toàn bộ chi tiêu)',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis,
+                  : Column(
+                      children: [
+                        // Card "Tổng ngân sách tháng"
+                        if (!hasTotalBudget || _selectedCategory == null) ...[
+                          InkWell(
+                            onTap: () => setState(() => _selectedCategory = null),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _selectedCategory == null ? const Color(0xFFF6E7CC) : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: _selectedCategory == null ? const Color(0xFFD9B97A) : const Color(0xFFECE7DB),
+                                  width: _selectedCategory == null ? 1.5 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.pie_chart_outline_rounded, color: Color(0xFF5D4222), size: 22),
+                                  const SizedBox(width: 8),
+                                  const Expanded(
+                                    child: Text(
+                                      'Tổng ngân sách tháng (Toàn bộ chi tiêu)',
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (_selectedCategory == null)
+                                    const Icon(Icons.check_circle_rounded, color: Color(0xFF5D4222), size: 18),
+                                ],
+                              ),
                             ),
                           ),
-                        ..._availableCategories.map((cat) => DropdownMenuItem<String?>(
-                              value: cat.name,
-                              child: Text(
-                                cat.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            )),
+                          const SizedBox(height: 10),
+                        ],
+
+                        // Lưới chọn danh mục bằng Card + CategoryIcon
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 220),
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 2.6,
+                            ),
+                            itemCount: _availableCategories.length,
+                            itemBuilder: (context, index) {
+                              final cat = _availableCategories[index];
+                              final name = cat.name;
+                              final isSelected = _selectedCategory == name;
+
+                              return InkWell(
+                                onTap: () => setState(() => _selectedCategory = name),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFFF6E7CC) : Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFFD9B97A) : const Color(0xFFECE7DB),
+                                      width: isSelected ? 1.5 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CategoryIcon(
+                                        categoryOrIconKey: name,
+                                        size: 28,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          name,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                            color: const Color(0xFF5D4222),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedCategory = val;
-                        });
-                      },
                     ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Amount Input
               const Text(

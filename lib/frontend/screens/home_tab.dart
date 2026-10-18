@@ -11,6 +11,7 @@ import '../../core/utils/money_input_formatter.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/mousey_avatar.dart';
+import '../widgets/budget_form_sheet.dart';
 import '../widgets/notification/notification_center_sheet.dart';
 import 'all_transactions_screen.dart';
 import 'budgets_screen.dart';
@@ -702,48 +703,68 @@ class _HomeTabState extends State<HomeTab> {
                     barColor = Colors.orange;
                   }
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                name,
+                  return InkWell(
+                    onTap: () {
+                      BudgetFormSheet.show(
+                        context: context,
+                        ledgerId: 'default_ledger',
+                        currentMonth: _monthStr,
+                        editingBudget: s.budget,
+                        existingBudgets: _budgetStatuses.map((b) => b.budget).toList(),
+                        onSave: (updatedBudget) async {
+                          if (updatedBudget.id == null || updatedBudget.id!.isEmpty) {
+                            await BudgetService.instance.insertBudget(updatedBudget);
+                          } else {
+                            await BudgetService.instance.updateBudget(updatedBudget);
+                          }
+                          _loadBudgets();
+                        },
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: HomeTab.darkBeige,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              MoneyText(
+                                amount: s.spent,
+                                prefix: '',
+                                suffix: ' / ${s.limit.toInt()} đ',
                                 style: const TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: HomeTab.darkBeige,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            MoneyText(
-                              amount: s.spent,
-                              prefix: '',
-                              suffix: ' / ${s.limit.toInt()} đ',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: HomeTab.darkBeige,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: (pct / 100.0).clamp(0.0, 1.0),
-                            minHeight: 8,
-                            backgroundColor: const Color(0xFFF2EFE6),
-                            valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: (pct / 100.0).clamp(0.0, 1.0),
+                              minHeight: 8,
+                              backgroundColor: const Color(0xFFF2EFE6),
+                              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
@@ -761,7 +782,7 @@ class _HomeTabState extends State<HomeTab> {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFFFFAF3),
+                  color: HomeTab.darkBeige,
                   letterSpacing: 0.8,
                 ),
               ),

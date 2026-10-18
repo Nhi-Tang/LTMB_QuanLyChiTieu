@@ -9,7 +9,7 @@ class AppTranslations {
       'total_balance': 'Tổng số dư',
       'income': 'Thu nhập',
       'expense': 'Chi tiêu',
-      'recent_transactions': 'Giao dịch gần đây',
+      'recent_transactions': 'Hoạt động gần đây',
       'view_all': 'Xem tất cả',
       'no_transactions': 'Chưa có giao dịch nào trong tháng này',
       'add_first_transaction': 'Nhấn vào nút Thu nhập/Chi tiêu ở trên hoặc nút (+) bên dưới để thêm giao dịch đầu tiên nhé!',
@@ -113,6 +113,7 @@ class AppTranslations {
       'recent_suggestions': 'GỢI Ý GẦN ĐÂY',
       'clear': 'Xóa',
       'save': 'Lưu',
+      'budget_overview': 'Ngân sách',
     },
     'en': {
       'home': 'Home',
@@ -227,6 +228,7 @@ class AppTranslations {
       'recent_suggestions': 'RECENT SUGGESTIONS',
       'clear': 'Clear',
       'save': 'Save',
+      'budget_overview': 'Budgets',
     },
     'ja': {
       'home': 'ホーム',
@@ -341,6 +343,7 @@ class AppTranslations {
       'recent_suggestions': '最近の候補',
       'clear': 'クリア',
       'save': '保存',
+      'budget_overview': '予算',
     },
     'zh': {
       'home': '首页',
@@ -455,6 +458,7 @@ class AppTranslations {
       'recent_suggestions': '最近建议',
       'clear': '清空',
       'save': '保存',
+      'budget_overview': '预算',
     },
     'ko': {
       'home': '홈',
@@ -569,6 +573,7 @@ class AppTranslations {
       'recent_suggestions': '최근 추천',
       'clear': '지우기',
       'save': '저장',
+      'budget_overview': '예산',
     },
   };
 

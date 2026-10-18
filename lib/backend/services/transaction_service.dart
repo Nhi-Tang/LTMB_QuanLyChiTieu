@@ -9,13 +9,23 @@ class TransactionService extends ChangeNotifier {
   factory TransactionService() => instance;
 
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  String _currentLedger = 'Sổ cá nhân 1';
 
-  Future<List<TransactionItem>> getTransactions({String? uid}) async {
-    return await _dbHelper.getTransactions(uid: uid);
+  String get currentLedger => _currentLedger;
+
+  void setCurrentLedger(String ledgerName) {
+    if (_currentLedger != ledgerName) {
+      _currentLedger = ledgerName;
+      notifyListeners();
+    }
   }
 
-  Future<int> addTransaction(TransactionItem item, {String? uid}) async {
-    final res = await _dbHelper.insertTransaction(item, uid: uid);
+  Future<List<TransactionItem>> getTransactions({String? uid, String? ledgerId}) async {
+    return await _dbHelper.getTransactions(uid: uid, ledgerId: ledgerId ?? _currentLedger);
+  }
+
+  Future<int> addTransaction(TransactionItem item, {String? uid, String? ledgerId}) async {
+    final res = await _dbHelper.insertTransaction(item, uid: uid, ledgerId: ledgerId ?? _currentLedger);
     notifyListeners();
     return res;
   }

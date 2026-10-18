@@ -45,7 +45,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 12,
+      version: 13,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -461,6 +461,12 @@ class DatabaseHelper {
         await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON app_notifications(isRead);");
       } catch (_) {}
     }
+    if (oldVersion < 13) {
+      // Migration v13: Thêm cột ledgerId phân lập giao dịch theo sổ sách
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN ledgerId TEXT DEFAULT 'Sổ cá nhân 1';");
+      } catch (_) {}
+    }
   }
 
   Future<void> _seedDefaultCategories(Database db) async {
@@ -542,30 +548,32 @@ class DatabaseHelper {
     }
   }
 
-  // --- TRANSACTIONS DAO METHODS (ISOLATED BY UID) ---
+  // --- TRANSACTIONS DAO METHODS (ISOLATED BY UID & LEDGER) ---
 
-  Future<List<TransactionItem>> getTransactions({String? uid}) async {
+  Future<List<TransactionItem>> getTransactions({String? uid, String? ledgerId}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
-    debugPrint('🗄️ [DatabaseHelper] Executing getTransactions for uid: $targetUid');
-    
-    // Đảm bảo lọc chính xác theo uid của người dùng hiện tại
+    final targetLedger = ledgerId ?? TransactionService.instance.currentLedger;
+    debugPrint('🗄️ [DatabaseHelper] Executing getTransactions for uid: $targetUid, ledgerId: $targetLedger');
+
     final result = await db.query(
       'transactions',
-      where: 'isDeleted = 0 AND (uid = ? OR uid IS NULL)',
-      whereArgs: [targetUid],
+      where: 'isDeleted = 0 AND (uid = ? OR uid IS NULL) AND (ledgerId = ? OR (ledgerId IS NULL AND ? = "Sổ cá nhân 1"))',
+      whereArgs: [targetUid, targetLedger, targetLedger],
       orderBy: 'date DESC',
     );
     return result.map((map) => TransactionItem.fromMap(map)).toList();
   }
 
-  Future<int> insertTransaction(TransactionItem item, {String? uid}) async {
+  Future<int> insertTransaction(TransactionItem item, {String? uid, String? ledgerId}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
+    final targetLedger = ledgerId ?? item.ledgerId ?? TransactionService.instance.currentLedger;
     final nowEpoch = DateTime.now().millisecondsSinceEpoch;
     final itemToSave = item.copyWith(
       id: item.id.isNotEmpty ? item.id : _uuid.v4(),
       uid: targetUid,
+      ledgerId: targetLedger,
       updatedAt: nowEpoch,
       isSynced: false,
     );

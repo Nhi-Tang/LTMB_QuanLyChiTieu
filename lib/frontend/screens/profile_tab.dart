@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
@@ -9,6 +7,7 @@ import '../../backend/services/export_service.dart';
 import '../../backend/services/sync_service.dart';
 import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
+import '../../core/widgets/settings_tile.dart';
 import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/category_link/linked_categories_screen.dart';
@@ -16,7 +15,6 @@ import '../widgets/mousey_avatar.dart';
 import '../widgets/notification/notification_settings_screen.dart';
 import '../widgets/notification/pending_inbox.dart';
 import '../widgets/pro_gate.dart';
-import '../../core/widgets/settings_tile.dart';
 import 'pro_upgrade_screen.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -63,6 +61,32 @@ class _ProfileTabState extends State<ProfileTab> {
     super.initState();
     _loadSyncInfo();
     _loadPendingCount();
+    _loadLedgers();
+  }
+
+  Future<void> _loadLedgers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = widget.currentUser.uid ?? 'default';
+    final list = prefs.getStringList('mousey_user_ledgers_$uid') ?? ['Sổ cá nhân 1'];
+    final selected = prefs.getString('mousey_selected_ledger_$uid') ?? list.first;
+
+    final targetSelected = list.contains(selected) ? selected : list.first;
+    TransactionService.instance.setCurrentLedger(targetSelected);
+
+    if (mounted) {
+      setState(() {
+        _ledgers.clear();
+        _ledgers.addAll(list);
+        _selectedLedger = targetSelected;
+      });
+    }
+  }
+
+  Future<void> _saveLedgers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = widget.currentUser.uid ?? 'default';
+    await prefs.setStringList('mousey_user_ledgers_$uid', _ledgers);
+    await prefs.setString('mousey_selected_ledger_$uid', _selectedLedger);
   }
 
   Future<void> _loadPendingCount() async {
@@ -204,14 +228,14 @@ class _ProfileTabState extends State<ProfileTab> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                    crossAxisCount: 4,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 1.1,
+                    childAspectRatio: 0.85,
                   ),
                   itemCount: avatars.length,
-                  itemBuilder: (ctx, i) {
-                    final item = avatars[i];
+                  itemBuilder: (context, index) {
+                    final item = avatars[index];
                     final key = item['key'] as String;
                     final isSel = widget.selectedAvatarKey == key;
 
@@ -223,11 +247,12 @@ class _ProfileTabState extends State<ProfileTab> {
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: isSel ? primaryBeige.withValues(alpha: 0.3) : const Color(0xFFFAF7EE),
+                          color: isSel ? primaryBeige : Colors.grey[100],
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSel ? accentBeige : const Color(0xFFE8E2D5),
+                            color: isSel ? darkBeige : Colors.transparent,
                             width: isSel ? 2 : 1,
                           ),
                         ),
@@ -266,7 +291,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
   Future<void> _showDeviceImagePicker(StateSetter setDialogState) async {
     final lang = widget.selectedLanguage;
-    Navigator.pop(context); // Close bottom sheet
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -283,7 +307,14 @@ class _ProfileTabState extends State<ProfileTab> {
         );
       }
     } catch (e) {
-      debugPrint('Error picking image: $e');
+      if (mounted) {
+        showAppAlertDialog(
+          context: context,
+          title: 'Lỗi chọn ảnh',
+          message: 'Không thể mở thư viện ảnh: $e',
+          isSuccess: false,
+        );
+      }
     }
   }
 
@@ -296,128 +327,68 @@ class _ProfileTabState extends State<ProfileTab> {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (dialogCtx, setDialogState) {
+        builder: (ctx, setDialogState) {
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                const Icon(Icons.person_outline_rounded, color: accentBeige, size: 28),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    AppTranslations.tr(lang, 'personal_info'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+            title: Text(
+              AppTranslations.tr(lang, 'personal_info'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            content: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Interactive Avatar Selection
-                      GestureDetector(
-                        onTap: () => _showAvatarPickerSheet(setDialogState),
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            buildUserAvatar(
-                              avatarKey: widget.selectedAvatarKey,
-                              userName: widget.currentUser.name,
-                              size: 72,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: accentBeige,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt_rounded,
-                                size: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: nameController,
-                        keyboardType: TextInputType.text,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        textCapitalization: TextCapitalization.none,
-                        decoration: InputDecoration(
-                          labelText: AppTranslations.tr(lang, 'full_name'),
-                          prefixIcon: const Icon(Icons.person, color: accentBeige),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ và tên' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        textCapitalization: TextCapitalization.none,
-                        decoration: InputDecoration(
-                          labelText: AppTranslations.tr(lang, 'email_or_phone'),
-                          prefixIcon: const Icon(Icons.email, color: accentBeige),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email / SĐT' : null,
-                      ),
-                      if (widget.currentUser.isAdmin) ...[
-                        const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF7EB),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE0EBE0)),
+            content: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => _showAvatarPickerSheet(setDialogState),
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          buildUserAvatar(
+                            avatarKey: widget.selectedAvatarKey,
+                            userName: widget.currentUser.name,
+                            size: 72,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Flexible(
-                                child: Text(
-                                  'Vai trò tài khoản:',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF555048)),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFECB3),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'Quản trị viên (Admin)',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFE65100),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: accentBeige,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
-                    ],
-                  ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: nameController,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        labelText: AppTranslations.tr(lang, 'full_name'),
+                        prefixIcon: const Icon(Icons.person, color: accentBeige),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ và tên' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        labelText: AppTranslations.tr(lang, 'email_or_phone'),
+                        prefixIcon: const Icon(Icons.email, color: accentBeige),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email / SĐT' : null,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -495,6 +466,88 @@ class _ProfileTabState extends State<ProfileTab> {
     );
   }
 
+  void _showAddNewLedgerDialog() {
+    final nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.menu_book_rounded, color: darkBeige),
+            SizedBox(width: 8),
+            Text('Thêm sổ sách mới', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Nhập tên sổ sách mới để quản lý chi tiêu riêng biệt:', style: TextStyle(fontSize: 13, color: Colors.grey)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: nameController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: 'VD: Sổ du lịch, Sổ kinh doanh...',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentBeige,
+              foregroundColor: darkBeige,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(content: Text('Vui lòng nhập tên sổ sách!'), backgroundColor: Colors.orange),
+                );
+                return;
+              }
+              if (_ledgers.contains(name)) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(content: Text('Sổ sách tên này đã tồn tại!'), backgroundColor: Colors.orange),
+                );
+                return;
+              }
+
+              setState(() {
+                _ledgers.add(name);
+                _selectedLedger = name;
+              });
+              TransactionService.instance.setCurrentLedger(name);
+              await _saveLedgers();
+
+              if (!ctx.mounted) return;
+              Navigator.pop(ctx);
+
+              if (!mounted) return;
+              showAppAlertDialog(
+                context: context,
+                title: 'Thành công',
+                message: 'Đã tạo sổ sách "$name" thành công!',
+                isSuccess: true,
+              );
+            },
+            child: const Text('Tạo sổ mới', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showLedgerPickerSheet() {
     final lang = widget.selectedLanguage;
     showModalBottomSheet(
@@ -538,6 +591,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         trailing: isSel ? const Icon(Icons.check_circle, color: accentBeige) : null,
                         onTap: () {
                           setState(() => _selectedLedger = ledger);
+                          TransactionService.instance.setCurrentLedger(ledger);
                           Navigator.pop(ctx);
                           showAppAlertDialog(
                             context: context,
@@ -563,19 +617,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         label: Text(AppTranslations.tr(lang, 'add_new_ledger'), style: const TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () {
                           Navigator.pop(ctx);
-                          if (!ProService.instance.isPro && !widget.currentUser.isAdmin) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
-                            );
-                          } else {
-                            showAppAlertDialog(
-                              context: context,
-                              title: 'Thêm sổ sách mới',
-                              message: 'Tính năng quản lý nhiều Sổ sách đã được kích hoạt trên tài khoản PRO!',
-                              isSuccess: true,
-                            );
-                          }
+                          _showAddNewLedgerDialog();
                         },
                       ),
                     ),
@@ -632,60 +674,46 @@ class _ProfileTabState extends State<ProfileTab> {
           children: [
             Text(
               AppTranslations.tr(lang, 'export_report_subtitle'),
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.description_outlined, color: Color(0xFF1E88E5)),
-              title: Text(AppTranslations.tr(lang, 'export_csv_title'), style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-              subtitle: Text(AppTranslations.tr(lang, 'export_csv_sub'), overflow: TextOverflow.ellipsis),
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.table_chart_rounded, color: Colors.green),
+              ),
+              title: Text(AppTranslations.tr(lang, 'export_csv_title'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              subtitle: Text(AppTranslations.tr(lang, 'export_csv_sub'), style: const TextStyle(fontSize: 11, color: Colors.grey)),
               onTap: () async {
                 Navigator.pop(ctx);
-                try {
-                  final filePath = await ExportService.exportToCsv();
-                  if (!ctx.mounted) return;
-                  showAppAlertDialog(
-                    context: ctx,
-                    title: 'Xuất file thành công',
-                    message: 'Đã lưu file CSV tại:\n$filePath',
-                    isSuccess: true,
-                  );
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  showAppAlertDialog(
-                    context: ctx,
-                    title: 'Lỗi xuất file',
-                    message: e.toString(),
-                    isSuccess: false,
-                  );
-                }
+                await ExportService.exportToCsv();
+                if (!mounted) return;
+                showAppAlertDialog(
+                  context: context,
+                  title: 'Thành công',
+                  message: AppTranslations.tr(lang, 'export_csv_success'),
+                  isSuccess: true,
+                );
               },
             ),
-            const Divider(),
+            const SizedBox(height: 8),
             ListTile(
-              leading: const Icon(Icons.table_chart_outlined, color: Color(0xFF43A047)),
-              title: Text(AppTranslations.tr(lang, 'export_excel_title'), style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-              subtitle: Text(AppTranslations.tr(lang, 'export_excel_sub'), overflow: TextOverflow.ellipsis),
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE3F2FD),
+                child: Icon(Icons.description_rounded, color: Colors.blue),
+              ),
+              title: Text(AppTranslations.tr(lang, 'export_excel_title'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              subtitle: Text(AppTranslations.tr(lang, 'export_excel_sub'), style: const TextStyle(fontSize: 11, color: Colors.grey)),
               onTap: () async {
                 Navigator.pop(ctx);
-                try {
-                  final filePath = await ExportService.exportToExcel();
-                  if (!ctx.mounted) return;
-                  showAppAlertDialog(
-                    context: ctx,
-                    title: 'Xuất file thành công',
-                    message: 'Đã lưu file Excel tại:\n$filePath',
-                    isSuccess: true,
-                  );
-                } catch (e) {
-                  if (!ctx.mounted) return;
-                  showAppAlertDialog(
-                    context: ctx,
-                    title: 'Lỗi xuất file',
-                    message: e.toString(),
-                    isSuccess: false,
-                  );
-                }
+                await ExportService.exportToExcel();
+                if (!mounted) return;
+                showAppAlertDialog(
+                  context: context,
+                  title: 'Thành công',
+                  message: AppTranslations.tr(lang, 'export_excel_success'),
+                  isSuccess: true,
+                );
               },
             ),
           ],
@@ -695,165 +723,54 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showDeleteMyDataDialog() {
-    bool isDeleting = false;
-
     showDialog(
       context: context,
-      barrierDismissible: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (dialogCtx, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-            contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-            title: const Text(
-              'Xoá các giao dịch?',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF222222),
-              ),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            SizedBox(width: 8),
+            Text('Cảnh báo xóa dữ liệu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Text(
+          'Bạn có chắc chắn muốn xóa toàn bộ giao dịch, tài khoản và danh mục tùy chỉnh? Hành động này không thể hoàn tác!',
+          style: TextStyle(fontSize: 14, color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            content: const Text(
-              'Việc này sẽ xoá vĩnh viễn mọi giao dịch. Tài khoản của bạn vẫn được giữ lại, nhưng số dư sẽ được đặt lại. Không thể hoàn tác.',
-              style: TextStyle(
-                fontSize: 15,
-                color: Color(0xFF4A4A4A),
-                height: 1.45,
-              ),
-            ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            actions: [
-              TextButton(
-                onPressed: isDeleting ? null : () => Navigator.pop(dialogCtx),
-                child: Text(
-                  'Hủy',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: isDeleting
-                    ? null
-                    : () async {
-                        setDialogState(() => isDeleting = true);
-                        try {
-                          await _executeDeleteMyData(false);
-                          if (!dialogCtx.mounted) return;
-                          Navigator.pop(dialogCtx);
-                          showAppAlertDialog(
-                            context: dialogCtx,
-                            title: 'Thành công',
-                            message: 'Đã xoá vĩnh viễn toàn bộ giao dịch. Số dư đã được đặt lại!',
-                            isSuccess: true,
-                          );
-                        } catch (e) {
-                          setDialogState(() => isDeleting = false);
-                          if (!dialogCtx.mounted) return;
-                          showAppAlertDialog(
-                            context: dialogCtx,
-                            title: 'Lỗi xoá dữ liệu',
-                            message: e.toString().replaceAll('Exception: ', ''),
-                            isSuccess: false,
-                          );
-                        }
-                      },
-                child: isDeleting
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red))
-                    : const Text(
-                        'Xoá giao dịch',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFD32F2F),
-                        ),
-                      ),
-              ),
-            ],
-          );
-        },
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await DatabaseHelper.instance.clearTransactions();
+              TransactionService.instance.notifyUpdated();
+              if (!mounted) return;
+              showAppAlertDialog(
+                context: context,
+                title: 'Đã xóa dữ liệu',
+                message: 'Toàn bộ dữ liệu tài chính cá nhân đã được làm sạch thành công.',
+                isSuccess: true,
+              );
+            },
+            child: const Text('Xác nhận Xóa', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> _executeDeleteMyData(bool deleteAccount) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception('Chưa đăng nhập tài khoản.');
-    final uid = user.uid;
-
-    debugPrint('🗑️ [DeleteData] Executing data wipe for uid: $uid (deleteAccount=$deleteAccount)...');
-
-    // 1. Dừng SyncService
-    SyncService.instance.stop();
-
-    final firestore = FirebaseFirestore.instance;
-    final db = await DatabaseHelper.instance.database;
-
-    // 2. Xóa Firestore subcollections qua batch
-    try {
-      final txBatch = firestore.batch();
-      final txDocs = await firestore.collection('users').doc(uid).collection('transactions').get();
-      for (var d in txDocs.docs) {
-        txBatch.delete(d.reference);
-      }
-      final goalDocs = await firestore.collection('users').doc(uid).collection('savings_goals').get();
-      for (var d in goalDocs.docs) {
-        txBatch.delete(d.reference);
-      }
-      final budgetDocs = await firestore.collection('users').doc(uid).collection('budgets').get();
-      for (var d in budgetDocs.docs) {
-        txBatch.delete(d.reference);
-      }
-      final orderDocs = await firestore.collection('users').doc(uid).collection('orders').get();
-      for (var d in orderDocs.docs) {
-        txBatch.delete(d.reference);
-      }
-      await txBatch.commit();
-      debugPrint('✅ [DeleteData] Firestore subcollections batch deleted for $uid');
-    } catch (fsErr) {
-      debugPrint('⚠️ [DeleteData] Firestore batch delete error: $fsErr');
-    }
-
-    // 3. Xóa SQLite data toàn bộ cho uid và dữ liệu không gán uid
-    await db.delete('transactions', where: 'uid = ? OR uid IS NULL OR uid = ""', whereArgs: [uid]);
-    await db.delete('savings_goals', where: 'uid = ? OR uid IS NULL OR uid = ""', whereArgs: [uid]);
-    await db.delete('savings_transactions');
-    await db.delete('budgets', where: 'uid = ? OR uid IS NULL OR uid = ""', whereArgs: [uid]);
-    await db.delete('budget_alerts');
-
-    // 4. Xóa SharedPreferences keys gắn với uid
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('last_sync_$uid');
-    await prefs.remove('mousey_last_sync_$uid');
-
-    debugPrint('✅ [DeleteData] Local SQLite data cleared for $uid');
-
-    // 5. Nếu chọn xóa vĩnh viễn tài khoản:
-    if (deleteAccount) {
-      try {
-        await firestore.collection('users').doc(uid).delete();
-      } catch (e) {
-        debugPrint('Firestore delete user doc error: $e');
-      }
-      await user.delete();
-    } else {
-      TransactionService.instance.notifyUpdated();
-    }
-  }
-
   void _showLanguagePickerSheet() {
     final lang = widget.selectedLanguage;
-    final languages = [
-      'English',
-      '日本語',
-      '中文',
-      '한국어',
-      'Tiếng Việt',
-    ];
+    final languages = ['Tiếng Việt', 'English (US)', '日本語 (Japanese)', '中文 (Chinese)', '한국어 (Korean)'];
 
     showModalBottomSheet(
       context: context,
@@ -861,9 +778,9 @@ class _ProfileTabState extends State<ProfileTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
+        return SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
