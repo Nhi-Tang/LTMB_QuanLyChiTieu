@@ -1,6 +1,6 @@
 class SavingsTransactionModel {
   final int? id;
-  final int goalId;
+  final String goalId;
   final double amount;
   final bool isDeposit;
   final String? note;
@@ -29,7 +29,7 @@ class SavingsTransactionModel {
   factory SavingsTransactionModel.fromMap(Map<String, dynamic> map) {
     return SavingsTransactionModel(
       id: map['id'] as int?,
-      goalId: map['goal_id'] as int? ?? 0,
+      goalId: map['goal_id']?.toString() ?? '',
       amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
       isDeposit: (map['is_deposit'] as int? ?? 1) == 1,
       note: map['note'] as String?,

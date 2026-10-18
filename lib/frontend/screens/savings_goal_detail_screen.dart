@@ -3,6 +3,7 @@ import '../../backend/database/db_helper.dart';
 import '../../backend/models/savings_goal_model.dart';
 import '../../backend/models/savings_transaction_model.dart';
 import '../../core/utils/money_input_formatter.dart';
+import '../../core/widgets/money_text.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/mousey_avatar.dart';
@@ -39,7 +40,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
 
   Future<void> _loadTransactions() async {
     setState(() => _isLoading = true);
-    final txs = await DatabaseHelper.instance.getSavingsTransactions(_goal.id ?? 0);
+    final txs = await DatabaseHelper.instance.getSavingsTransactions(_goal.id ?? '');
     setState(() {
       _transactions = txs;
       _isLoading = false;
@@ -76,129 +77,134 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
             left: 20,
             right: 20,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    isDeposit ? 'Nạp thêm tiền vào mục tiêu' : 'Rút bớt tiền khỏi mục tiêu',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDeposit ? accentBeige : Colors.red[700],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [MoneyInputFormatter()],
-                decoration: InputDecoration(
-                  labelText: 'Số tiền (đ)',
-                  prefixIcon: Icon(Icons.attach_money, color: isDeposit ? accentBeige : Colors.red),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: noteController,
-                decoration: InputDecoration(
-                  labelText: 'Ghi chú (Tùy chọn)',
-                  prefixIcon: const Icon(Icons.note, color: Colors.grey),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        isDeposit ? 'Nạp thêm tiền vào mục tiêu' : 'Rút bớt tiền khỏi mục tiêu',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDeposit ? accentBeige : Colors.red[700],
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isDeposit ? accentBeige : Colors.red[700],
-                    foregroundColor: isDeposit ? const Color(0xFF5D4222) : Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [MoneyInputFormatter()],
+                  decoration: InputDecoration(
+                    labelText: 'Số tiền (đ)',
+                    prefixIcon: Icon(Icons.attach_money, color: isDeposit ? accentBeige : Colors.red),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  onPressed: () async {
-                    final amount = parseMoney(amountController.text).toDouble();
-                    if (amount <= 0) {
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: noteController,
+                  decoration: InputDecoration(
+                    labelText: 'Ghi chú (Tùy chọn)',
+                    prefixIcon: const Icon(Icons.note, color: Colors.grey),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDeposit ? accentBeige : Colors.red[700],
+                      foregroundColor: isDeposit ? const Color(0xFF5D4222) : Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () async {
+                      final amount = parseMoney(amountController.text).toDouble();
+                      if (amount <= 0) {
+                        showAppAlertDialog(
+                          context: context,
+                          title: 'Thông báo',
+                          message: 'Vui lòng nhập số tiền hợp lệ lớn hơn 0!',
+                          isSuccess: false,
+                        );
+                        return;
+                      }
+
+                      if (!isDeposit && amount > _goal.currentAmount) {
+                        showAppAlertDialog(
+                          context: context,
+                          title: 'Không thể rút',
+                          message: 'Số tiền rút không được vượt quá số tiền hiện có (${_formatCurrency(_goal.currentAmount)})!',
+                          isSuccess: false,
+                        );
+                        return;
+                      }
+
+                      final tx = SavingsTransactionModel(
+                        goalId: _goal.id ?? '',
+                        amount: amount,
+                        isDeposit: isDeposit,
+                        note: noteController.text.trim().isNotEmpty ? noteController.text.trim() : (isDeposit ? 'Nạp thêm' : 'Rút bớt'),
+                        date: DateTime.now().toIso8601String(),
+                      );
+
+                      await DatabaseHelper.instance.addSavingsTransaction(tx);
+
+                      // Refresh goal from DB
+                      final goals = await DatabaseHelper.instance.getSavingsGoals();
+                      final updated = goals.firstWhere((g) => g.id == _goal.id);
+
+                      if (!mounted) return;
+                      setState(() {
+                        _goal = updated;
+                      });
+                      _loadTransactions();
+                      widget.onGoalUpdated();
+
+                      if (!ctx.mounted) return;
+                      Navigator.pop(ctx);
+
+                      if (!mounted) return;
                       showAppAlertDialog(
                         context: context,
-                        title: 'Thông báo',
-                        message: 'Vui lòng nhập số tiền hợp lệ lớn hơn 0!',
-                        isSuccess: false,
+                        title: 'Thành công',
+                        message: isDeposit ? 'Đã nạp thêm tiền thành công! 🐖' : 'Đã rút bớt tiền thành công!',
+                        isSuccess: true,
                       );
-                      return;
-                    }
-
-                    if (!isDeposit && amount > _goal.currentAmount) {
-                      showAppAlertDialog(
-                        context: context,
-                        title: 'Không thể rút',
-                        message: 'Số tiền rút không được vượt quá số tiền hiện có (${_formatCurrency(_goal.currentAmount)})!',
-                        isSuccess: false,
-                      );
-                      return;
-                    }
-
-                    final tx = SavingsTransactionModel(
-                      goalId: _goal.id ?? 0,
-                      amount: amount,
-                      isDeposit: isDeposit,
-                      note: noteController.text.trim().isNotEmpty ? noteController.text.trim() : (isDeposit ? 'Nạp thêm' : 'Rút bớt'),
-                      date: DateTime.now().toIso8601String(),
-                    );
-
-                    await DatabaseHelper.instance.addSavingsTransaction(tx);
-
-                    // Refresh goal from DB
-                    final goals = await DatabaseHelper.instance.getSavingsGoals();
-                    final updated = goals.firstWhere((g) => g.id == _goal.id);
-
-                    if (!mounted) return;
-                    setState(() {
-                      _goal = updated;
-                    });
-                    _loadTransactions();
-                    widget.onGoalUpdated();
-
-                    if (!ctx.mounted) return;
-                    Navigator.pop(ctx);
-
-                    if (!mounted) return;
-                    showAppAlertDialog(
-                      context: context,
-                      title: 'Thành công',
-                      message: isDeposit ? 'Đã nạp thêm tiền thành công! 🐖' : 'Đã rút bớt tiền thành công!',
-                      isSuccess: true,
-                    );
-                  },
-                  child: Text(
-                    isDeposit ? 'XÁC NHẬN NẠP THÊM' : 'XÁC NHẬN RÚT BỚT',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    },
+                    child: Text(
+                      isDeposit ? 'XÁC NHẬN NẠP THÊM' : 'XÁC NHẬN RÚT BỚT',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -295,7 +301,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7EB),
       appBar: AppBar(
-        title: Text(_goal.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+        title: Text(_goal.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87), overflow: TextOverflow.ellipsis),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
@@ -335,7 +341,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                       onPressed: () async {
-                        await DatabaseHelper.instance.deleteSavingsGoal(_goal.id ?? 0);
+                        await DatabaseHelper.instance.deleteSavingsGoal(_goal.id ?? '');
                         if (!ctx.mounted) return;
                         Navigator.pop(ctx);
                         Navigator.pop(context);
@@ -387,6 +393,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                             Text(
                               _goal.name,
                               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -396,6 +403,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                                 fontWeight: FontWeight.w600,
                                 color: _goal.isCompleted ? accentBeige : Colors.grey[600],
                               ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -406,13 +414,19 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        _formatCurrency(_goal.currentAmount),
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: accentBeige),
+                      Flexible(
+                        child: MoneyText(
+                          amount: _goal.currentAmount,
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: accentBeige),
+                        ),
                       ),
-                      Text(
-                        _formatCurrency(_goal.targetAmount),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: MoneyText(
+                          amount: _goal.targetAmount,
+                          alignment: Alignment.centerRight,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+                        ),
                       ),
                     ],
                   ),
@@ -420,7 +434,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
-                      value: progress,
+                      value: progress.clamp(0.0, 1.0),
                       minHeight: 14,
                       backgroundColor: const Color(0xFFF2EFE6),
                       valueColor: const AlwaysStoppedAnimation<Color>(accentBeige),
@@ -601,21 +615,28 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                                       Text(
                                         tx.note ?? (tx.isDeposit ? 'Nạp thêm' : 'Rút bớt'),
                                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         '${date.day}/${date.month}/${date.year} · ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
                                         style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
                                 ),
-                                Text(
-                                  '${tx.isDeposit ? '+' : '-'}${_formatCurrency(tx.amount)}',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: tx.isDeposit ? accentBeige : Colors.red,
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: MoneyText(
+                                    amount: tx.amount,
+                                    prefix: tx.isDeposit ? '+' : '-',
+                                    alignment: Alignment.centerRight,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: tx.isDeposit ? accentBeige : Colors.red,
+                                    ),
                                   ),
                                 ),
                               ],

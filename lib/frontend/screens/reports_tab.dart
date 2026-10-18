@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
+import '../../core/widgets/money_text.dart';
 import '../utils/app_translations.dart';
 import '../widgets/mousey_avatar.dart';
 
@@ -19,21 +20,11 @@ class ReportsTab extends StatefulWidget {
 }
 
 class _ReportsTabState extends State<ReportsTab> {
-  int _reportTypeIndex = 0; // 0: Chi tiêu, 1: Thu nhập, 2: Số dư
+  int _reportTypeIndex = 0; // 0: Chi tiêu, 1: Thu nhập
   String _timeRange = 'all_time';
   String _selectedCategoryFilter = 'Tất cả';
   bool _showAllCategories = false;
   int _trendMonthRange = 6; // 3t, 6t, 12t, 24t
-
-  String _formatCurrency(double amount) {
-    final isNegative = amount < 0;
-    final absAmount = amount.abs();
-    final formatted = absAmount.toInt().toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        );
-    return '${isNegative ? '-' : ''}đ$formatted';
-  }
 
   Color _getCategoryColor(String category) {
     switch (category) {
@@ -181,31 +172,6 @@ class _ReportsTabState extends State<ReportsTab> {
     return result;
   }
 
-  // Dynamic calculations for "Số dư" (Balance / Net Income)
-  double get _totalIncomeAll {
-    double sum = 0.0;
-    for (var t in widget.transactions) {
-      if (!t.isExpense) sum += t.amount;
-    }
-    return sum;
-  }
-
-  double get _totalExpenseAll {
-    double sum = 0.0;
-    for (var t in widget.transactions) {
-      if (t.isExpense) sum += t.amount;
-    }
-    return sum;
-  }
-
-  double get _netBalance => _totalIncomeAll - _totalExpenseAll;
-
-  double get _savingsPercentage {
-    if (_totalIncomeAll <= 0) return 0.0;
-    final pct = (_netBalance / _totalIncomeAll) * 100.0;
-    return pct < 0 ? 0.0 : pct;
-  }
-
   String get _aiInsightQuote {
     final lang = widget.selectedLanguage;
     final categories = _dynamicCategories;
@@ -230,7 +196,7 @@ class _ReportsTabState extends State<ReportsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 2. Segmented Selector Tabs (Chi tiêu | Thu nhập | Số dư)
+          // Segmented Selector Tabs (Chi tiêu | Thu nhập)
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -241,14 +207,13 @@ class _ReportsTabState extends State<ReportsTab> {
               children: [
                 _buildSegmentTab(0, AppTranslations.tr(lang, 'expense')),
                 _buildSegmentTab(1, AppTranslations.tr(lang, 'income')),
-                _buildSegmentTab(2, AppTranslations.tr(lang, 'balance_toggle')),
               ],
             ),
           ),
 
           const SizedBox(height: 14),
 
-          // 3. Filter Bar
+          // Filter Bar
           Row(
             children: [
               InkWell(
@@ -315,11 +280,8 @@ class _ReportsTabState extends State<ReportsTab> {
 
           const SizedBox(height: 16),
 
-          // Render view based on active tab:
-          if (_reportTypeIndex == 2)
-            _buildBalanceView()
-          else
-            _buildExpenseOrIncomeView(),
+          // Main View (Chi tiêu / Thu nhập)
+          _buildExpenseOrIncomeView(),
         ],
       ),
     );
@@ -350,27 +312,32 @@ class _ReportsTabState extends State<ReportsTab> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _reportTypeIndex == 0
-                        ? '${AppTranslations.tr(lang, 'total_spent')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}'
-                        : '${AppTranslations.tr(lang, 'total_earned')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.8,
-                      color: Color(0xFF706C66),
+                  Expanded(
+                    child: Text(
+                      _reportTypeIndex == 0
+                          ? '${AppTranslations.tr(lang, 'total_spent')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}'
+                          : '${AppTranslations.tr(lang, 'total_earned')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                        color: Color(0xFF706C66),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const MouseyAvatar(size: 48),
                 ],
               ),
               const SizedBox(height: 4),
-              Text(
-                _formatCurrency(_totalReportAmount),
+              MoneyText(
+                amount: _totalReportAmount,
+                prefix: 'đ',
+                suffix: '',
                 style: TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w900,
-                  color: _reportTypeIndex == 1 ? const Color(0xFFE5D3AF) : const Color(0xFF222222),
+                  color: _reportTypeIndex == 1 ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
                   letterSpacing: -0.5,
                 ),
               ),
@@ -499,33 +466,42 @@ class _ReportsTabState extends State<ReportsTab> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 10,
-                                          height: 10,
-                                          decoration: BoxDecoration(
-                                            color: cat['color'] as Color,
-                                            shape: BoxShape.circle,
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: cat['color'] as Color,
+                                              shape: BoxShape.circle,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          AppTranslations.trCategory(lang, cat['name'] as String),
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFF222222),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              AppTranslations.trCategory(lang, cat['name'] as String),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF222222),
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                    Text(
-                                      '${(cat['percentage'] as double).toStringAsFixed(1)}%',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF222222),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        '${(cat['percentage'] as double).toStringAsFixed(1)}%',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF222222),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
@@ -558,39 +534,50 @@ class _ReportsTabState extends State<ReportsTab> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 38,
-                                      height: 38,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFFAF7EE),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          cat['icon'] as String,
-                                          style: const TextStyle(fontSize: 18),
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 38,
+                                        height: 38,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFFAF7EE),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            cat['icon'] as String,
+                                            style: const TextStyle(fontSize: 18),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      AppTranslations.trCategory(lang, cat['name'] as String),
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF222222),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          AppTranslations.trCategory(lang, cat['name'] as String),
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF222222),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  _formatCurrency(cat['amount'] as double),
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF222222),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: MoneyText(
+                                    amount: cat['amount'] as double,
+                                    prefix: 'đ',
+                                    suffix: '',
+                                    alignment: Alignment.centerRight,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF222222),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -602,7 +589,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(6),
                                     child: LinearProgressIndicator(
-                                      value: pct / 100.0,
+                                      value: (pct / 100.0).clamp(0.0, 1.0),
                                       minHeight: 10,
                                       backgroundColor: const Color(0xFFF2EFE6),
                                       valueColor: AlwaysStoppedAnimation<Color>(catColor),
@@ -663,13 +650,16 @@ class _ReportsTabState extends State<ReportsTab> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              AppTranslations.tr(lang, 'trend'),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.0,
-                color: Color(0xFF706C66),
+            Expanded(
+              child: Text(
+                AppTranslations.tr(lang, 'trend'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  color: Color(0xFF706C66),
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Container(
@@ -713,14 +703,15 @@ class _ReportsTabState extends State<ReportsTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _formatCurrency(_totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0),
+                        MoneyText(
+                          amount: _totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0,
+                          prefix: 'đ',
+                          suffix: '',
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFF222222),
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -782,292 +773,6 @@ class _ReportsTabState extends State<ReportsTab> {
         ),
       ],
     );
-  }
-
-  // --- BALANCE TAB VIEW ("Số dư") ---
-  Widget _buildBalanceView() {
-    final lang = widget.selectedLanguage;
-    final net = _netBalance;
-    final isPositive = net >= 0;
-    final monthlyTableData = _getMonthlyTableData();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Hero Card Số Dư
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF4F7F2),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFE2E9E0)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${AppTranslations.tr(lang, 'balance_toggle').toUpperCase()} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.8,
-                  color: Color(0xFF706C66),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    '${isPositive ? '+' : ''}${_formatCurrency(net)}',
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w900,
-                      color: isPositive ? const Color(0xFFE5D3AF) : Colors.red[700],
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppTranslations.tr(lang, 'saved_amount'),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF555048),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _totalIncomeAll > 0
-                    ? 'Bạn đã giữ lại ${_savingsPercentage.toStringAsFixed(0)}% so với thu nhập.'
-                    : AppTranslations.tr(lang, 'no_balance_data'),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF666666),
-                  height: 1.35,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Section: THU NHẬP & CHI TIÊU
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${AppTranslations.tr(lang, 'income').toUpperCase()} & ${AppTranslations.tr(lang, 'expense').toUpperCase()}',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.0,
-                color: Color(0xFF706C66),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFECE7DB),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: const [
-                  _SmallPillText('N'),
-                  SizedBox(width: 8),
-                  _SmallPillText('T'),
-                  SizedBox(width: 8),
-                  _SmallPillText('T', isActive: true),
-                  SizedBox(width: 8),
-                  _SmallPillText('N'),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 10),
-
-        // Dual Bar & Line Trend Container
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFECE7DB)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Legend row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        _LegendLineDot(AppTranslations.tr(lang, 'income'), const Color(0xFFE5D3AF)),
-                        _LegendLineDot(AppTranslations.tr(lang, 'expense'), const Color(0xFFE53935)),
-                        _LegendLineDot(AppTranslations.tr(lang, 'balance_toggle'), const Color(0xFFFB8C00)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [6, 12, 24].map((range) {
-                      final isSel = _trendMonthRange == range;
-                      return GestureDetector(
-                        onTap: () => setState(() => _trendMonthRange = range),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 3),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSel ? const Color(0xFF222222) : const Color(0xFFF2EEE5),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${range}t',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: isSel ? Colors.white : const Color(0xFF666666),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Dual-direction Bar + Balance Line Chart
-              SizedBox(
-                height: 190,
-                width: double.infinity,
-                child: CustomPaint(
-                  painter: BalanceTrendChartPainter(
-                    months: _getRecent6MonthsLabels(),
-                    transactions: widget.transactions,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-              const Divider(color: Color(0xFFF0EBE0), height: 1),
-              const SizedBox(height: 16),
-
-              // Monthly Breakdown Table
-              Row(
-                children: [
-                  const Expanded(flex: 2, child: Text('KỲ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                  Expanded(flex: 3, child: Text(AppTranslations.tr(lang, 'income').toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                  Expanded(flex: 3, child: Text(AppTranslations.tr(lang, 'expense').toUpperCase(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                  Expanded(flex: 3, child: Text(AppTranslations.tr(lang, 'balance_toggle').toUpperCase(), textAlign: TextAlign.right, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF888480)))),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              if (monthlyTableData.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Text(AppTranslations.tr(lang, 'no_financial_period_data'), style: const TextStyle(fontSize: 13, color: Colors.grey)),
-                  ),
-                )
-              else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: monthlyTableData.length,
-                  separatorBuilder: (ctx, i) => const Divider(color: Color(0xFFF5F2EA), height: 16),
-                  itemBuilder: (ctx, index) {
-                    final row = monthlyTableData[index];
-                    final double inc = row['income'] as double;
-                    final double exp = row['expense'] as double;
-                    final double bal = inc - exp;
-
-                    return Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            row['label'] as String,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            _formatCurrency(inc),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFFE5D3AF)),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            '-${_formatCurrency(exp)}',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFFE53935)),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            '${bal >= 0 ? '+' : ''}${_formatCurrency(bal)}',
-                            textAlign: TextAlign.right,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  List<Map<String, dynamic>> _getMonthlyTableData() {
-    final now = DateTime.now();
-    final List<Map<String, dynamic>> list = [];
-
-    for (int i = 0; i < 6; i++) {
-      final targetMonth = DateTime(now.year, now.month - i, 1);
-      double inc = 0.0;
-      double exp = 0.0;
-
-      for (var t in widget.transactions) {
-        if (t.date.year == targetMonth.year && t.date.month == targetMonth.month) {
-          if (t.isExpense) {
-            exp += t.amount;
-          } else {
-            inc += t.amount;
-          }
-        }
-      }
-
-      if (inc > 0 || exp > 0) {
-        list.add({
-          'label': 'thg ${targetMonth.month} ${targetMonth.year.toString().substring(2)}',
-          'income': inc,
-          'expense': exp,
-        });
-      }
-    }
-    return list;
   }
 
   List<String> _getRecent6MonthsLabels() {
@@ -1135,40 +840,47 @@ class _ReportsTabState extends State<ReportsTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppTranslations.tr(lang, 'filter'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ...options.map((key) {
-                final isSel = _timeRange == key;
-                return ListTile(
-                  title: Text(
-                    AppTranslations.tr(lang, key),
-                    style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
+        return Material(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFFE5D3AF)) : null,
-                  onTap: () {
-                    setState(() => _timeRange = key);
-                    Navigator.pop(ctx);
-                  },
-                );
-              }),
-            ],
+                  const SizedBox(height: 16),
+                  Text(
+                    AppTranslations.tr(lang, 'filter'),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  ...options.map((key) {
+                    final isSel = _timeRange == key;
+                    return ListTile(
+                      title: Text(
+                        AppTranslations.tr(lang, key),
+                        style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
+                      ),
+                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFFE5D3AF)) : null,
+                      onTap: () {
+                        setState(() => _timeRange = key);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -1217,59 +929,64 @@ class _ReportsTabState extends State<ReportsTab> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.65,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+        return Material(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.65,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                AppTranslations.tr(lang, 'filter_categories'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    final cat = categories[index];
-                    final isSel = _selectedCategoryFilter == cat;
-                    return ListTile(
-                      leading: Text(
-                        cat == 'Tất cả' ? '📌' : _getCategoryIcon(cat),
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                      title: Text(
-                        AppTranslations.trCategory(lang, cat),
-                        style: TextStyle(
-                          fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                          color: isSel ? const Color(0xFFE5D3AF) : Colors.black87,
+                const SizedBox(height: 16),
+                Text(
+                  AppTranslations.tr(lang, 'filter_categories'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = categories[index];
+                      final isSel = _selectedCategoryFilter == cat;
+                      return ListTile(
+                        leading: Text(
+                          cat == 'Tất cả' ? '📌' : _getCategoryIcon(cat),
+                          style: const TextStyle(fontSize: 20),
                         ),
-                      ),
-                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFFE5D3AF)) : null,
-                      onTap: () {
-                        setState(() {
-                          _selectedCategoryFilter = cat;
-                        });
-                        Navigator.pop(ctx);
-                      },
-                    );
-                  },
+                        title: Text(
+                          AppTranslations.trCategory(lang, cat),
+                          style: TextStyle(
+                            fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                            color: isSel ? const Color(0xFFE5D3AF) : Colors.black87,
+                          ),
+                        ),
+                        trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFFE5D3AF)) : null,
+                        onTap: () {
+                          setState(() {
+                            _selectedCategoryFilter = cat;
+                          });
+                          Navigator.pop(ctx);
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1390,163 +1107,6 @@ class StackedBarChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// --- BALANCE DUAL BAR & LINE CHART PAINTER ---
-class BalanceTrendChartPainter extends CustomPainter {
-  final List<String> months;
-  final List<TransactionItem> transactions;
-
-  BalanceTrendChartPainter({required this.months, required this.transactions});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double barWidth = 22.0;
-    final double spacing = (size.width - (months.length * barWidth)) / (months.length + 1);
-    final double zeroY = size.height * 0.55; // Baseline 0 line
-
-    final now = DateTime.now();
-    final List<double> monthlyIncomes = List.filled(months.length, 0.0);
-    final List<double> monthlyExpenses = List.filled(months.length, 0.0);
-
-    for (var t in transactions) {
-      for (int i = 0; i < months.length; i++) {
-        final targetMonth = DateTime(now.year, now.month - (5 - i), 1);
-        if (t.date.year == targetMonth.year && t.date.month == targetMonth.month) {
-          if (t.isExpense) {
-            monthlyExpenses[i] += t.amount;
-          } else {
-            monthlyIncomes[i] += t.amount;
-          }
-        }
-      }
-    }
-
-    double maxVal = 100000.0;
-    for (int i = 0; i < months.length; i++) {
-      maxVal = math.max(maxVal, math.max(monthlyIncomes[i], monthlyExpenses[i]));
-    }
-
-    // Draw 0 Baseline
-    final linePaint = Paint()
-      ..color = const Color(0xFFE0DACF)
-      ..strokeWidth = 1.0;
-    canvas.drawLine(Offset(0, zeroY), Offset(size.width, zeroY), linePaint);
-
-    final List<Offset> linePoints = [];
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-
-    for (int i = 0; i < months.length; i++) {
-      final x = spacing + i * (barWidth + spacing);
-      final centerX = x + barWidth / 2;
-
-      // Draw Income Bar (pointing UP)
-      final inc = monthlyIncomes[i];
-      if (inc > 0) {
-        final incH = (inc / maxVal) * (zeroY - 20);
-        final incPaint = Paint()..color = const Color(0xFFE5D3AF);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, zeroY - incH, barWidth, incH),
-            const Radius.circular(4),
-          ),
-          incPaint,
-        );
-      }
-
-      // Draw Expense Bar (pointing DOWN)
-      final exp = monthlyExpenses[i];
-      if (exp > 0) {
-        final expH = (exp / maxVal) * (size.height - zeroY - 25);
-        final expPaint = Paint()..color = const Color(0xFFE53935);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, zeroY, barWidth, expH),
-            const Radius.circular(4),
-          ),
-          expPaint,
-        );
-      }
-
-      // Balance point for line
-      final net = inc - exp;
-      final netY = zeroY - (net / maxVal) * (zeroY - 25);
-      linePoints.add(Offset(centerX, netY));
-
-      // Draw Month Label below bar
-      textPainter.text = TextSpan(
-        text: months[i],
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF706C66),
-        ),
-      );
-      textPainter.layout();
-      textPainter.paint(
-        canvas,
-        Offset(centerX - textPainter.width / 2, size.height - 18),
-      );
-    }
-
-    // Draw Balance Connecting Yellow/Orange Line
-    if (linePoints.length > 1) {
-      final yellowLinePaint = Paint()
-        ..color = const Color(0xFFFB8C00)
-        ..strokeWidth = 3.0
-        ..style = PaintingStyle.stroke;
-
-      final path = Path()..moveTo(linePoints[0].dx, linePoints[0].dy);
-      for (int i = 1; i < linePoints.length; i++) {
-        path.lineTo(linePoints[i].dx, linePoints[i].dy);
-      }
-      canvas.drawPath(path, yellowLinePaint);
-
-      // Draw dots on nodes
-      final dotPaint = Paint()..color = const Color(0xFFFB8C00);
-      final dotInnerPaint = Paint()..color = Colors.white;
-      for (var pt in linePoints) {
-        canvas.drawCircle(pt, 5, dotPaint);
-        canvas.drawCircle(pt, 2.5, dotInnerPaint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class _LegendLineDot extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _LegendLineDot(this.label, this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 3,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF555048),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class _SmallPillText extends StatelessWidget {

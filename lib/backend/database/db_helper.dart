@@ -3,17 +3,30 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:uuid/uuid.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../models/app_notification_model.dart';
+import '../models/budget_model.dart';
+import '../models/pending_transaction_model.dart';
 import '../models/savings_goal_model.dart';
 import '../models/savings_transaction_model.dart';
 import '../models/transaction_model.dart';
 import '../models/user_change_model.dart';
 import '../models/user_model.dart';
+import '../services/sync_service.dart';
+import '../services/transaction_service.dart';
+import '../services/in_app_notification_service.dart';
+import '../../core/utils/account_masker.dart';
+import '../../core/utils/money_input_formatter.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static const _uuid = Uuid();
 
   DatabaseHelper._init();
+
+  String? get _currentUid => FirebaseAuth.instance.currentUser?.uid;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -22,7 +35,6 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDB(String filePath) async {
-    // Enable FFI for Windows/Linux desktop if needed
     if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
@@ -33,12 +45,11 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 6,
+      version: 12,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
 
-    // Ensure all users except admin are demoted to free ('user')
     await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
 
     return db;
@@ -77,7 +88,7 @@ class DatabaseHelper {
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS savings_goals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         target_amount REAL NOT NULL,
         current_amount REAL NOT NULL,
@@ -85,14 +96,18 @@ class DatabaseHelper {
         icon TEXT NOT NULL,
         color TEXT NOT NULL,
         is_completed INTEGER NOT NULL DEFAULT 0,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        updatedAt INTEGER NOT NULL,
+        isDeleted INTEGER NOT NULL DEFAULT 0,
+        isSynced INTEGER NOT NULL DEFAULT 0,
+        uid TEXT
       )
     ''');
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS savings_transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        goal_id INTEGER NOT NULL,
+        goal_id TEXT NOT NULL,
         amount REAL NOT NULL,
         is_deposit INTEGER NOT NULL DEFAULT 1,
         note TEXT,
@@ -107,7 +122,11 @@ class DatabaseHelper {
         category TEXT NOT NULL,
         amount REAL NOT NULL,
         is_expense INTEGER NOT NULL,
-        date TEXT NOT NULL
+        date TEXT NOT NULL,
+        updatedAt INTEGER NOT NULL,
+        isDeleted INTEGER NOT NULL DEFAULT 0,
+        isSynced INTEGER NOT NULL DEFAULT 0,
+        uid TEXT
       )
     ''');
 
@@ -135,9 +154,65 @@ class DatabaseHelper {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS budgets (
+        id TEXT PRIMARY KEY,
+        uid TEXT,
+        categoryId TEXT,
+        amountLimit INTEGER NOT NULL,
+        month TEXT,
+        isRecurring INTEGER NOT NULL DEFAULT 0,
+        ledgerId TEXT,
+        updatedAt INTEGER NOT NULL,
+        isDeleted INTEGER NOT NULL DEFAULT 0,
+        isSynced INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS budget_alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        budgetId TEXT NOT NULL,
+        month TEXT NOT NULL,
+        level TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS pending_transactions (
+        id TEXT PRIMARY KEY,
+        uid TEXT,
+        type TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        bankName TEXT NOT NULL,
+        accountLast4 TEXT,
+        description TEXT,
+        occurredAt TEXT NOT NULL,
+        fingerprint TEXT NOT NULL UNIQUE,
+        status TEXT NOT NULL,
+        suggestedCategoryId TEXT,
+        suggestionConfidence TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS app_notifications (
+        id TEXT PRIMARY KEY,
+        uid TEXT,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        payload TEXT,
+        createdAt TEXT NOT NULL,
+        isRead INTEGER NOT NULL DEFAULT 0,
+        dedupeKey TEXT UNIQUE
+      )
+    ''');
+
     await _seedDefaultCategories(db);
 
-    // Seed default Admin account
     final now = DateTime.now().toIso8601String();
     await db.insert('users', {
       'name': 'Quản trị viên (Admin)',
@@ -150,7 +225,6 @@ class DatabaseHelper {
       'plan': 'pro',
     });
 
-    // Seed default Demo User account (Free)
     await db.insert('users', {
       'name': 'Nguyễn Văn A',
       'email': 'user@piggysmart.com',
@@ -181,7 +255,7 @@ class DatabaseHelper {
     if (oldVersion < 3) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS savings_goals (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           target_amount REAL NOT NULL,
           current_amount REAL NOT NULL,
@@ -189,13 +263,17 @@ class DatabaseHelper {
           icon TEXT NOT NULL,
           color TEXT NOT NULL,
           is_completed INTEGER NOT NULL DEFAULT 0,
-          created_at TEXT NOT NULL
+          created_at TEXT NOT NULL,
+          updatedAt INTEGER NOT NULL,
+          isDeleted INTEGER NOT NULL DEFAULT 0,
+          isSynced INTEGER NOT NULL DEFAULT 0,
+          uid TEXT
         )
       ''');
       await db.execute('''
         CREATE TABLE IF NOT EXISTS savings_transactions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          goal_id INTEGER NOT NULL,
+          goal_id TEXT NOT NULL,
           amount REAL NOT NULL,
           is_deposit INTEGER NOT NULL DEFAULT 1,
           note TEXT,
@@ -231,7 +309,11 @@ class DatabaseHelper {
           category TEXT NOT NULL,
           amount REAL NOT NULL,
           is_expense INTEGER NOT NULL,
-          date TEXT NOT NULL
+          date TEXT NOT NULL,
+          updatedAt INTEGER NOT NULL,
+          isDeleted INTEGER NOT NULL DEFAULT 0,
+          isSynced INTEGER NOT NULL DEFAULT 0,
+          uid TEXT
         )
       ''');
     }
@@ -262,6 +344,122 @@ class DatabaseHelper {
       if (count == 0) {
         await _seedDefaultCategories(db);
       }
+    }
+    if (oldVersion < 7) {
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN updatedAt INTEGER DEFAULT 0;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN isDeleted INTEGER DEFAULT 0;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN isSynced INTEGER DEFAULT 0;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN uid TEXT;");
+      } catch (_) {}
+
+      final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+      await db.rawUpdate("UPDATE transactions SET updatedAt = ? WHERE updatedAt IS NULL OR updatedAt = 0", [nowEpoch]);
+    }
+    if (oldVersion < 8) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS budgets (
+          id TEXT PRIMARY KEY,
+          uid TEXT,
+          categoryId TEXT,
+          amountLimit INTEGER NOT NULL,
+          month TEXT,
+          isRecurring INTEGER NOT NULL DEFAULT 0,
+          ledgerId TEXT,
+          updatedAt INTEGER NOT NULL,
+          isDeleted INTEGER NOT NULL DEFAULT 0,
+          isSynced INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS budget_alerts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          budgetId TEXT NOT NULL,
+          month TEXT NOT NULL,
+          level TEXT NOT NULL,
+          createdAt TEXT NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 9) {
+      // Migration v9: Ensure uid columns and indexes for user data isolation
+      try {
+        await db.execute("ALTER TABLE budget_alerts ADD COLUMN uid TEXT;");
+      } catch (_) {}
+      try {
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_tx_uid ON transactions(uid);");
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_goals_uid ON savings_goals(uid);");
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_budgets_uid ON budgets(uid);");
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_categories_uid ON categories(uid);");
+      } catch (_) {}
+    }
+    if (oldVersion < 10) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS pending_transactions (
+          id TEXT PRIMARY KEY,
+          uid TEXT,
+          type TEXT NOT NULL,
+          amount INTEGER NOT NULL,
+          bankName TEXT NOT NULL,
+          accountLast4 TEXT,
+          description TEXT,
+          occurredAt TEXT NOT NULL,
+          fingerprint TEXT NOT NULL,
+          status TEXT NOT NULL,
+          suggestedCategoryId TEXT,
+          suggestionConfidence TEXT NOT NULL,
+          createdAt TEXT NOT NULL
+        )
+      ''');
+      try {
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_pending_uid ON pending_transactions(uid);");
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_pending_status ON pending_transactions(status);");
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_pending_fp ON pending_transactions(fingerprint);");
+      } catch (_) {}
+    }
+    if (oldVersion < 11) {
+      // Migration v11: Mask account numbers in pending_transactions.description
+      try {
+        final pendingRows = await db.query('pending_transactions');
+        for (var row in pendingRows) {
+          final id = row['id'] as String;
+          final rawDesc = row['description'] as String? ?? '';
+          if (rawDesc.isNotEmpty) {
+            final maskedDesc = maskAccountNumbers(rawDesc);
+            if (maskedDesc != rawDesc) {
+              await db.update('pending_transactions', {'description': maskedDesc}, where: 'id = ?', whereArgs: [id]);
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Migration v11 pending_transactions error: $e');
+      }
+    }
+    if (oldVersion < 12) {
+      // Migration v12: Tạo bảng app_notifications cho Trung tâm thông báo
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS app_notifications (
+          id TEXT PRIMARY KEY,
+          uid TEXT,
+          type TEXT NOT NULL,
+          title TEXT NOT NULL,
+          body TEXT NOT NULL,
+          payload TEXT,
+          createdAt TEXT NOT NULL,
+          isRead INTEGER NOT NULL DEFAULT 0,
+          dedupeKey TEXT UNIQUE
+        )
+      ''');
+      try {
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_uid ON app_notifications(uid);");
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON app_notifications(isRead);");
+      } catch (_) {}
     }
   }
 
@@ -344,27 +542,74 @@ class DatabaseHelper {
     }
   }
 
-  // --- TRANSACTIONS DAO METHODS ---
+  // --- TRANSACTIONS DAO METHODS (ISOLATED BY UID) ---
 
-  Future<List<TransactionItem>> getTransactions() async {
+  Future<List<TransactionItem>> getTransactions({String? uid}) async {
     final db = await instance.database;
-    final result = await db.query('transactions', orderBy: 'date DESC');
+    final targetUid = uid ?? _currentUid;
+    debugPrint('🗄️ [DatabaseHelper] Executing getTransactions for uid: $targetUid');
+    
+    // Đảm bảo lọc chính xác theo uid của người dùng hiện tại
+    final result = await db.query(
+      'transactions',
+      where: 'isDeleted = 0 AND (uid = ? OR uid IS NULL)',
+      whereArgs: [targetUid],
+      orderBy: 'date DESC',
+    );
     return result.map((map) => TransactionItem.fromMap(map)).toList();
   }
 
-  Future<int> insertTransaction(TransactionItem item) async {
+  Future<int> insertTransaction(TransactionItem item, {String? uid}) async {
     final db = await instance.database;
-    return await db.insert('transactions', item.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    final targetUid = uid ?? _currentUid;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final itemToSave = item.copyWith(
+      id: item.id.isNotEmpty ? item.id : _uuid.v4(),
+      uid: targetUid,
+      updatedAt: nowEpoch,
+      isSynced: false,
+    );
+    final res = await db.insert('transactions', itemToSave.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    SyncService.instance.syncAll();
+    TransactionService.instance.notifyUpdated();
+    return res;
   }
 
-  Future<int> deleteTransaction(String id) async {
+  Future<int> deleteTransaction(String id, {String? uid}) async {
     final db = await instance.database;
-    return await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
+    final targetUid = uid ?? _currentUid;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final res = await db.update(
+      'transactions',
+      {
+        'isDeleted': 1,
+        'updatedAt': nowEpoch,
+        'isSynced': 0,
+      },
+      where: 'id = ? AND (uid = ? OR uid IS NULL)',
+      whereArgs: [id, targetUid],
+    );
+    SyncService.instance.syncAll();
+    TransactionService.instance.notifyUpdated();
+    return res;
   }
 
-  Future<int> clearTransactions() async {
+  Future<int> clearTransactions({String? uid}) async {
     final db = await instance.database;
-    return await db.delete('transactions');
+    final targetUid = uid ?? _currentUid;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final res = await db.update(
+      'transactions',
+      {
+        'isDeleted': 1,
+        'updatedAt': nowEpoch,
+        'isSynced': 0,
+      },
+      where: 'uid = ? OR uid IS NULL',
+      whereArgs: [targetUid],
+    );
+    SyncService.instance.syncAll();
+    return res;
   }
 
   // --- USER AUTHENTICATION & REGISTRATION ---
@@ -372,7 +617,6 @@ class DatabaseHelper {
   Future<int> registerUser(UserModel user) async {
     final db = await instance.database;
     try {
-      // New registered users are always free ('user') unless specified as admin
       final userToInsert = user.copyWith(role: user.email == 'admin@piggysmart.com' ? 'admin' : 'user');
       return await db.insert('users', userToInsert.toMap());
     } catch (e) {
@@ -558,36 +802,78 @@ class DatabaseHelper {
     return result.map((map) => UserChangeModel.fromMap(map)).toList();
   }
 
-  // --- SAVINGS GOALS & TRANSACTIONS CRUD ---
+  // --- SAVINGS GOALS & TRANSACTIONS CRUD (ISOLATED BY UID) ---
 
-  Future<List<SavingsGoalModel>> getSavingsGoals() async {
+  Future<List<SavingsGoalModel>> getSavingsGoals({String? uid}) async {
     final db = await instance.database;
-    final result = await db.query('savings_goals', orderBy: 'id DESC');
+    final targetUid = uid ?? _currentUid;
+    debugPrint('🗄️ [DatabaseHelper] Executing getSavingsGoals for uid: $targetUid');
+    final result = await db.query(
+      'savings_goals',
+      where: 'isDeleted = 0 AND (uid = ? OR uid IS NULL)',
+      whereArgs: [targetUid],
+      orderBy: 'updatedAt DESC',
+    );
     return result.map((map) => SavingsGoalModel.fromMap(map)).toList();
   }
 
-  Future<int> insertSavingsGoal(SavingsGoalModel goal) async {
+  Future<String> insertSavingsGoal(SavingsGoalModel goal, {String? uid}) async {
     final db = await instance.database;
-    return await db.insert('savings_goals', goal.toMap());
+    final targetUid = uid ?? _currentUid;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final goalId = goal.id != null && goal.id!.isNotEmpty ? goal.id! : _uuid.v4();
+    final goalToSave = goal.copyWith(
+      id: goalId,
+      uid: targetUid,
+      updatedAt: nowEpoch,
+      isSynced: false,
+    );
+    await db.insert('savings_goals', goalToSave.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    SyncService.instance.syncAll();
+    return goalId;
   }
 
   Future<int> updateSavingsGoal(SavingsGoalModel goal) async {
     final db = await instance.database;
-    return await db.update(
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final goalToUpdate = goal.copyWith(
+      updatedAt: nowEpoch,
+      isSynced: false,
+    );
+    final res = await db.update(
       'savings_goals',
-      goal.toMap(),
+      goalToUpdate.toMap(),
       where: 'id = ?',
       whereArgs: [goal.id],
     );
+    SyncService.instance.syncAll();
+    return res;
   }
 
-  Future<int> deleteSavingsGoal(int goalId) async {
+  Future<int> deleteSavingsGoal(String goalId) async {
     final db = await instance.database;
-    await db.delete('savings_transactions', where: 'goal_id = ?', whereArgs: [goalId]);
-    return await db.delete('savings_goals', where: 'id = ?', whereArgs: [goalId]);
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    await db.update(
+      'savings_transactions',
+      {},
+      where: 'goal_id = ?',
+      whereArgs: [goalId],
+    );
+    final res = await db.update(
+      'savings_goals',
+      {
+        'isDeleted': 1,
+        'updatedAt': nowEpoch,
+        'isSynced': 0,
+      },
+      where: 'id = ?',
+      whereArgs: [goalId],
+    );
+    SyncService.instance.syncAll();
+    return res;
   }
 
-  Future<List<SavingsTransactionModel>> getSavingsTransactions(int goalId) async {
+  Future<List<SavingsTransactionModel>> getSavingsTransactions(String goalId) async {
     final db = await instance.database;
     final result = await db.query(
       'savings_transactions',
@@ -602,7 +888,6 @@ class DatabaseHelper {
     final db = await instance.database;
     final txId = await db.insert('savings_transactions', tx.toMap());
 
-    // Update goal current amount (do NOT auto-complete)
     final goalRes = await db.query('savings_goals', where: 'id = ?', whereArgs: [tx.goalId]);
     if (goalRes.isNotEmpty) {
       final goal = SavingsGoalModel.fromMap(goalRes.first);
@@ -611,16 +896,325 @@ class DatabaseHelper {
           : goal.currentAmount - tx.amount;
       if (newAmount < 0) newAmount = 0;
 
+      final nowEpoch = DateTime.now().millisecondsSinceEpoch;
       await db.update(
         'savings_goals',
         {
           'current_amount': newAmount,
+          'updatedAt': nowEpoch,
+          'isSynced': 0,
         },
         where: 'id = ?',
         whereArgs: [tx.goalId],
       );
+
+      if (newAmount >= goal.targetAmount && goal.currentAmount < goal.targetAmount) {
+        final formattedGoalAmount = formatMoney(newAmount);
+        await InAppNotificationService.instance.add(
+          type: 'savings',
+          title: 'Chúc mừng! Đạt mục tiêu tiết kiệm',
+          body: 'Mục tiêu "${goal.name}" đã hoàn thành 100%! Bạn đã tích lũy $formattedGoalAmount đ.',
+          dedupeKey: 'notif_savings_${goal.id}',
+          uid: goal.uid,
+        );
+      }
     }
 
+    SyncService.instance.syncAll();
     return txId;
+  }
+
+  // --- BUDGETS & BUDGET ALERTS CRUD (ISOLATED BY UID) ---
+
+  Future<List<BudgetModel>> getBudgets(String ledgerId, {String? month, String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    debugPrint('🗄️ [DatabaseHelper] Executing getBudgets for uid: $targetUid');
+    String where = 'ledgerId = ? AND isDeleted = 0 AND (uid = ? OR uid IS NULL)';
+    List<dynamic> args = [ledgerId, targetUid];
+    if (month != null) {
+      where += ' AND (month = ? OR month IS NULL OR isRecurring = 1)';
+      args.add(month);
+    }
+    final result = await db.query(
+      'budgets',
+      where: where,
+      whereArgs: args,
+      orderBy: 'updatedAt DESC',
+    );
+    return result.map((map) => BudgetModel.fromMap(map)).toList();
+  }
+
+  Future<String> insertBudget(BudgetModel budget, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final budgetId = budget.id != null && budget.id!.isNotEmpty ? budget.id! : _uuid.v4();
+    final budgetToSave = budget.copyWith(
+      id: budgetId,
+      uid: targetUid,
+      updatedAt: nowEpoch,
+      isSynced: false,
+    );
+    await db.insert('budgets', budgetToSave.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    SyncService.instance.syncAll();
+    return budgetId;
+  }
+
+  Future<int> updateBudget(BudgetModel budget) async {
+    final db = await instance.database;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final budgetToUpdate = budget.copyWith(
+      updatedAt: nowEpoch,
+      isSynced: false,
+    );
+    final res = await db.update(
+      'budgets',
+      budgetToUpdate.toMap(),
+      where: 'id = ?',
+      whereArgs: [budget.id],
+    );
+    SyncService.instance.syncAll();
+    return res;
+  }
+
+  Future<int> deleteBudget(String budgetId) async {
+    final db = await instance.database;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final res = await db.update(
+      'budgets',
+      {
+        'isDeleted': 1,
+        'updatedAt': nowEpoch,
+        'isSynced': 0,
+      },
+      where: 'id = ?',
+      whereArgs: [budgetId],
+    );
+    SyncService.instance.syncAll();
+    return res;
+  }
+
+  Future<List<Map<String, dynamic>>> getBudgetAlerts(String budgetId, String month) async {
+    final db = await instance.database;
+    return await db.query(
+      'budget_alerts',
+      where: 'budgetId = ? AND month = ?',
+      whereArgs: [budgetId, month],
+    );
+  }
+
+  Future<int> clearBudgetAlerts(String budgetId, String month) async {
+    final db = await instance.database;
+    return await db.delete(
+      'budget_alerts',
+      where: 'budgetId = ? AND month = ?',
+      whereArgs: [budgetId, month],
+    );
+  }
+
+  Future<int> insertBudgetAlert(String budgetId, String month, String level, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    return await db.insert('budget_alerts', {
+      'budgetId': budgetId,
+      'month': month,
+      'level': level,
+      'createdAt': DateTime.now().toIso8601String(),
+      'uid': targetUid,
+    });
+  }
+
+  // --- PENDING TRANSACTIONS CRUD (BANK NOTIFICATIONS) ---
+
+  Future<bool> insertPendingTransaction(PendingTransactionModel pending, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+
+    // Chống trùng lặp theo fingerprint
+    final existing = await db.query(
+      'pending_transactions',
+      where: 'fingerprint = ? AND (uid = ? OR uid IS NULL)',
+      whereArgs: [pending.fingerprint, targetUid],
+    );
+
+    if (existing.isNotEmpty) {
+      return false; // Đã tồn tại giao dịch trùng lặp
+    }
+
+    final itemToSave = pending.copyWith(
+      uid: targetUid,
+    );
+
+    await db.insert(
+      'pending_transactions',
+      itemToSave.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return true;
+  }
+
+  Future<List<PendingTransactionModel>> getPendingTransactions({String? uid, String status = 'pending'}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final result = await db.query(
+      'pending_transactions',
+      where: 'status = ? AND (uid = ? OR uid IS NULL)',
+      whereArgs: [status, targetUid],
+      orderBy: 'occurredAt DESC',
+    );
+    return result.map((map) => PendingTransactionModel.fromMap(map)).toList();
+  }
+
+  Future<int> getPendingTransactionsCount({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final res = await db.rawQuery(
+      "SELECT COUNT(*) FROM pending_transactions WHERE status = 'pending' AND (uid = ? OR uid IS NULL)",
+      [targetUid],
+    );
+    return Sqflite.firstIntValue(res) ?? 0;
+  }
+
+  Future<int> updatePendingTransactionStatus(String id, String status, {String? categoryId}) async {
+    final db = await instance.database;
+    final Map<String, dynamic> values = {'status': status};
+    if (categoryId != null) {
+      values['suggestedCategoryId'] = categoryId;
+    }
+    return await db.update(
+      'pending_transactions',
+      values,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> deletePendingTransaction(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'pending_transactions',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // --- IN-APP NOTIFICATIONS CRUD (ISOLATED BY UID) ---
+
+  Future<List<AppNotificationModel>> getNotifications({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final result = await db.query(
+      'app_notifications',
+      where: 'uid = ? OR uid IS NULL',
+      whereArgs: [targetUid],
+      orderBy: 'createdAt DESC',
+    );
+    return result.map((map) => AppNotificationModel.fromMap(map)).toList();
+  }
+
+  Future<bool> insertAppNotification(AppNotificationModel notification, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+
+    if (notification.dedupeKey != null && notification.dedupeKey!.isNotEmpty) {
+      final existing = await db.query(
+        'app_notifications',
+        where: 'dedupeKey = ? AND (uid = ? OR uid IS NULL)',
+        whereArgs: [notification.dedupeKey, targetUid],
+      );
+      if (existing.isNotEmpty) {
+        return false; // Đã tồn tại thông báo trùng lặp theo dedupeKey
+      }
+    }
+
+    final itemToSave = notification.copyWith(uid: targetUid);
+    try {
+      final res = await db.insert(
+        'app_notifications',
+        itemToSave.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+      return res > 0;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<int> markNotificationRead(String id, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    return await db.update(
+      'app_notifications',
+      {'isRead': 1},
+      where: 'id = ? AND (uid = ? OR uid IS NULL)',
+      whereArgs: [id, targetUid],
+    );
+  }
+
+  Future<int> markAllNotificationsRead({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    return await db.update(
+      'app_notifications',
+      {'isRead': 1},
+      where: 'uid = ? OR uid IS NULL',
+      whereArgs: [targetUid],
+    );
+  }
+
+  Future<int> deleteNotification(String id, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    return await db.delete(
+      'app_notifications',
+      where: 'id = ? AND (uid = ? OR uid IS NULL)',
+      whereArgs: [id, targetUid],
+    );
+  }
+
+  Future<int> clearAllNotifications({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    return await db.delete(
+      'app_notifications',
+      where: 'uid = ? OR uid IS NULL',
+      whereArgs: [targetUid],
+    );
+  }
+
+  Future<int> getUnreadNotificationCount({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final res = await db.rawQuery(
+      'SELECT COUNT(*) FROM app_notifications WHERE isRead = 0 AND (uid = ? OR uid IS NULL)',
+      [targetUid],
+    );
+    return Sqflite.firstIntValue(res) ?? 0;
+  }
+
+  Future<void> autoPruneNotifications({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+
+    // 1. Xóa thông báo cũ hơn 30 ngày
+    final cutoff = DateTime.now().subtract(const Duration(days: 30)).toIso8601String();
+    await db.delete(
+      'app_notifications',
+      where: 'createdAt < ? AND (uid = ? OR uid IS NULL)',
+      whereArgs: [cutoff, targetUid],
+    );
+
+    // 2. Tự động giới hạn tối đa 200 thông báo gần nhất mỗi người dùng
+    await db.rawDelete('''
+      DELETE FROM app_notifications 
+      WHERE (uid = ? OR uid IS NULL) 
+        AND id NOT IN (
+          SELECT id FROM app_notifications 
+          WHERE (uid = ? OR uid IS NULL) 
+          ORDER BY createdAt DESC 
+          LIMIT 200
+        )
+    ''', [targetUid, targetUid]);
   }
 }

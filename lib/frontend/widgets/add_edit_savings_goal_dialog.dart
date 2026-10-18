@@ -26,10 +26,11 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
   late TextEditingController _initialController;
   final FocusNode _initialFocusNode = FocusNode();
   DateTime? _selectedDeadline;
-  String _selectedIcon = 'assets/icon/laptop_icon.jpg';
+  String _selectedIcon = 'assets/icon/tietkiem_icon.jpg';
   String _selectedColor = '0xFF2E7D32';
 
   final List<String> _availableIcons = [
+    'assets/icon/tietkiem_icon.jpg',
     'assets/icon/laptop_icon.jpg',
     'assets/icon/maybay_icon.jpg',
     'assets/icon/baohiem_tk_icon.jpg',
@@ -87,7 +88,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
         children: [
           ClipOval(
             child: Image.asset(
-              'assets/icon/tietkiem.png',
+              'assets/icon/tietkiem_icon.jpg',
               width: 26,
               height: 26,
               fit: BoxFit.cover,

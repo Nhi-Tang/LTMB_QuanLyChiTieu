@@ -46,6 +46,10 @@ class CategoryRepository {
     return result.map((map) => CategoryModel.fromMap(map, isLinked: true)).toList();
   }
 
+  Future<List<CategoryModel>> getCategories({required String type}) async {
+    return await getAllCategories(type);
+  }
+
   /// Thêm danh mục mới và tự động liên kết với ledgerId hiện tại
   Future<int> addCategory(CategoryModel category, String ledgerId) async {
     final db = await DatabaseHelper.instance.database;

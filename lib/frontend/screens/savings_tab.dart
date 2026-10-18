@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/savings_goal_model.dart';
+import '../../core/widgets/money_text.dart';
 import '../utils/app_translations.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/mousey_avatar.dart';
@@ -111,13 +112,16 @@ class _SavingsTabState extends State<SavingsTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      AppTranslations.tr(lang, 'piggy_savings_badge'),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                        color: darkBeigy,
+                    Expanded(
+                      child: Text(
+                        AppTranslations.tr(lang, 'piggy_savings_badge'),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                          color: darkBeigy,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     buildUserAvatar(
@@ -138,8 +142,8 @@ class _SavingsTabState extends State<SavingsTab> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  _formatCurrency(_totalSavedAmount),
+                MoneyText(
+                  amount: _totalSavedAmount,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
@@ -189,13 +193,16 @@ class _SavingsTabState extends State<SavingsTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                AppTranslations.tr(lang, 'savings_goals'),
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                  color: Color(0xFF706C66),
+              Expanded(
+                child: Text(
+                  AppTranslations.tr(lang, 'savings_goals'),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                    color: Color(0xFF706C66),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               ElevatedButton.icon(
@@ -213,7 +220,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 onPressed: _showAddGoalDialog,
                 icon: ClipOval(
                   child: Image.asset(
-                    'assets/icon/tietkiem.png',
+                    'assets/icon/tietkiem_icon.jpg',
                     width: 16,
                     height: 16,
                     fit: BoxFit.cover,
@@ -351,6 +358,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                           Text(
                                             goal.name,
                                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
@@ -360,13 +368,18 @@ class _SavingsTabState extends State<SavingsTab> {
                                               fontWeight: FontWeight.w600,
                                               color: goal.isCompleted ? accentBeigy : Colors.grey[600],
                                             ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Text(
-                                      '$percent%',
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: accentBeigy),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        '$percent%',
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: accentBeigy),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -374,13 +387,19 @@ class _SavingsTabState extends State<SavingsTab> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      _formatCurrency(goal.currentAmount),
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                                    Flexible(
+                                      child: MoneyText(
+                                        amount: goal.currentAmount,
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                                      ),
                                     ),
-                                    Text(
-                                      _formatCurrency(goal.targetAmount),
-                                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: MoneyText(
+                                        amount: goal.targetAmount,
+                                        alignment: Alignment.centerRight,
+                                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -388,7 +407,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(6),
                                   child: LinearProgressIndicator(
-                                    value: progress,
+                                    value: progress.clamp(0.0, 1.0),
                                     minHeight: 10,
                                     backgroundColor: const Color(0xFFF2EFE6),
                                     valueColor: const AlwaysStoppedAnimation<Color>(accentBeigy),

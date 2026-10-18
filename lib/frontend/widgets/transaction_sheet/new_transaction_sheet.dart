@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
 import '../../../backend/models/transaction_model.dart';
+import '../../screens/budgets_screen.dart';
 import '../app_alert_dialog.dart';
 import 'amount_card.dart';
 import 'amount_expression.dart';
 import 'calculator_keypad.dart';
 import 'category_grid.dart';
 import 'mousey_colors.dart';
+import 'show_note_sheet.dart';
 import 'transaction_type_switcher.dart';
 
 class NewTransactionSheet extends StatefulWidget {
   final TransactionItem? editingTransaction;
+  final bool defaultExpense;
   final Function(TransactionItem item) onSave;
 
   const NewTransactionSheet({
     super.key,
     this.editingTransaction,
+    this.defaultExpense = true,
     required this.onSave,
   });
 
   static Future<void> show({
     required BuildContext context,
+    bool defaultExpense = true,
     TransactionItem? editingTransaction,
     required Function(TransactionItem item) onSave,
   }) {
@@ -31,6 +36,7 @@ class NewTransactionSheet extends StatefulWidget {
         heightFactor: 0.92,
         child: NewTransactionSheet(
           editingTransaction: editingTransaction,
+          defaultExpense: defaultExpense,
           onSave: onSave,
         ),
       ),
@@ -42,7 +48,7 @@ class NewTransactionSheet extends StatefulWidget {
 }
 
 class _NewTransactionSheetState extends State<NewTransactionSheet> {
-  int _tabIndex = 0; // 0: Chi tiêu, 1: Thu nhập
+  int _tabIndex = 0; // 0: Chi tiêu, 1: Thu nhập, 2: Ngân sách
   String _expression = '';
   String _selectedCategory = 'Ăn uống';
   DateTime _selectedDate = DateTime.now();
@@ -63,6 +69,9 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
       } else {
         _tabIndex = 0;
       }
+    } else {
+      _tabIndex = widget.defaultExpense ? 0 : 1;
+      _selectedCategory = widget.defaultExpense ? 'Ăn uống' : 'Lương';
     }
   }
 
@@ -123,39 +132,15 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
     );
   }
 
-  void _showNoteDialog() {
-    final noteController = TextEditingController(text: _note);
-    showDialog(
+  void _showNoteDialog() async {
+    final result = await showNoteSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Nhập ghi chú giao dịch'),
-        content: TextField(
-          controller: noteController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Giao dịch này có ghi chú gì?',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: MouseyColors.primaryGreen,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              setState(() => _note = noteController.text.trim());
-              Navigator.pop(ctx);
-            },
-            child: const Text('Xác nhận'),
-          ),
-        ],
-      ),
+      currentNote: _note,
+      category: _selectedCategory,
     );
+    if (result != null) {
+      setState(() => _note = result);
+    }
   }
 
   @override
@@ -203,10 +188,19 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  // 1. Transaction Type Switcher
+                  // 1. Transaction Type Switcher (Chi tiêu | Thu nhập | Ngân sách)
                   TransactionTypeSwitcher(
                     selectedIndex: _tabIndex,
                     onTabChanged: (index) {
+                      if (index == 2) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BudgetsScreen(ledgerId: 'default_ledger'),
+                          ),
+                        );
+                        return;
+                      }
                       setState(() {
                         _tabIndex = index;
                         if (index == 0) {

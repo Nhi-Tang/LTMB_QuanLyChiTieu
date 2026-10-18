@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
+import '../../backend/services/bank_notification_listener_manager.dart';
 import '../../backend/services/transaction_service.dart';
+import '../../core/widgets/notch_tab_bar.dart';
+import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/transaction_sheet/new_transaction_sheet.dart';
 import 'home_tab.dart';
@@ -26,10 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedAvatarKey = 'piggy';
   String _selectedLanguage = 'Tiếng Việt';
 
-  // Theme Colors
-  static const Color primaryBeige = Color(0xFFE5D3AF);
-  static const Color darkBeige = Color(0xFF5D4222);
-
   // Transactions list
   final List<TransactionItem> _transactions = [];
   final TransactionService _transactionService = TransactionService();
@@ -41,6 +40,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     _selectedMonth = DateTime(now.year, now.month, 1);
     _loadTransactions();
+    _transactionService.addListener(_loadTransactions);
+    BankNotificationListenerManager.instance.startListening(uid: _currentUser.uid);
+  }
+
+  @override
+  void dispose() {
+    _transactionService.removeListener(_loadTransactions);
+    super.dispose();
   }
 
   Future<void> _loadTransactions() async {
@@ -66,15 +73,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE5D3AF),
-              foregroundColor: const Color(0xFF5D4222),
+              backgroundColor: AppColors.accentBeige,
+              foregroundColor: AppColors.darkBeige,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () async {
               Navigator.pop(ctx);
               await AuthService().signOut();
             },
-            child: const Text('Đăng xuất', style: TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
+            child: const Text('Đăng xuất', style: TextStyle(color: AppColors.darkBeige, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -111,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAddTransactionModal({bool defaultExpense = true, TransactionItem? editingTransaction}) {
     NewTransactionSheet.show(
       context: context,
+      defaultExpense: defaultExpense,
       editingTransaction: editingTransaction,
       onSave: (newItem) async {
         await _transactionService.addTransaction(newItem);
@@ -121,12 +129,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = _selectedLanguage;
+
+    final navItems = [
+      NotchTabItemData(
+        keyName: 'home',
+        label: AppTranslations.tr(lang, 'home'),
+        assetPath: 'assets/icon/nha_icon.jpg',
+        icon: Icons.home_rounded,
+      ),
+      NotchTabItemData(
+        keyName: 'savings',
+        label: AppTranslations.tr(lang, 'savings'),
+        assetPath: 'assets/icon/tietkiem_icon.jpg',
+        icon: Icons.savings_rounded,
+      ),
+      NotchTabItemData(
+        keyName: 'reports',
+        label: AppTranslations.tr(lang, 'reports'),
+        assetPath: 'assets/icon/baocao_tabbar_icon.jpg',
+        icon: Icons.pie_chart_rounded,
+      ),
+      NotchTabItemData(
+        keyName: 'profile',
+        label: AppTranslations.tr(lang, 'profile'),
+        assetPath: 'assets/icon/canhan_icon.jpg',
+        icon: Icons.person_rounded,
+      ),
+    ];
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7EB),
+      backgroundColor: AppColors.backgroundCream,
       body: SafeArea(
         bottom: false,
         child: Stack(
           children: [
+            // Preserved tab state using IndexedStack (4 tabs)
             IndexedStack(
               index: _currentTabIndex,
               children: [
@@ -188,120 +226,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+
+            // Separate FAB (+) for adding transaction
             Positioned(
-              left: 20,
               right: 20,
-              bottom: 20,
-              child: _buildFloatingBottomTabBar(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFloatingBottomTabBar() {
-    final lang = _selectedLanguage;
-
-    return Container(
-      height: 66,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: darkBeige,
-        borderRadius: BorderRadius.circular(33),
-        boxShadow: [
-          BoxShadow(
-            color: darkBeige.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildFloatingNavItem(
-            index: 0,
-            icon: Icons.home_rounded,
-            label: AppTranslations.tr(lang, 'home'),
-          ),
-          _buildFloatingNavItem(
-            index: 1,
-            customIcon: ClipOval(
-              child: Image.asset(
-                'assets/icon/tietkiem.png',
-                width: 22,
-                height: 22,
-                fit: BoxFit.cover,
+              bottom: 96,
+              child: FloatingActionButton(
+                heroTag: 'home_add_tx_fab',
+                backgroundColor: AppColors.accentBeige,
+                foregroundColor: Colors.white,
+                elevation: 6,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                onPressed: () => _showAddTransactionModal(defaultExpense: true),
+                child: const Icon(Icons.add_rounded, size: 28),
               ),
             ),
-            label: AppTranslations.tr(lang, 'savings'),
-          ),
-          GestureDetector(
-            onTap: () => _showAddTransactionModal(defaultExpense: true),
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: primaryBeige,
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.add_rounded,
-                  color: darkBeige,
-                  size: 30,
-                ),
-              ),
-            ),
-          ),
-          _buildFloatingNavItem(
-            index: 2,
-            icon: Icons.pie_chart_rounded,
-            label: AppTranslations.tr(lang, 'reports'),
-          ),
-          _buildFloatingNavItem(
-            index: 3,
-            icon: Icons.person_rounded,
-            label: AppTranslations.tr(lang, 'profile'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildFloatingNavItem({
-    required int index,
-    IconData? icon,
-    Widget? customIcon,
-    required String label,
-  }) {
-    final isSelected = _currentTabIndex == index;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _currentTabIndex = index;
-        });
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            customIcon ??
-                Icon(
-                  icon!,
-                  size: 22,
-                  color: isSelected ? primaryBeige : Colors.white60,
-                ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? primaryBeige : Colors.white60,
+            // Sliding Curved Notched TabBar
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: NotchTabBar(
+                items: navItems,
+                currentIndex: _currentTabIndex,
+                onChanged: (index) {
+                  setState(() {
+                    _currentTabIndex = index;
+                  });
+                },
               ),
             ),
           ],

@@ -9,7 +9,7 @@ class SavingsService {
     return await _dbHelper.getSavingsGoals();
   }
 
-  Future<int> insertSavingsGoal(SavingsGoalModel goal) async {
+  Future<String> insertSavingsGoal(SavingsGoalModel goal) async {
     return await _dbHelper.insertSavingsGoal(goal);
   }
 
@@ -17,11 +17,11 @@ class SavingsService {
     return await _dbHelper.updateSavingsGoal(goal);
   }
 
-  Future<int> deleteSavingsGoal(int goalId) async {
+  Future<int> deleteSavingsGoal(String goalId) async {
     return await _dbHelper.deleteSavingsGoal(goalId);
   }
 
-  Future<List<SavingsTransactionModel>> getSavingsTransactions(int goalId) async {
+  Future<List<SavingsTransactionModel>> getSavingsTransactions(String goalId) async {
     return await _dbHelper.getSavingsTransactions(goalId);
   }
 

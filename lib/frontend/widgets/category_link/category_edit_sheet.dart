@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../backend/models/category_model.dart';
+import '../../../core/widgets/category_icon.dart';
 import '../../theme/app_colors.dart';
 import 'icon_picker_grid.dart';
 
@@ -92,9 +93,12 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                 decoration: InputDecoration(
                   labelText: 'Tên danh mục',
                   hintText: 'Nhập tên danh mục...',
-                  prefixIcon: Icon(
-                    CategoryModel.getIconData(_selectedIconKey),
-                    color: AppColors.primaryGreen,
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: CategoryIcon(
+                      categoryOrIconKey: _nameController.text.isNotEmpty ? _nameController.text : _selectedIconKey,
+                      size: 28,
+                    ),
                   ),
                   filled: true,
                   fillColor: AppColors.cardCream,

@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 
 class MoneyInputFormatter extends TextInputFormatter {
+  static const int maxDigits = 12;
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
@@ -23,9 +25,9 @@ class MoneyInputFormatter extends TextInputFormatter {
       );
     }
 
-    // Tối đa 12 chữ số
-    if (digitsOnly.length > 12) {
-      digitsOnly = digitsOnly.substring(0, 12);
+    // Tối đa 12 chữ số (tối đa 999.999.999.999 VND)
+    if (digitsOnly.length > maxDigits) {
+      digitsOnly = digitsOnly.substring(0, maxDigits);
     }
 
     // Bỏ số 0 thừa ở đầu, nhưng cho phép giữ "0"
@@ -51,6 +53,9 @@ class MoneyInputFormatter extends TextInputFormatter {
 
 String formatMoneyStr(String digitsOnly) {
   if (digitsOnly.isEmpty) return '';
+  if (digitsOnly.length > 12) {
+    digitsOnly = digitsOnly.substring(0, 12);
+  }
   final buffer = StringBuffer();
   int count = 0;
   for (int i = digitsOnly.length - 1; i >= 0; i--) {
@@ -65,11 +70,18 @@ String formatMoneyStr(String digitsOnly) {
 }
 
 String formatMoney(num value) {
-  return formatMoneyStr(value.toInt().toString());
+  num safeValue = value;
+  if (safeValue.abs() > 999999999999) {
+    safeValue = safeValue < 0 ? -999999999999 : 999999999999;
+  }
+  return formatMoneyStr(safeValue.toInt().abs().toString());
 }
 
 int parseMoney(String text) {
   if (text.isEmpty) return 0;
   String digitsOnly = text.replaceAll(RegExp(r'\D'), '');
+  if (digitsOnly.length > 12) {
+    digitsOnly = digitsOnly.substring(0, 12);
+  }
   return int.tryParse(digitsOnly) ?? 0;
 }

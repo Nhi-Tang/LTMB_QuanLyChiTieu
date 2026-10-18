@@ -1,0 +1,275 @@
+import 'package:flutter/material.dart';
+import '../../backend/services/budget_service.dart';
+import '../../core/widgets/money_text.dart';
+
+class BudgetCard extends StatelessWidget {
+  final BudgetStatus status;
+  final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final String selectedLanguage;
+
+  const BudgetCard({
+    super.key,
+    required this.status,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+    this.selectedLanguage = 'Tiếng Việt',
+  });
+
+  Color _getProgressColor(String level) {
+    switch (level) {
+      case 'exceeded':
+        return const Color(0xFFE53935); // Đỏ
+      case 'warning':
+        return const Color(0xFFF57C00); // Vàng/Cam
+      case 'ok':
+      default:
+        return const Color(0xFF43A047); // Xanh lá
+    }
+  }
+
+  IconData _getCategoryIcon(String? categoryId) {
+    if (categoryId == null || categoryId.isEmpty) {
+      return Icons.account_balance_wallet_rounded;
+    }
+    switch (categoryId) {
+      case 'Ăn uống':
+        return Icons.fastfood_rounded;
+      case 'Hóa đơn':
+        return Icons.receipt_rounded;
+      case 'Di chuyển':
+        return Icons.directions_bus_rounded;
+      case 'Mua sắm':
+        return Icons.shopping_bag_rounded;
+      case 'Giải trí':
+        return Icons.sports_esports_rounded;
+      case 'Sức khoẻ':
+        return Icons.medical_services_rounded;
+      case 'Làm đẹp':
+        return Icons.content_cut_rounded;
+      case 'Quần áo':
+        return Icons.checkroom_rounded;
+      case 'Học tập':
+        return Icons.school_rounded;
+      case 'Thú cưng':
+        return Icons.pets_rounded;
+      case 'Con cái':
+        return Icons.child_care_rounded;
+      case 'Hỗ trợ gia đình':
+        return Icons.family_restroom_rounded;
+      case 'Bảo hiểm':
+        return Icons.security_rounded;
+      case 'Thuế':
+        return Icons.account_balance_rounded;
+      case 'Công việc':
+        return Icons.work_rounded;
+      case 'Nhà ở':
+        return Icons.home_rounded;
+      case 'Tiền nợ':
+      case 'Tiền Nợ':
+        return Icons.money_off_rounded;
+      default:
+        return Icons.category_rounded;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final budget = status.budget;
+    final categoryName = budget.categoryId == null || budget.categoryId!.isEmpty
+        ? 'Tổng ngân sách tháng'
+        : budget.categoryId!;
+    final progressColor = _getProgressColor(status.level);
+    final progressVal = (status.percent / 100.0).clamp(0.0, 1.0);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.brown.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top row: Icon, Category Name, Actions (Edit/Delete)
+            Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFCF1D0),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _getCategoryIcon(budget.categoryId),
+                    color: const Color(0xFF5D4222),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        categoryName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF5D4222),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          if (budget.isRecurring)
+                            Container(
+                              margin: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'Định kỳ',
+                                style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              budget.month != null ? 'Tháng ${budget.month}' : 'Mọi tháng',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (onEdit != null)
+                  IconButton(
+                    icon: const Icon(Icons.edit_rounded, size: 18, color: Colors.grey),
+                    onPressed: onEdit,
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(8),
+                  ),
+                if (onDelete != null)
+                  IconButton(
+                    icon: const Icon(Icons.delete_rounded, size: 18, color: Colors.redAccent),
+                    onPressed: onDelete,
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(8),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Spent / Limit & Percentage
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: MoneyText(
+                    amount: status.spent,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: progressColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: MoneyText(
+                    amount: status.limit,
+                    prefix: 'Hạn mức: ',
+                    alignment: Alignment.centerRight,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Progress Bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: progressVal,
+                minHeight: 10,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Bottom stats: Remaining & Daily budget / Percentage
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: MoneyText(
+                    amount: status.remaining.abs(),
+                    prefix: status.remaining >= 0 ? 'Còn lại: ' : 'Vượt: ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: status.remaining >= 0 ? Colors.grey[600] : Colors.red,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: MoneyText(
+                    amount: status.dailyRemaining,
+                    prefix: 'Chi tiêu/ngày: ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: progressColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${status.percent.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: progressColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

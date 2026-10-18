@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/category_icon.dart';
 
 class CategoryModel {
   final int? id;
@@ -84,6 +85,139 @@ class CategoryModel {
       updatedAt: updatedAt ?? this.updatedAt,
       isLinked: isLinked ?? this.isLinked,
     );
+  }
+
+  static Widget getCategoryIconWidget(
+    String categoryOrIconKey, {
+    double size = 44,
+    Color? bgColor,
+    Color? fallbackColor,
+  }) {
+    return CategoryIcon(
+      categoryOrIconKey: categoryOrIconKey,
+      size: size,
+      bgColor: bgColor,
+      iconColor: fallbackColor,
+    );
+  }
+
+  static String getCategoryAssetPath(String categoryOrIconKey) {
+    final key = categoryOrIconKey.trim().toLowerCase();
+    switch (key) {
+      case 'ăn uống':
+      case 'an uong':
+      case 'fastfood_rounded':
+      case 'food_icon':
+        return 'assets/icon/food_icon.jpg';
+      case 'hóa đơn':
+      case 'hoa don':
+      case 'receipt_rounded':
+      case 'bill_icon':
+        return 'assets/icon/bill_icon.jpg';
+      case 'di chuyển':
+      case 'di chuyen':
+      case 'directions_bus_rounded':
+      case 'move_icon':
+        return 'assets/icon/move_icon.jpg';
+      case 'mua sắm':
+      case 'mua sam':
+      case 'shopping_bag_rounded':
+      case 'shopping_icon':
+        return 'assets/icon/shopping_icon.jpg';
+      case 'giải trí':
+      case 'giai tri':
+      case 'sports_esports_rounded':
+      case 'game_icon':
+        return 'assets/icon/game_icon.jpg';
+      case 'sức khoẻ':
+      case 'suc khoe':
+      case 'medical_services_rounded':
+      case 'health_icon':
+        return 'assets/icon/health_icon.jpg';
+      case 'làm đẹp':
+      case 'lam dep':
+      case 'content_cut_rounded':
+      case 'beauty_icon':
+      case 'beautify_icon':
+        return 'assets/icon/beautify_icon.jpg';
+      case 'quần áo':
+      case 'quan ao':
+      case 'checkroom_rounded':
+      case 'clothes_icon':
+        return 'assets/icon/clothes_icon.jpg';
+      case 'học tập':
+      case 'hoc tap':
+      case 'school_rounded':
+      case 'study_icon':
+        return 'assets/icon/study_icon.jpg';
+      case 'thú cưng':
+      case 'thu cung':
+      case 'pets_rounded':
+      case 'pets_icon':
+        return 'assets/icon/pets_icon.jpg';
+      case 'con cái':
+      case 'con cai':
+      case 'child_care_rounded':
+      case 'chil_icon':
+      case 'concai_icon':
+        return 'assets/icon/chil_icon.jpg';
+      case 'hỗ trợ gia đình':
+      case 'ho tro gia dinh':
+      case 'family_restroom_rounded':
+      case 'hotrogiadinh_icon':
+        return 'assets/icon/hotrogiadinh_icon.jpg';
+      case 'bảo hiểm':
+      case 'bao hiem':
+      case 'security_rounded':
+      case 'baohiem_tk_icon':
+        return 'assets/icon/baohiem_tk_icon.jpg';
+      case 'thuế':
+      case 'thue':
+      case 'account_balance_rounded':
+      case 'thue_icon':
+        return 'assets/icon/thue_icon.jpg';
+      case 'công việc':
+      case 'cong viec':
+      case 'work_rounded':
+      case 'congviec_icon':
+        return 'assets/icon/congviec_icon.jpg';
+      case 'nhà ở':
+      case 'nha o':
+      case 'home_rounded':
+      case 'nha_icon':
+        return 'assets/icon/nha_icon.jpg';
+      case 'tiền nợ':
+      case 'tien no':
+      case 'money_off_rounded':
+      case 'tienno_icon':
+        return 'assets/icon/tienno_icon.jpg';
+      case 'lương':
+      case 'luong':
+      case 'account_balance_wallet_rounded':
+      case 'luong_icon':
+        return 'assets/icon/luong_icon.jpg';
+      case 'thưởng':
+      case 'thuong':
+      case 'card_giftcard_rounded':
+      case 'qua_icon':
+        return 'assets/icon/qua_icon.jpg';
+      case 'đầu tư':
+      case 'dau tu':
+      case 'trending_up_rounded':
+      case 'dautu_icon':
+        return 'assets/icon/dautu_icon.jpg';
+      case 'bán hàng':
+      case 'ban hang':
+      case 'storefront_rounded':
+      case 'banhang_icon':
+        return 'assets/icon/banhang_icon.jpg';
+      case 'khác':
+      case 'khac':
+      case 'category_rounded':
+      case 'khac_icon':
+      default:
+        return 'assets/icon/khac_icon.jpg';
+    }
   }
 
   static IconData getIconData(String iconKey) {

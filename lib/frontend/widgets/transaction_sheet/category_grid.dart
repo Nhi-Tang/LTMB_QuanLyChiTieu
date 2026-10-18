@@ -125,13 +125,12 @@ class _CategoryGridState extends State<CategoryGrid> {
                 crossAxisCount: 3,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
-                childAspectRatio: 2.8,
+                childAspectRatio: 2.6,
               ),
               itemCount: displayCategories.length,
               itemBuilder: (context, index) {
                 final cat = displayCategories[index];
                 final name = cat.name;
-                final icon = CategoryModel.getIconData(cat.iconKey);
                 final isSelected = widget.selectedCategory == name;
 
                 return InkWell(
@@ -149,10 +148,10 @@ class _CategoryGridState extends State<CategoryGrid> {
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          icon,
-                          size: 16,
-                          color: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
+                        CategoryModel.getCategoryIconWidget(
+                          name,
+                          size: 30,
+                          fallbackColor: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
                         ),
                         const SizedBox(width: 6),
                         Expanded(

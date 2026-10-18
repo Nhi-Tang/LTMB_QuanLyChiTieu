@@ -22,6 +22,11 @@ class MouseyAvatar extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
+          errorBuilder: (ctx, err, stack) => CircleAvatar(
+            radius: size / 2,
+            backgroundColor: primaryBeige,
+            child: Icon(Icons.person, size: size * 0.6, color: const Color(0xFF5D4222)),
+          ),
         ),
       ),
     );
@@ -51,6 +56,7 @@ Widget buildUserAvatar({
           width: size,
           height: size,
           fit: BoxFit.cover,
+          errorBuilder: (ctx, err, stack) => MouseyAvatar(size: size),
         ),
       ),
     );
@@ -79,18 +85,20 @@ Widget buildUserAvatar({
   }
 }
 
-Widget buildGoalIcon(String icon, {double size = 24}) {
-  if (icon.startsWith('assets/')) {
+Widget buildGoalIcon(String? icon, {double size = 24}) {
+  final safeIcon = icon ?? 'assets/icon/tietkiem_icon.jpg';
+  if (safeIcon.startsWith('assets/')) {
     return ClipOval(
       child: Image.asset(
-        icon,
+        safeIcon,
         width: size,
         height: size,
         fit: BoxFit.cover,
+        errorBuilder: (ctx, err, stack) => Icon(Icons.savings_rounded, size: size, color: const Color(0xFF5D4222)),
       ),
     );
   }
-  return Text(icon, style: TextStyle(fontSize: size * 0.9));
+  return Text(safeIcon, style: TextStyle(fontSize: size * 0.9));
 }
 
 Widget _buildEmojiAvatar(String emoji, Color bgColor, double size) {

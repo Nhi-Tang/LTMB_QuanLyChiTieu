@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'backend/database/db_helper.dart';
 import 'backend/models/user_model.dart';
 import 'backend/services/auth_service.dart';
+import 'backend/services/pro_service.dart';
+import 'backend/services/sync_service.dart';
 import 'frontend/screens/auth_screen.dart';
 import 'frontend/screens/home_screen.dart';
 import 'frontend/screens/admin_management_screen.dart';
@@ -18,6 +20,7 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }
+  await ProService.instance.init();
   runApp(const MouseyApp());
 }
 
@@ -79,13 +82,21 @@ class AuthGate extends StatelessWidget {
                 createdAt: DateTime.now().toIso8601String(),
               );
 
-              // Background sync with backend (non-blocking on network error)
+              // Background sync with backend & Pro status (non-blocking on network error)
               AuthService().syncSessionInBackground(firebaseUser);
+              SyncService.instance.syncAll();
+              ProService.instance.init();
 
               if (localUser.isAdmin) {
-                return AdminManagementScreen(currentAdmin: localUser);
+                return AdminManagementScreen(
+                  key: ValueKey('admin_${firebaseUser.uid}'),
+                  currentAdmin: localUser,
+                );
               } else {
-                return HomeScreen(currentUser: localUser);
+                return HomeScreen(
+                  key: ValueKey('user_${firebaseUser.uid}'),
+                  currentUser: localUser,
+                );
               }
             },
           );

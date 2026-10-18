@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'mousey_colors.dart';
 
 class TransactionTypeSwitcher extends StatelessWidget {
-  final int selectedIndex; // 0: Chi tiêu, 1: Thu nhập
+  final int selectedIndex; // 0: Chi tiêu, 1: Thu nhập, 2: Ngân sách
   final ValueChanged<int> onTabChanged;
 
   const TransactionTypeSwitcher({
@@ -24,6 +24,7 @@ class TransactionTypeSwitcher extends StatelessWidget {
         children: [
           _buildTab(0, 'Chi tiêu', Icons.arrow_downward_rounded, MouseyColors.expenseRed),
           _buildTab(1, 'Thu nhập', Icons.arrow_upward_rounded, MouseyColors.incomeGreen),
+          _buildTab(2, 'Ngân sách', Icons.pie_chart_outline_rounded, const Color(0xFF5D4222)),
         ],
       ),
     );
@@ -53,14 +54,17 @@ class TransactionTypeSwitcher extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: isSelected ? color : MouseyColors.textSub),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
+              Icon(icon, size: 15, color: isSelected ? color : MouseyColors.textSub),
+              const SizedBox(width: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
+                  ),
                 ),
               ),
             ],

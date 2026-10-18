@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PiggySmart smoke test', (WidgetTester tester) async {
+  testWidgets('Mousey smoke test', (WidgetTester tester) async {
     expect(true, isTrue);
   });
 }

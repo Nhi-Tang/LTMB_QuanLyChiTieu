@@ -1,18 +1,18 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../database/db_helper.dart';
 import '../models/user_model.dart';
 import '../models/user_change_model.dart';
+import 'pro_service.dart';
+import 'sync_service.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  final String _baseUrl = 'http://10.0.2.2:3000'; // Backend REST API URL
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
@@ -83,7 +83,6 @@ class AuthService {
           password: password,
         );
       } catch (authErr) {
-        // Auto-create Firebase Auth user if missing (for seamless SQLite migration)
         try {
           credential = await _firebaseAuth.createUserWithEmailAndPassword(
             email: email,
@@ -119,7 +118,6 @@ class AuthService {
         );
       } on FirebaseAuthException catch (e) {
         if (e.code == 'email-already-in-use') {
-          // If already in firebase auth, try signing in or updating
           credential = await _firebaseAuth.signInWithEmailAndPassword(
             email: email,
             password: password,
@@ -174,32 +172,29 @@ class AuthService {
       createdAt: now,
     );
 
+    // Fetch from Cloud Firestore to preserve real plan status
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/auth/session'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (idToken != null) 'Authorization': 'Bearer $idToken',
-        },
-        body: jsonEncode({
-          'uid': firebaseUser.uid,
-          'email': firebaseUser.email,
-          'displayName': firebaseUser.displayName,
-          'photoUrl': firebaseUser.photoURL,
-        }),
-      ).timeout(const Duration(seconds: 3));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        userModel = userModel.copyWith(
-          plan: data['plan'] ?? 'free',
-          proExpiredAt: data['proExpiredAt'],
-          role: data['role'] ?? userModel.role,
-        );
+      final doc = await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        final cloudPlan = data['plan'] as String? ?? 'free';
+        final cloudExpiry = data['proExpiredAt'] as String?;
+        if (cloudPlan == 'pro') {
+          userModel = userModel.copyWith(plan: 'pro', proExpiredAt: cloudExpiry);
+          developer.log('💎 [AuthService] Preserved PRO plan from Firestore for user ${firebaseUser.uid}');
+        }
       }
-    } on SocketException {
-      // Offline mode: use cached data
-    } catch (_) {}
+    } catch (e) {
+      developer.log('Error reading plan from Firestore in AuthService: $e');
+    }
+
+    // Preserve existing local PRO plan if active
+    if (existingLocal != null && existingLocal.plan == 'pro') {
+      userModel = userModel.copyWith(
+        plan: existingLocal.plan,
+        proExpiredAt: existingLocal.proExpiredAt,
+      );
+    }
 
     await _dbHelper.insertOrUpdateUser(userModel);
     return userModel;
@@ -207,9 +202,22 @@ class AuthService {
 
   Future<void> signOut() async {
     final uid = _firebaseAuth.currentUser?.uid;
+    
+    // Reset ProService in-memory state so it doesn't leak Pro to the next logged in user
+    ProService.instance.resetState();
+
     if (uid != null) {
+      await SyncService.instance.clearSyncData(uid);
       await _dbHelper.clearUserSession(uid);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('mousey_is_pro_$uid');
+      await prefs.remove('mousey_pro_expired_at_$uid');
+      await prefs.remove('mousey_trial_used_$uid');
+      await prefs.remove('mousey_remaining_days_$uid');
+      await prefs.remove('last_sync_$uid');
+      await prefs.remove('mousey_last_sync_$uid');
     }
+    
     try {
       await _googleSignIn.signOut();
     } catch (_) {}

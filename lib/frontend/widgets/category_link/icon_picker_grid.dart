@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../backend/models/category_model.dart';
+import '../../../core/widgets/category_icon.dart';
 import '../../theme/app_colors.dart';
 
 class IconPickerGrid extends StatelessWidget {
@@ -32,7 +32,7 @@ class IconPickerGrid extends StatelessWidget {
     {'key': 'money_off_rounded', 'label': 'Tiền nợ'},
     {'key': 'account_balance_wallet_rounded', 'label': 'Ví tiền'},
     {'key': 'card_giftcard_rounded', 'label': 'Quà tặng'},
-    {'key': 'storefront_rounded', 'label': 'Cửa hàng'},
+    {'key': 'storefront_rounded', 'label': 'Bán hàng'},
     {'key': 'trending_up_rounded', 'label': 'Đầu tư'},
     {'key': 'star_rounded', 'label': 'Ngôi sao'},
     {'key': 'favorite_rounded', 'label': 'Yêu thích'},
@@ -55,8 +55,8 @@ class IconPickerGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = availableIcons[index];
         final key = item['key']!;
+        final label = item['label']!;
         final isSelected = selectedIconKey == key;
-        final iconData = CategoryModel.getIconData(key);
 
         return InkWell(
           onTap: () => onIconSelected(key),
@@ -71,10 +71,9 @@ class IconPickerGrid extends StatelessWidget {
               ),
             ),
             alignment: Alignment.center,
-            child: Icon(
-              iconData,
-              size: 24,
-              color: isSelected ? AppColors.primaryGreen : AppColors.textMain,
+            child: CategoryIcon(
+              categoryOrIconKey: label,
+              size: 32,
             ),
           ),
         );
