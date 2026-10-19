@@ -96,4 +96,32 @@ class DailyReminderService {
   Future<void> cancelDailyReminder() async {
     await _notificationsPlugin.cancel(888);
   }
+
+  Future<void> showInstantNotification({
+    required String title,
+    required String body,
+    int id = 999,
+  }) async {
+    await init();
+
+    const androidDetails = AndroidNotificationDetails(
+      'mousey_bank_transactions',
+      'Biến động số dư ngân hàng',
+      channelDescription: 'Thông báo khi có biến động số dư từ các ứng dụng ngân hàng',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'Biến động số dư',
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    try {
+      await _notificationsPlugin.show(
+        id,
+        title,
+        body,
+        notificationDetails,
+      );
+    } catch (_) {}
+  }
 }

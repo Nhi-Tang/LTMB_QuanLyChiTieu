@@ -5,6 +5,7 @@ import '../models/pending_transaction_model.dart';
 import '../models/transaction_model.dart';
 import 'bank_parser/bank_notification_parser.dart';
 import 'in_app_notification_service.dart';
+import 'daily_reminder_service.dart';
 import '../../core/utils/money_input_formatter.dart';
 
 class CategorySuggestionResult {
@@ -151,12 +152,22 @@ class CategorySuggestionService {
     // Thêm thông báo nội bộ vào Trung tâm thông báo
     final formattedAmount = formatMoney(parsed.amount);
     final signText = parsed.type == 'expense' ? '-' : '+';
+    final notifTitle = 'Biến động số dư từ ${parsed.bankName}';
+    final notifBody = '$signText$formattedAmount đ · ${parsed.description}';
+
     await InAppNotificationService.instance.add(
       type: 'pending_tx',
-      title: 'Biến động số dư từ ${parsed.bankName}',
-      body: '$signText$formattedAmount đ · ${parsed.description}',
+      title: notifTitle,
+      body: notifBody,
       dedupeKey: 'notif_pending_${pendingItem.id}',
       uid: uid,
+    );
+
+    // Hiển thị thông báo đẩy (system push notification) ra thanh trạng thái điện thoại thực
+    await DailyReminderService.instance.showInstantNotification(
+      title: notifTitle,
+      body: notifBody,
+      id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
 
     if (isHighConfidenceAutoConfirm) {
