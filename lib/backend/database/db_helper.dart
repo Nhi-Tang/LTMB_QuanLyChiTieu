@@ -321,10 +321,7 @@ class DatabaseHelper {
     }
   }
 
-  Future<bool> _hasColumn(Database db, String table, String column) async {
-    final result = await db.rawQuery('PRAGMA table_info($table)');
-    return result.any((row) => row['name'] == column);
-  }
+
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     debugPrint('🗄️ [DatabaseHelper] _onUpgrade from $oldVersion to $newVersion');
@@ -1421,11 +1418,20 @@ class DatabaseHelper {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
 
+    final String uidWhere;
+    final List<dynamic> whereArgs = [pending.fingerprint];
+    if (targetUid != null && targetUid.isNotEmpty) {
+      uidWhere = '(uid = ? OR uid IS NULL OR uid = \'\')';
+      whereArgs.add(targetUid);
+    } else {
+      uidWhere = '(uid IS NULL OR uid = \'\')';
+    }
+
     // Chống trùng lặp theo fingerprint
     final existing = await db.query(
       'pending_transactions',
-      where: 'fingerprint = ? AND (uid = ? OR uid IS NULL)',
-      whereArgs: [pending.fingerprint, targetUid],
+      where: 'fingerprint = ? AND $uidWhere',
+      whereArgs: whereArgs,
     );
 
     if (existing.isNotEmpty) {
@@ -1447,10 +1453,20 @@ class DatabaseHelper {
   Future<List<PendingTransactionModel>> getPendingTransactions({String? uid, String status = 'pending'}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
+
+    final String uidWhere;
+    final List<dynamic> whereArgs = [status];
+    if (targetUid != null && targetUid.isNotEmpty) {
+      uidWhere = '(uid = ? OR uid IS NULL OR uid = \'\')';
+      whereArgs.add(targetUid);
+    } else {
+      uidWhere = '(uid IS NULL OR uid = \'\')';
+    }
+
     final result = await db.query(
       'pending_transactions',
-      where: 'status = ? AND (uid = ? OR uid IS NULL)',
-      whereArgs: [status, targetUid],
+      where: 'status = ? AND $uidWhere',
+      whereArgs: whereArgs,
       orderBy: 'occurredAt DESC',
     );
     return result.map((map) => PendingTransactionModel.fromMap(map)).toList();
@@ -1459,9 +1475,19 @@ class DatabaseHelper {
   Future<int> getPendingTransactionsCount({String? uid}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
+
+    final String uidWhere;
+    final List<dynamic> whereArgs = [];
+    if (targetUid != null && targetUid.isNotEmpty) {
+      uidWhere = '(uid = ? OR uid IS NULL OR uid = \'\')';
+      whereArgs.add(targetUid);
+    } else {
+      uidWhere = '(uid IS NULL OR uid = \'\')';
+    }
+
     final res = await db.rawQuery(
-      "SELECT COUNT(*) FROM pending_transactions WHERE status = 'pending' AND (uid = ? OR uid IS NULL)",
-      [targetUid],
+      "SELECT COUNT(*) FROM pending_transactions WHERE status = 'pending' AND $uidWhere",
+      whereArgs,
     );
     return Sqflite.firstIntValue(res) ?? 0;
   }

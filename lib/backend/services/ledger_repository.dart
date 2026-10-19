@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../database/db_helper.dart';
 import 'transaction_service.dart';
 import 'sync_service.dart';
@@ -12,7 +11,7 @@ class LedgerRepository {
     // Kiểm tra giới hạn theo gói (Free tối đa 1, Pro không giới hạn)
     if (!ProService.instance.isPro) {
       final ledgers = await DatabaseHelper.instance.getLedgers(uid: uid);
-      if (ledgers.length >= 1) {
+      if (ledgers.isNotEmpty) {
         throw Exception('Giới hạn gói Free: Bạn chỉ có thể sử dụng 1 Sổ sách. Hãy nâng cấp PRO để tạo thêm!');
       }
     }

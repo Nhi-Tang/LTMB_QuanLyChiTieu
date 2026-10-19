@@ -14,7 +14,9 @@ class BankNotificationListenerManager {
   bool _isListening = false;
 
   void startListening({String? uid}) {
-    if (_isListening) return;
+    if (_isListening) {
+      stopListening();
+    }
 
     // Lên lịch nhắc nhở tổng hợp hàng ngày lúc 20:30
     DailyReminderService.instance.scheduleDailyEveningReminder(uid: uid);

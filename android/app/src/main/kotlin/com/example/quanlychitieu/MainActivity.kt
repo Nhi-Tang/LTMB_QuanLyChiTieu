@@ -10,12 +10,13 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    private val CHANNEL_CONTROL = "com.mousey.app/notifications_control"
     private val CHANNEL_NOTIFICATIONS = "com.mousey.app/notifications"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_NOTIFICATIONS)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_CONTROL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "isNotificationPermissionGranted" -> {

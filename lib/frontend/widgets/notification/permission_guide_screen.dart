@@ -11,7 +11,7 @@ class PermissionGuideScreen extends StatefulWidget {
 }
 
 class _PermissionGuideScreenState extends State<PermissionGuideScreen> with WidgetsBindingObserver {
-  static const _channel = MethodChannel('com.mousey.app/notifications');
+  static const _channel = MethodChannel('com.mousey.app/notifications_control');
   bool _isNotificationPermissionGranted = false;
   bool _isLoading = true;
 

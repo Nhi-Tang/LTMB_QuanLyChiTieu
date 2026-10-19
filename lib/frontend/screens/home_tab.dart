@@ -716,17 +716,17 @@ class _HomeTabState extends State<HomeTab> {
                               editingBudget: s.budget,
                               existingBudgets: budgetStatuses.map((b) => b.budget).toList(),
                               onSave: (updatedBudget) async {
+                                final scaffold = ScaffoldMessenger.of(context);
                                 try {
                                   if (updatedBudget.id == null || updatedBudget.id!.isEmpty) {
                                     await BudgetService.instance.insertBudget(updatedBudget);
                                   } else {
                                     await BudgetService.instance.updateBudget(updatedBudget);
                                   }
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Đã cập nhật ngân sách!'), backgroundColor: Colors.green),
-                                    );
-                                  }
+                                  if (!mounted) return;
+                                  scaffold.showSnackBar(
+                                    const SnackBar(content: Text('Đã cập nhật ngân sách!'), backgroundColor: Colors.green),
+                                  );
                                 } catch (e) {
                                   debugPrint('Error updating budget: $e');
                                 }
