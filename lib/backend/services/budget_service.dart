@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../database/db_helper.dart';
 import '../models/budget_model.dart';
 import 'in_app_notification_service.dart';
@@ -25,17 +26,40 @@ class BudgetStatus {
   });
 }
 
-class BudgetService {
+class BudgetService extends ChangeNotifier {
   static final BudgetService instance = BudgetService._init();
   BudgetService._init();
 
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final TransactionService _transactionService = TransactionService();
 
+  List<BudgetStatus> _currentBudgets = [];
+  bool _isLoading = false;
+
+  List<BudgetStatus> get currentBudgets => _currentBudgets;
+  bool get isLoading => _isLoading;
+
+  /// Nạp lại dữ liệu ngân sách theo tháng và ledgerId (lấy từ TransactionService)
+  Future<void> loadBudgets(String monthStr) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final ledgerId = _transactionService.currentLedgerId;
+      _currentBudgets = await getBudgetStatuses(ledgerId, monthStr);
+      await checkAndTriggerAlerts(ledgerId, monthStr);
+    } catch (e) {
+      debugPrint('Error loading budgets in BudgetService: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Tính tổng số tiền đã chi tiêu cho một danh mục trong tháng (hoặc tổng tất cả nếu categoryId == null).
   /// Loại trừ các giao dịch đã xóa, không phải chi phí (thu nhập), hoặc giao dịch chuyển khoản/tiết kiệm.
   Future<double> spent(String? categoryId, String month, String ledgerId) async {
-    final transactions = await _transactionService.getTransactions();
+    final transactions = await _transactionService.getTransactions(ledgerId: ledgerId);
     final parts = month.split('-');
     if (parts.length != 2) return 0.0;
     final year = int.tryParse(parts[0]) ?? DateTime.now().year;
@@ -172,14 +196,23 @@ class BudgetService {
   }
 
   Future<String> insertBudget(BudgetModel budget) async {
-    return await _dbHelper.insertBudget(budget);
+    final id = await _dbHelper.insertBudget(budget);
+    _transactionService.notifyUpdated();
+    notifyListeners();
+    return id;
   }
 
   Future<int> updateBudget(BudgetModel budget) async {
-    return await _dbHelper.updateBudget(budget);
+    final res = await _dbHelper.updateBudget(budget);
+    _transactionService.notifyUpdated();
+    notifyListeners();
+    return res;
   }
 
   Future<int> deleteBudget(String budgetId) async {
-    return await _dbHelper.deleteBudget(budgetId);
+    final res = await _dbHelper.deleteBudget(budgetId);
+    _transactionService.notifyUpdated();
+    notifyListeners();
+    return res;
   }
 }

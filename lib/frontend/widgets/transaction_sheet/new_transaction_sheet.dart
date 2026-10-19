@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../backend/models/transaction_model.dart';
+import '../../../backend/services/transaction_service.dart';
 import '../../screens/budgets_screen.dart';
 import '../app_alert_dialog.dart';
 import 'amount_card.dart';
@@ -196,7 +197,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const BudgetsScreen(ledgerId: 'default_ledger'),
+                            builder: (context) => BudgetsScreen(ledgerId: TransactionService.instance.currentLedgerId),
                           ),
                         );
                         return;
@@ -218,6 +219,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                   CategoryGrid(
                     isExpense: _tabIndex == 0,
                     selectedCategory: _selectedCategory,
+                    ledgerId: TransactionService.instance.currentLedgerId,
                     onCategorySelected: (cat) {
                       setState(() => _selectedCategory = cat);
                     },

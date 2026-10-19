@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../database/db_helper.dart';
 import '../models/category_model.dart';
@@ -8,29 +9,49 @@ class CategoryRepository {
   CategoryRepository._init();
 
   /// Lấy danh sách danh mục cho một sổ (ledger) và loại (expense/income), kèm trạng thái liên kết (isLinked)
-  Future<List<CategoryModel>> getCategoriesForLedger(String ledgerId, String type) async {
+  Future<List<CategoryModel>> getCategoriesForLedger(String ledgerId, String type, {String? uid}) async {
     final db = await DatabaseHelper.instance.database;
+    final targetUid = uid ?? DatabaseHelper.instance.currentUid;
+
+    // Đảm bảo danh mục mặc định đã có đủ 100%
+    if (targetUid != null && targetUid.isNotEmpty) {
+      try {
+        await DatabaseHelper.instance.ensureDefaultCategories(targetUid);
+      } catch (e) {
+        debugPrint('ensureDefaultCategories error: $e');
+      }
+    }
+
+    final String where;
+    final List<dynamic> whereArgs;
+    if (targetUid != null && targetUid.isNotEmpty) {
+      where = 'type = ? AND isArchived = 0 AND (uid = ? OR uid IS NULL OR isDefault = 1)';
+      whereArgs = [type, targetUid];
+    } else {
+      where = 'type = ? AND isArchived = 0 AND (uid IS NULL OR isDefault = 1)';
+      whereArgs = [type];
+    }
 
     // Lấy tất cả danh mục chưa lưu trữ thuộc loại type
     final categoriesResult = await db.query(
       'categories',
-      where: 'type = ? AND isArchived = 0',
-      whereArgs: [type],
+      where: where,
+      whereArgs: whereArgs,
       orderBy: 'sortOrder ASC, id ASC',
     );
 
-    // Lấy danh sách categoryId đã liên kết với ledgerId này
-    final linkedResult = await db.query(
+    // Lấy danh sách categoryId bị hủy liên kết thủ công trong ledger_categories
+    final unlinkedResult = await db.query(
       'ledger_categories',
-      where: 'ledgerId = ?',
+      where: 'ledgerId = ? AND isUnlinked = 1',
       whereArgs: [ledgerId],
     );
-    final linkedIds = linkedResult.map((row) => row['categoryId'] as int).toSet();
+    final unlinkedIds = unlinkedResult.map((row) => row['categoryId'] as int).toSet();
 
     return categoriesResult.map((map) {
       final id = map['id'] as int;
-      final isLinked = linkedIds.contains(id);
-      return CategoryModel.fromMap(map, isLinked: isLinked);
+      final isUnlinked = unlinkedIds.contains(id);
+      return CategoryModel.fromMap(map, isLinked: !isUnlinked);
     }).toList();
   }
 
@@ -164,20 +185,20 @@ class CategoryRepository {
   /// Liên kết danh mục với sổ
   Future<void> linkCategory(String ledgerId, int categoryId) async {
     final db = await DatabaseHelper.instance.database;
-    await db.insert(
+    await db.delete(
       'ledger_categories',
-      {'ledgerId': ledgerId, 'categoryId': categoryId},
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      where: 'ledgerId = ? AND categoryId = ?',
+      whereArgs: [ledgerId, categoryId],
     );
   }
 
   /// Hủy liên kết danh mục với sổ
   Future<void> unlinkCategory(String ledgerId, int categoryId) async {
     final db = await DatabaseHelper.instance.database;
-    await db.delete(
+    await db.insert(
       'ledger_categories',
-      where: 'ledgerId = ? AND categoryId = ?',
-      whereArgs: [ledgerId, categoryId],
+      {'ledgerId': ledgerId, 'categoryId': categoryId, 'isUnlinked': 1},
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 

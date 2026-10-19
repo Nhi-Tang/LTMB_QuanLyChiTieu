@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../backend/models/budget_model.dart';
 import '../../backend/services/budget_service.dart';
+import '../../backend/services/transaction_service.dart';
 import '../utils/app_translations.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/budget_form_sheet.dart';
@@ -21,54 +22,63 @@ class BudgetsScreen extends StatefulWidget {
 
 class _BudgetsScreenState extends State<BudgetsScreen> {
   late DateTime _selectedMonth;
-  List<BudgetStatus> _budgetStatuses = [];
-  List<BudgetModel> _budgets = [];
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _selectedMonth = DateTime(now.year, now.month, 1);
-    _loadBudgets();
+    BudgetService.instance.addListener(_onBudgetsUpdated);
+    BudgetService.instance.loadBudgets(_monthStr);
+  }
+
+  void _onBudgetsUpdated() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    BudgetService.instance.removeListener(_onBudgetsUpdated);
+    super.dispose();
   }
 
   String get _monthStr {
     return '${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}';
   }
 
-  Future<void> _loadBudgets() async {
-    setState(() {
-      _isLoading = true;
-    });
-    final statuses = await BudgetService.instance.getBudgetStatuses(widget.ledgerId, _monthStr);
-    final rawBudgets = await BudgetService.instance.getBudgets(widget.ledgerId, month: _monthStr);
-    
-    // Check and trigger alerts
-    await BudgetService.instance.checkAndTriggerAlerts(widget.ledgerId, _monthStr);
-
-    if (!mounted) return;
-    setState(() {
-      _budgetStatuses = statuses;
-      _budgets = rawBudgets;
-      _isLoading = false;
-    });
+  String get _activeLedgerId {
+    return widget.ledgerId != 'default_ledger'
+        ? widget.ledgerId
+        : TransactionService.instance.currentLedgerId;
   }
 
   void _showAddEditBudget({BudgetModel? editingBudget}) {
     BudgetFormSheet.show(
       context: context,
-      ledgerId: widget.ledgerId,
+      ledgerId: _activeLedgerId,
       currentMonth: _monthStr,
       editingBudget: editingBudget,
-      existingBudgets: _budgets,
+      existingBudgets: BudgetService.instance.currentBudgets.map((b) => b.budget).toList(),
       onSave: (budget) async {
-        if (budget.id == null || budget.id!.isEmpty) {
-          await BudgetService.instance.insertBudget(budget);
-        } else {
-          await BudgetService.instance.updateBudget(budget);
+        try {
+          if (budget.id == null || budget.id!.isEmpty) {
+            await BudgetService.instance.insertBudget(budget);
+          } else {
+            await BudgetService.instance.updateBudget(budget);
+          }
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã lưu ngân sách thành công!'), backgroundColor: Colors.green),
+            );
+          }
+        } catch (e) {
+          debugPrint('Error saving budget: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi lưu ngân sách: $e'), backgroundColor: Colors.red),
+            );
+          }
         }
-        _loadBudgets();
       },
     );
   }
@@ -100,7 +110,6 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
 
     if (confirmed == true) {
       await BudgetService.instance.deleteBudget(budgetId);
-      _loadBudgets();
     }
   }
 
@@ -161,7 +170,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                       setState(() {
                         _selectedMonth = DateTime(picked.year, picked.month, 1);
                       });
-                      _loadBudgets();
+                      BudgetService.instance.loadBudgets(_monthStr);
                     }
                   },
                   borderRadius: BorderRadius.circular(16),
@@ -201,47 +210,59 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
 
           // Budget List
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _budgetStatuses.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.pie_chart_outline_rounded, size: 64, color: Colors.brown),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Chưa có ngân sách nào trong tháng này',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF5D4222)),
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF5D4222),
-                                foregroundColor: const Color(0xFFFCF1D0),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              ),
-                              onPressed: () => _showAddEditBudget(),
-                              icon: const Icon(Icons.add_rounded),
-                              label: const Text('Thêm Ngân Sách Ngay', style: TextStyle(fontWeight: FontWeight.bold)),
-                            ),
-                          ],
+            child: ListenableBuilder(
+              listenable: BudgetService.instance,
+              builder: (context, _) {
+                final isLoading = BudgetService.instance.isLoading;
+                final budgetStatuses = BudgetService.instance.currentBudgets;
+
+                if (isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (budgetStatuses.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.pie_chart_outline_rounded, size: 64, color: Colors.brown),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Chưa có ngân sách nào trong tháng này',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF5D4222)),
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        itemCount: _budgetStatuses.length,
-                        itemBuilder: (context, index) {
-                          final status = _budgetStatuses[index];
-                          return BudgetCard(
-                            status: status,
-                            selectedLanguage: widget.selectedLanguage,
-                            onEdit: () => _showAddEditBudget(editingBudget: status.budget),
-                            onDelete: () => status.budget.id != null ? _deleteBudget(status.budget.id!) : null,
-                          );
-                        },
-                      ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF5D4222),
+                            foregroundColor: const Color(0xFFFCF1D0),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          ),
+                          onPressed: () => _showAddEditBudget(),
+                          icon: const Icon(Icons.add_rounded),
+                          label: const Text('Thêm Ngân Sách Ngay', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  itemCount: budgetStatuses.length,
+                  itemBuilder: (context, index) {
+                    final status = budgetStatuses[index];
+                    return BudgetCard(
+                      status: status,
+                      selectedLanguage: widget.selectedLanguage,
+                      onEdit: () => _showAddEditBudget(editingBudget: status.budget),
+                      onDelete: () => status.budget.id != null ? _deleteBudget(status.budget.id!) : null,
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

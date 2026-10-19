@@ -207,6 +207,13 @@ class ProService extends ChangeNotifier {
     }
   }
 
+  /// Dành riêng cho Unit Test (MOCK)
+  @visibleForTesting
+  void testSetPro(bool val) {
+    _isPro = val;
+    notifyListeners();
+  }
+
   /// Kích hoạt dùng thử 7 ngày miễn phí
   Future<bool> startTrial() async {
     _isLoading = true;

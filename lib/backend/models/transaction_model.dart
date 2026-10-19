@@ -22,7 +22,7 @@ class TransactionItem {
     this.isDeleted = false,
     this.isSynced = false,
     this.uid,
-    this.ledgerId = 'Sổ cá nhân 1',
+    this.ledgerId,
   }) : updatedAt = updatedAt ?? DateTime.now().millisecondsSinceEpoch;
 
   Map<String, dynamic> toMap() {

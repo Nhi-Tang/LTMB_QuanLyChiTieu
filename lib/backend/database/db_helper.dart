@@ -26,7 +26,14 @@ class DatabaseHelper {
 
   DatabaseHelper._init();
 
-  String? get _currentUid => FirebaseAuth.instance.currentUser?.uid;
+  String? get _currentUid {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+  String? get currentUid => _currentUid;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -45,9 +52,15 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 13,
+      version: 18,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
+      onOpen: (db) async {
+        debugPrint('🗄️ [DatabaseHelper] onOpen: database path=${db.path}, version=${await db.getVersion()}');
+        await ensureSchema(db);
+        // Sau khi đã có schema chuẩn, chèn dữ liệu ledger mặc định
+        await _ensureDefaultLedgers(db);
+      },
     );
 
     await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
@@ -56,8 +69,14 @@ class DatabaseHelper {
   }
 
   Future<void> _createDB(Database db, int version) async {
+    await ensureSchema(db);
+    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
+  }
+
+  Future<void> ensureSchema(Database db) async {
+    debugPrint('🗄️ [DatabaseHelper] ensureSchema called');
     await db.execute('''
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
@@ -87,6 +106,20 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
+      CREATE TABLE IF NOT EXISTS ledgers (
+        id TEXT PRIMARY KEY,
+        uid TEXT NOT NULL,
+        name TEXT NOT NULL,
+        isDefault INTEGER NOT NULL DEFAULT 0,
+        createdAt INTEGER NOT NULL,
+        updatedAt INTEGER NOT NULL,
+        isDeleted INTEGER NOT NULL DEFAULT 0,
+        isSynced INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+    try { await db.execute("CREATE INDEX IF NOT EXISTS idx_ledgers_uid ON ledgers(uid);"); } catch (_) {}
+
+    await db.execute('''
       CREATE TABLE IF NOT EXISTS savings_goals (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -100,9 +133,11 @@ class DatabaseHelper {
         updatedAt INTEGER NOT NULL,
         isDeleted INTEGER NOT NULL DEFAULT 0,
         isSynced INTEGER NOT NULL DEFAULT 0,
-        uid TEXT
+        uid TEXT,
+        ledgerId TEXT DEFAULT 'Sổ cá nhân 1'
       )
     ''');
+    try { await db.execute("CREATE INDEX IF NOT EXISTS idx_goals_uid ON savings_goals(uid);"); } catch (_) {}
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS savings_transactions (
@@ -126,9 +161,11 @@ class DatabaseHelper {
         updatedAt INTEGER NOT NULL,
         isDeleted INTEGER NOT NULL DEFAULT 0,
         isSynced INTEGER NOT NULL DEFAULT 0,
-        uid TEXT
+        uid TEXT,
+        ledgerId TEXT DEFAULT 'Sổ cá nhân 1'
       )
     ''');
+    try { await db.execute("CREATE INDEX IF NOT EXISTS idx_tx_uid ON transactions(uid);"); } catch (_) {}
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS categories (
@@ -140,16 +177,19 @@ class DatabaseHelper {
         sortOrder INTEGER NOT NULL,
         isDefault INTEGER NOT NULL DEFAULT 0,
         isArchived INTEGER NOT NULL DEFAULT 0,
+        isDeleted INTEGER NOT NULL DEFAULT 0,
         createdAt TEXT NOT NULL,
         updatedAt TEXT NOT NULL
       )
     ''');
+    try { await db.execute("CREATE INDEX IF NOT EXISTS idx_categories_uid ON categories(uid);"); } catch (_) {}
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS ledger_categories (
         ledgerId TEXT NOT NULL,
         categoryId INTEGER NOT NULL,
         uid TEXT,
+        isUnlinked INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY(ledgerId, categoryId)
       )
     ''');
@@ -162,12 +202,13 @@ class DatabaseHelper {
         amountLimit INTEGER NOT NULL,
         month TEXT,
         isRecurring INTEGER NOT NULL DEFAULT 0,
-        ledgerId TEXT,
+        ledgerId TEXT DEFAULT 'Sổ cá nhân 1',
         updatedAt INTEGER NOT NULL,
         isDeleted INTEGER NOT NULL DEFAULT 0,
         isSynced INTEGER NOT NULL DEFAULT 0
       )
     ''');
+    try { await db.execute("CREATE INDEX IF NOT EXISTS idx_budgets_uid ON budgets(uid);"); } catch (_) {}
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS budget_alerts (
@@ -175,7 +216,8 @@ class DatabaseHelper {
         budgetId TEXT NOT NULL,
         month TEXT NOT NULL,
         level TEXT NOT NULL,
-        createdAt TEXT NOT NULL
+        createdAt TEXT NOT NULL,
+        uid TEXT
       )
     ''');
 
@@ -196,6 +238,11 @@ class DatabaseHelper {
         createdAt TEXT NOT NULL
       )
     ''');
+    try {
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_pending_uid ON pending_transactions(uid);");
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_pending_status ON pending_transactions(status);");
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_pending_fp ON pending_transactions(fingerprint);");
+    } catch (_) {}
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS app_notifications (
@@ -210,34 +257,78 @@ class DatabaseHelper {
         dedupeKey TEXT UNIQUE
       )
     ''');
+    try {
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_uid ON app_notifications(uid);");
+      await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON app_notifications(isRead);");
+    } catch (_) {}
 
-    await _seedDefaultCategories(db);
+    final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM users')) ?? 0;
+    if (count == 0) {
+      final now = DateTime.now().toIso8601String();
+      await db.insert('users', {
+        'name': 'Quản trị viên (Admin)',
+        'email': 'admin@piggysmart.com',
+        'password': 'admin123',
+        'role': 'admin',
+        'isActive': 1,
+        'createdAt': now,
+        'provider': 'password',
+        'plan': 'pro',
+      });
 
-    final now = DateTime.now().toIso8601String();
-    await db.insert('users', {
-      'name': 'Quản trị viên (Admin)',
-      'email': 'admin@piggysmart.com',
-      'password': 'admin123',
-      'role': 'admin',
-      'isActive': 1,
-      'createdAt': now,
-      'provider': 'password',
-      'plan': 'pro',
-    });
+      await db.insert('users', {
+        'name': 'Nguyễn Văn A',
+        'email': 'user@piggysmart.com',
+        'password': 'user123',
+        'role': 'user',
+        'isActive': 1,
+        'createdAt': now,
+        'provider': 'password',
+        'plan': 'free',
+      });
+    }
+  }
 
-    await db.insert('users', {
-      'name': 'Nguyễn Văn A',
-      'email': 'user@piggysmart.com',
-      'password': 'user123',
-      'role': 'user',
-      'isActive': 1,
-      'createdAt': now,
-      'provider': 'password',
-      'plan': 'free',
-    });
+  Future<void> _ensureDefaultLedgers(Database db) async {
+    final List<Map<String, dynamic>> uidsResult = await db.rawQuery('SELECT DISTINCT uid FROM users WHERE uid IS NOT NULL AND uid != \'\'');
+    // Bổ sung uid = '' nếu có dữ liệu legacy
+    final List<String> allUids = uidsResult.map((m) => m['uid'] as String).toList();
+    if (!allUids.contains('')) allUids.add('');
+
+    for (final uid in allUids) {
+      final defaultLedgerId = 'default_$uid';
+      final existing = await db.query('ledgers', where: 'id = ?', whereArgs: [defaultLedgerId]);
+      if (existing.isEmpty) {
+        final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+        await db.insert('ledgers', {
+          'id': defaultLedgerId,
+          'uid': uid,
+          'name': 'Sổ cá nhân 1',
+          'isDefault': 1,
+          'createdAt': nowEpoch,
+          'updatedAt': nowEpoch,
+          'isDeleted': 0,
+          'isSynced': 0,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+        // Gán lại dữ liệu cũ bị thiếu ledgerId cho uid này
+        String uidWhere = uid.isEmpty ? '(uid IS NULL OR uid = \'\')' : 'uid = ?';
+        List<dynamic> args = uid.isEmpty ? [] : [uid];
+        await db.rawUpdate('UPDATE transactions SET ledgerId = ? WHERE ledgerId IS NULL AND $uidWhere', [defaultLedgerId, ...args]);
+        await db.rawUpdate('UPDATE budgets SET ledgerId = ? WHERE ledgerId IS NULL AND $uidWhere', [defaultLedgerId, ...args]);
+        await db.rawUpdate('UPDATE savings_goals SET ledgerId = ? WHERE ledgerId IS NULL AND $uidWhere', [defaultLedgerId, ...args]);
+      }
+    }
+  }
+
+  Future<bool> _hasColumn(Database db, String table, String column) async {
+    final result = await db.rawQuery('PRAGMA table_info($table)');
+    return result.any((row) => row['name'] == column);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    debugPrint('🗄️ [DatabaseHelper] _onUpgrade from $oldVersion to $newVersion');
+    await ensureSchema(db);
     await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
     if (oldVersion < 2) {
       await db.execute('''
@@ -467,6 +558,133 @@ class DatabaseHelper {
         await db.execute("ALTER TABLE transactions ADD COLUMN ledgerId TEXT DEFAULT 'Sổ cá nhân 1';");
       } catch (_) {}
     }
+    if (oldVersion < 14) {
+      // Migration v14: Tạo bảng ledgers cho quản lý đa sổ sách
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ledgers (
+          id TEXT PRIMARY KEY,
+          uid TEXT NOT NULL,
+          name TEXT NOT NULL,
+          isDefault INTEGER NOT NULL DEFAULT 0,
+          createdAt INTEGER NOT NULL,
+          updatedAt INTEGER NOT NULL,
+          isDeleted INTEGER NOT NULL DEFAULT 0,
+          isSynced INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      try {
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_ledgers_uid ON ledgers(uid);");
+      } catch (_) {}
+    }
+    if (oldVersion < 15) {
+      // Migration v15: Phục hồi và bảo đảm các danh mục mặc định cho mọi sổ
+      try {
+        await db.execute("ALTER TABLE categories ADD COLUMN isDeleted INTEGER DEFAULT 0;");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE ledger_categories ADD COLUMN isUnlinked INTEGER DEFAULT 0;");
+      } catch (_) {}
+    }
+    if (oldVersion < 16) {
+      // Migration v16: Thêm cột ledgerId cho budgets và savings_goals
+      try {
+        await db.execute("ALTER TABLE budgets ADD COLUMN ledgerId TEXT DEFAULT 'Sổ cá nhân 1';");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE savings_goals ADD COLUMN ledgerId TEXT DEFAULT 'Sổ cá nhân 1';");
+      } catch (_) {}
+    }
+    if (oldVersion < 17) {
+      // Migration v17: Chuẩn hóa bảng budgets
+      try {
+        await db.execute("UPDATE budgets SET isDeleted = 0 WHERE isDeleted IS NULL;");
+        await db.execute("UPDATE budgets SET ledgerId = 'Sổ cá nhân 1' WHERE ledgerId IS NULL OR ledgerId = '';");
+      } catch (_) {}
+    }
+  }
+
+  static const List<Map<String, String>> defaultExpenseCategories = [
+    {'name': 'Ăn uống', 'iconKey': 'fastfood_rounded'},
+    {'name': 'Hóa đơn', 'iconKey': 'receipt_rounded'},
+    {'name': 'Di chuyển', 'iconKey': 'directions_bus_rounded'},
+    {'name': 'Mua sắm', 'iconKey': 'shopping_bag_rounded'},
+    {'name': 'Giải trí', 'iconKey': 'sports_esports_rounded'},
+    {'name': 'Sức khoẻ', 'iconKey': 'medical_services_rounded'},
+    {'name': 'Làm đẹp', 'iconKey': 'content_cut_rounded'},
+    {'name': 'Quần áo', 'iconKey': 'checkroom_rounded'},
+    {'name': 'Học tập', 'iconKey': 'school_rounded'},
+    {'name': 'Thú cưng', 'iconKey': 'pets_rounded'},
+    {'name': 'Con cái', 'iconKey': 'child_care_rounded'},
+    {'name': 'Hỗ trợ gia đình', 'iconKey': 'family_restroom_rounded'},
+    {'name': 'Bảo hiểm', 'iconKey': 'security_rounded'},
+    {'name': 'Thuế', 'iconKey': 'account_balance_rounded'},
+    {'name': 'Công việc', 'iconKey': 'work_rounded'},
+    {'name': 'Nhà ở', 'iconKey': 'home_rounded'},
+    {'name': 'Tiền nợ', 'iconKey': 'money_off_rounded'},
+    {'name': 'Khác', 'iconKey': 'category_rounded'},
+  ];
+
+  static const List<Map<String, String>> defaultIncomeCategories = [
+    {'name': 'Lương', 'iconKey': 'account_balance_wallet_rounded'},
+    {'name': 'Thưởng', 'iconKey': 'card_giftcard_rounded'},
+    {'name': 'Bán hàng', 'iconKey': 'storefront_rounded'},
+    {'name': 'Đầu tư', 'iconKey': 'trending_up_rounded'},
+    {'name': 'Khác', 'iconKey': 'category_rounded'},
+  ];
+
+  Future<void> ensureDefaultCategories(String uid) async {
+    final db = await instance.database;
+    final now = DateTime.now().toIso8601String();
+
+    // 1. Đọc tất cả tên danh mục hiện có của user trong 1 query duy nhất
+    final existingRows = await db.query(
+      'categories',
+      columns: ['name'],
+      where: 'uid = ? OR isDefault = 1',
+      whereArgs: [uid],
+    );
+    final existingNames = existingRows.map((r) => (r['name'] as String).trim().toLowerCase()).toSet();
+
+    final missingExpense = defaultExpenseCategories.where((c) => !existingNames.contains(c['name']!.toLowerCase())).toList();
+    final missingIncome = defaultIncomeCategories.where((c) => !existingNames.contains(c['name']!.toLowerCase())).toList();
+
+    if (missingExpense.isEmpty && missingIncome.isEmpty) {
+      return; // Đã đủ danh mục, thoát ngay tức thì trong <1ms
+    }
+
+    await db.transaction((txn) async {
+      await txn.update('categories', {'uid': uid}, where: 'uid IS NULL OR uid = ""');
+
+      int sortOrder = 0;
+      for (var cat in missingExpense) {
+        await txn.insert('categories', {
+          'uid': uid,
+          'name': cat['name'],
+          'iconKey': cat['iconKey'],
+          'type': 'expense',
+          'sortOrder': sortOrder++,
+          'isDefault': 1,
+          'isArchived': 0,
+          'createdAt': now,
+          'updatedAt': now,
+        });
+      }
+
+      sortOrder = 0;
+      for (var cat in missingIncome) {
+        await txn.insert('categories', {
+          'uid': uid,
+          'name': cat['name'],
+          'iconKey': cat['iconKey'],
+          'type': 'income',
+          'sortOrder': sortOrder++,
+          'isDefault': 1,
+          'isArchived': 0,
+          'createdAt': now,
+          'updatedAt': now,
+        });
+      }
+    });
   }
 
   Future<void> _seedDefaultCategories(Database db) async {
@@ -548,18 +766,112 @@ class DatabaseHelper {
     }
   }
 
+  // --- LEDGERS DAO METHODS ---
+
+  Future<List<Map<String, dynamic>>> getLedgers({String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    return await db.query(
+      'ledgers',
+      where: 'isDeleted = 0 AND uid = ?',
+      whereArgs: [targetUid],
+      orderBy: 'isDefault DESC, createdAt ASC',
+    );
+  }
+
+  Future<Map<String, dynamic>?> getLedgerById(String id, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final rows = await db.query(
+      'ledgers',
+      where: 'id = ? AND uid = ? AND isDeleted = 0',
+      whereArgs: [id, targetUid],
+    );
+    return rows.isNotEmpty ? rows.first : null;
+  }
+
+  Future<String> insertLedger({
+    required String name,
+    String? id,
+    String? uid,
+    bool isDefault = false,
+  }) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final ledgerId = id ?? 'ledger_${_uuid.v4()}';
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+
+    await db.insert(
+      'ledgers',
+      {
+        'id': ledgerId,
+        'uid': targetUid,
+        'name': name,
+        'isDefault': isDefault ? 1 : 0,
+        'createdAt': nowEpoch,
+        'updatedAt': nowEpoch,
+        'isDeleted': 0,
+        'isSynced': 0,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    SyncService.instance.syncAll();
+    return ledgerId;
+  }
+
+  Future<int> deleteLedger(String ledgerId, {String? uid}) async {
+    final db = await instance.database;
+    final targetUid = uid ?? _currentUid;
+    final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+
+    final res = await db.update(
+      'ledgers',
+      {
+        'isDeleted': 1,
+        'updatedAt': nowEpoch,
+        'isSynced': 0,
+      },
+      where: 'id = ? AND uid = ?',
+      whereArgs: [ledgerId, targetUid],
+    );
+
+    SyncService.instance.syncAll();
+    return res;
+  }
+
   // --- TRANSACTIONS DAO METHODS (ISOLATED BY UID & LEDGER) ---
 
   Future<List<TransactionItem>> getTransactions({String? uid, String? ledgerId}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
-    final targetLedger = ledgerId ?? TransactionService.instance.currentLedger;
+    final targetLedger = ledgerId ?? TransactionService.instance.currentLedgerId;
     debugPrint('🗄️ [DatabaseHelper] Executing getTransactions for uid: $targetUid, ledgerId: $targetLedger');
+
+    final isDefaultLedger = targetLedger.startsWith('default_') || targetLedger == 'Sổ cá nhân 1' || targetLedger == 'default_ledger';
+    final List<dynamic> whereArgs = [];
+
+    final String uidWhere;
+    if (targetUid != null && targetUid.isNotEmpty) {
+      uidWhere = '(uid = ? OR uid IS NULL OR uid = \'\')';
+      whereArgs.add(targetUid);
+    } else {
+      uidWhere = '(uid IS NULL OR uid = \'\')';
+    }
+
+    final String where;
+    if (isDefaultLedger) {
+      where = 'isDeleted = 0 AND $uidWhere AND (ledgerId = ? OR ledgerId = \'Sổ cá nhân 1\' OR ledgerId = \'default_ledger\' OR ledgerId IS NULL OR ledgerId LIKE \'default_%\')';
+      whereArgs.add(targetLedger);
+    } else {
+      where = 'isDeleted = 0 AND $uidWhere AND ledgerId = ?';
+      whereArgs.add(targetLedger);
+    }
 
     final result = await db.query(
       'transactions',
-      where: 'isDeleted = 0 AND (uid = ? OR uid IS NULL) AND (ledgerId = ? OR (ledgerId IS NULL AND ? = "Sổ cá nhân 1"))',
-      whereArgs: [targetUid, targetLedger, targetLedger],
+      where: where,
+      whereArgs: whereArgs,
       orderBy: 'date DESC',
     );
     return result.map((map) => TransactionItem.fromMap(map)).toList();
@@ -568,7 +880,11 @@ class DatabaseHelper {
   Future<int> insertTransaction(TransactionItem item, {String? uid, String? ledgerId}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
-    final targetLedger = ledgerId ?? item.ledgerId ?? TransactionService.instance.currentLedger;
+    final targetLedger = ledgerId ??
+        ((item.ledgerId != null && item.ledgerId != 'Sổ cá nhân 1')
+            ? item.ledgerId!
+            : TransactionService.instance.currentLedgerId);
+
     final nowEpoch = DateTime.now().millisecondsSinceEpoch;
     final itemToSave = item.copyWith(
       id: item.id.isNotEmpty ? item.id : _uuid.v4(),
@@ -937,30 +1253,91 @@ class DatabaseHelper {
   Future<List<BudgetModel>> getBudgets(String ledgerId, {String? month, String? uid}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
-    debugPrint('🗄️ [DatabaseHelper] Executing getBudgets for uid: $targetUid');
-    String where = 'ledgerId = ? AND isDeleted = 0 AND (uid = ? OR uid IS NULL)';
-    List<dynamic> args = [ledgerId, targetUid];
+    final targetLedger = (ledgerId != 'default_ledger' && ledgerId.isNotEmpty) ? ledgerId : TransactionService.instance.currentLedgerId;
+    debugPrint('🗄️ [DatabaseHelper] Executing getBudgets for uid: $targetUid, ledgerId: $targetLedger');
+
+    final isDefaultLedger = targetLedger.startsWith('default_') || targetLedger == 'default_ledger' || targetLedger == 'Sổ cá nhân 1';
+    final List<dynamic> args = [];
+
+    // 1. Placeholder 1: ledgerWhere
+    final String ledgerWhere;
+    if (isDefaultLedger) {
+      ledgerWhere = '(b.ledgerId = ? OR b.ledgerId = \'default_ledger\' OR b.ledgerId = \'Sổ cá nhân 1\' OR b.ledgerId IS NULL OR b.ledgerId LIKE \'default_%\')';
+      args.add(targetLedger);
+    } else {
+      ledgerWhere = 'b.ledgerId = ?';
+      args.add(targetLedger);
+    }
+
+    // 2. Placeholder 2: uidWhere
+    final String uidWhere;
+    if (targetUid != null && targetUid.isNotEmpty) {
+      uidWhere = '(b.uid = ? OR b.uid IS NULL OR b.uid = \'\')';
+      args.add(targetUid);
+    } else {
+      uidWhere = '(b.uid IS NULL OR b.uid = \'\')';
+    }
+
+    String where = '$ledgerWhere AND (b.isDeleted = 0 OR b.isDeleted IS NULL) AND $uidWhere';
     if (month != null) {
-      where += ' AND (month = ? OR month IS NULL OR isRecurring = 1)';
+      where += ' AND (b.month = ? OR b.month IS NULL OR b.isRecurring = 1)';
       args.add(month);
     }
-    final result = await db.query(
-      'budgets',
-      where: where,
-      whereArgs: args,
-      orderBy: 'updatedAt DESC',
-    );
+
+    final sql = '''
+      SELECT b.*, c.name as categoryName, c.iconKey as categoryIcon
+      FROM budgets b
+      LEFT JOIN categories c ON b.categoryId = c.name AND (c.uid = b.uid OR c.uid IS NULL OR c.isDefault = 1)
+      WHERE $where
+      ORDER BY b.updatedAt DESC
+    ''';
+
+    final result = await db.rawQuery(sql, args);
     return result.map((map) => BudgetModel.fromMap(map)).toList();
   }
 
   Future<String> insertBudget(BudgetModel budget, {String? uid}) async {
     final db = await instance.database;
     final targetUid = uid ?? _currentUid;
+    final targetLedger = (budget.ledgerId != null && budget.ledgerId != 'default_ledger' && budget.ledgerId != 'Sổ cá nhân 1')
+        ? budget.ledgerId
+        : TransactionService.instance.currentLedgerId;
+
+    // Check upsert
+    final existing = await db.query(
+      'budgets',
+      where: 'ledgerId = ? AND (uid = ? OR uid IS NULL OR uid = \'\') AND (categoryId = ? OR (categoryId IS NULL AND ? IS NULL)) AND (month = ? OR month IS NULL) AND isDeleted = 0',
+      whereArgs: [
+        targetLedger,
+        targetUid ?? '',
+        budget.categoryId,
+        budget.categoryId,
+        budget.month
+      ],
+    );
+
+    if (existing.isNotEmpty && budget.id == null) {
+      final existingId = existing.first['id'] as String;
+      final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+      final budgetToUpdate = budget.copyWith(
+        id: existingId,
+        uid: targetUid,
+        ledgerId: targetLedger,
+        updatedAt: nowEpoch,
+        isSynced: false,
+      );
+      await db.update('budgets', budgetToUpdate.toMap(), where: 'id = ?', whereArgs: [existingId]);
+      SyncService.instance.syncAll();
+      return existingId;
+    }
+
     final nowEpoch = DateTime.now().millisecondsSinceEpoch;
     final budgetId = budget.id != null && budget.id!.isNotEmpty ? budget.id! : _uuid.v4();
+
     final budgetToSave = budget.copyWith(
       id: budgetId,
       uid: targetUid,
+      ledgerId: targetLedger,
       updatedAt: nowEpoch,
       isSynced: false,
     );
@@ -972,7 +1349,12 @@ class DatabaseHelper {
   Future<int> updateBudget(BudgetModel budget) async {
     final db = await instance.database;
     final nowEpoch = DateTime.now().millisecondsSinceEpoch;
+    final targetLedger = (budget.ledgerId != null && budget.ledgerId != 'default_ledger' && budget.ledgerId != 'Sổ cá nhân 1')
+        ? budget.ledgerId
+        : TransactionService.instance.currentLedgerId;
+
     final budgetToUpdate = budget.copyWith(
+      ledgerId: targetLedger,
       updatedAt: nowEpoch,
       isSynced: false,
     );

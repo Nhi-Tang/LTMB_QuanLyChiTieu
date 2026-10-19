@@ -55,7 +55,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  List<BudgetStatus> _budgetStatuses = [];
   int _unreadNotifCount = 0;
   int _pendingDraftCount = 0;
 
@@ -65,13 +64,18 @@ class _HomeTabState extends State<HomeTab> {
     _loadBudgets();
     _loadNotificationCounts();
     InAppNotificationService.instance.addListener(_loadNotificationCounts);
-    TransactionService.instance.addListener(_loadNotificationCounts);
+    TransactionService.instance.addListener(_onDataUpdated);
+  }
+
+  void _onDataUpdated() {
+    BudgetService.instance.loadBudgets(_monthStr);
+    _loadNotificationCounts();
   }
 
   @override
   void dispose() {
     InAppNotificationService.instance.removeListener(_loadNotificationCounts);
-    TransactionService.instance.removeListener(_loadNotificationCounts);
+    TransactionService.instance.removeListener(_onDataUpdated);
     super.dispose();
   }
 
@@ -79,7 +83,7 @@ class _HomeTabState extends State<HomeTab> {
   void didUpdateWidget(covariant HomeTab oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedMonth != widget.selectedMonth) {
-      _loadBudgets();
+      BudgetService.instance.loadBudgets(_monthStr);
     }
   }
 
@@ -88,15 +92,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _loadBudgets() async {
-    try {
-      final statuses = await BudgetService.instance.getBudgetStatuses('default_ledger', _monthStr);
-      await BudgetService.instance.checkAndTriggerAlerts('default_ledger', _monthStr);
-      if (mounted) {
-        setState(() {
-          _budgetStatuses = statuses;
-        });
-      }
-    } catch (_) {}
+    await BudgetService.instance.loadBudgets(_monthStr);
   }
 
   Future<void> _loadNotificationCounts() async {
@@ -349,7 +345,7 @@ class _HomeTabState extends State<HomeTab> {
     NotificationCenterSheet.show(
       context,
       selectedLanguage: widget.selectedLanguage,
-      ledgerId: 'default_ledger',
+      ledgerId: TransactionService.instance.currentLedgerId,
       onTransactionsUpdated: () {
         _loadBudgets();
         _loadNotificationCounts();
@@ -651,127 +647,146 @@ class _HomeTabState extends State<HomeTab> {
           const SizedBox(height: 24),
 
           // Budget Overview Widget
-          if (_budgetStatuses.isNotEmpty) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppTranslations.tr(lang, 'budget_overview').toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF706C66),
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BudgetsScreen(ledgerId: 'default_ledger'),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    AppTranslations.tr(lang, 'view_all'),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: HomeTab.darkBeige,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFECE7DB)),
-              ),
-              child: Column(
-                children: _budgetStatuses.take(2).map((s) {
-                  final name = s.budget.categoryId ?? 'Tổng ngân sách tháng';
-                  final pct = s.percent.clamp(0.0, 100.0);
-                  Color barColor = const Color(0xFF4CAF50);
-                  if (s.level == 'exceeded') {
-                    barColor = Colors.red;
-                  } else if (s.level == 'warning') {
-                    barColor = Colors.orange;
-                  }
+          ListenableBuilder(
+            listenable: BudgetService.instance,
+            builder: (context, _) {
+              final budgetStatuses = BudgetService.instance.currentBudgets;
+              if (budgetStatuses.isEmpty) return const SizedBox.shrink();
 
-                  return InkWell(
-                    onTap: () {
-                      BudgetFormSheet.show(
-                        context: context,
-                        ledgerId: 'default_ledger',
-                        currentMonth: _monthStr,
-                        editingBudget: s.budget,
-                        existingBudgets: _budgetStatuses.map((b) => b.budget).toList(),
-                        onSave: (updatedBudget) async {
-                          if (updatedBudget.id == null || updatedBudget.id!.isEmpty) {
-                            await BudgetService.instance.insertBudget(updatedBudget);
-                          } else {
-                            await BudgetService.instance.updateBudget(updatedBudget);
-                          }
-                          _loadBudgets();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppTranslations.tr(lang, 'budget_overview').toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF706C66),
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BudgetsScreen(ledgerId: TransactionService.instance.currentLedgerId),
+                            ),
+                          );
                         },
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  name,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: HomeTab.darkBeige,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              MoneyText(
-                                amount: s.spent,
-                                prefix: '',
-                                suffix: ' / ${s.limit.toInt()} đ',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: HomeTab.darkBeige,
-                                ),
-                              ),
-                            ],
+                        child: Text(
+                          AppTranslations.tr(lang, 'view_all'),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: HomeTab.darkBeige,
                           ),
-                          const SizedBox(height: 6),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: (pct / 100.0).clamp(0.0, 1.0),
-                              minHeight: 8,
-                              backgroundColor: const Color(0xFFF2EFE6),
-                              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFECE7DB)),
+                    ),
+                    child: Column(
+                      children: budgetStatuses.take(2).map((s) {
+                        final name = s.budget.categoryId ?? 'Tổng ngân sách tháng';
+                        final pct = s.percent.clamp(0.0, 100.0);
+                        Color barColor = const Color(0xFF4CAF50);
+                        if (s.level == 'exceeded') {
+                          barColor = Colors.red;
+                        } else if (s.level == 'warning') {
+                          barColor = Colors.orange;
+                        }
+
+                        return InkWell(
+                          onTap: () {
+                            BudgetFormSheet.show(
+                              context: context,
+                              ledgerId: TransactionService.instance.currentLedgerId,
+                              currentMonth: _monthStr,
+                              editingBudget: s.budget,
+                              existingBudgets: budgetStatuses.map((b) => b.budget).toList(),
+                              onSave: (updatedBudget) async {
+                                try {
+                                  if (updatedBudget.id == null || updatedBudget.id!.isEmpty) {
+                                    await BudgetService.instance.insertBudget(updatedBudget);
+                                  } else {
+                                    await BudgetService.instance.updateBudget(updatedBudget);
+                                  }
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Đã cập nhật ngân sách!'), backgroundColor: Colors.green),
+                                    );
+                                  }
+                                } catch (e) {
+                                  debugPrint('Error updating budget: $e');
+                                }
+                              },
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        name,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: HomeTab.darkBeige,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    MoneyText(
+                                      amount: s.spent,
+                                      prefix: '',
+                                      suffix: ' / ${s.limit.toInt()} đ',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: HomeTab.darkBeige,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: (pct / 100.0).clamp(0.0, 1.0),
+                                    minHeight: 8,
+                                    backgroundColor: const Color(0xFFF2EFE6),
+                                    valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              );
+            },
+          ),
 
           // Recent Transactions Section Header
           Row(

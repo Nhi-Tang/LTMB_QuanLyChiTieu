@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/export_service.dart';
 import '../../backend/services/sync_service.dart';
 import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
+import '../../backend/services/ledger_repository.dart';
 import '../../core/widgets/settings_tile.dart';
 import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
@@ -43,8 +43,6 @@ class ProfileTab extends StatefulWidget {
 
 class _ProfileTabState extends State<ProfileTab> {
   // Profile Settings state
-  String _selectedLedger = 'Sổ cá nhân 1';
-  final List<String> _ledgers = ['Sổ cá nhân 1'];
   bool _dailyReminderEnabled = true;
 
   bool _isSyncing = false;
@@ -64,29 +62,31 @@ class _ProfileTabState extends State<ProfileTab> {
     _loadLedgers();
   }
 
-  Future<void> _loadLedgers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final uid = widget.currentUser.uid ?? 'default';
-    final list = prefs.getStringList('mousey_user_ledgers_$uid') ?? ['Sổ cá nhân 1'];
-    final selected = prefs.getString('mousey_selected_ledger_$uid') ?? list.first;
+  List<Map<String, dynamic>> _userLedgers = [];
+  String _activeLedgerId = '';
+  String _activeLedgerName = 'Sổ cá nhân 1';
 
-    final targetSelected = list.contains(selected) ? selected : list.first;
-    TransactionService.instance.setCurrentLedger(targetSelected);
+  Future<void> _loadLedgers() async {
+    final uid = widget.currentUser.uid ?? 'default';
+    await TransactionService.instance.initActiveLedger(uid);
+    final ledgersList = await DatabaseHelper.instance.getLedgers(uid: uid);
+    final currentId = TransactionService.instance.currentLedgerId;
+
+    String currentName = 'Sổ cá nhân 1';
+    for (var l in ledgersList) {
+      if (l['id'] == currentId) {
+        currentName = l['name'] as String? ?? 'Sổ cá nhân 1';
+        break;
+      }
+    }
 
     if (mounted) {
       setState(() {
-        _ledgers.clear();
-        _ledgers.addAll(list);
-        _selectedLedger = targetSelected;
+        _userLedgers = ledgersList;
+        _activeLedgerId = currentId;
+        _activeLedgerName = currentName;
       });
     }
-  }
-
-  Future<void> _saveLedgers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final uid = widget.currentUser.uid ?? 'default';
-    await prefs.setStringList('mousey_user_ledgers_$uid', _ledgers);
-    await prefs.setString('mousey_selected_ledger_$uid', _selectedLedger);
   }
 
   Future<void> _loadPendingCount() async {
@@ -468,88 +468,114 @@ class _ProfileTabState extends State<ProfileTab> {
 
   void _showAddNewLedgerDialog() {
     final nameController = TextEditingController();
+    bool isCreating = false;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.menu_book_rounded, color: darkBeige),
-            SizedBox(width: 8),
-            Text('Thêm sổ sách mới', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Nhập tên sổ sách mới để quản lý chi tiêu riêng biệt:', style: TextStyle(fontSize: 13, color: Colors.grey)),
-            const SizedBox(height: 12),
-            TextField(
-              controller: nameController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'VD: Sổ du lịch, Sổ kinh doanh...',
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Row(
+              children: [
+                Icon(Icons.menu_book_rounded, color: darkBeige),
+                SizedBox(width: 8),
+                Text('Thêm sổ sách mới', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Nhập tên sổ sách mới để quản lý chi tiêu riêng biệt:', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  enabled: !isCreating,
+                  maxLength: 40,
+                  decoration: InputDecoration(
+                    hintText: 'VD: Sổ du lịch, Sổ kinh doanh...',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isCreating ? null : () => Navigator.pop(ctx),
+                child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: accentBeige,
-              foregroundColor: darkBeige,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('Vui lòng nhập tên sổ sách!'), backgroundColor: Colors.orange),
-                );
-                return;
-              }
-              if (_ledgers.contains(name)) {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('Sổ sách tên này đã tồn tại!'), backgroundColor: Colors.orange),
-                );
-                return;
-              }
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentBeige,
+                  foregroundColor: darkBeige,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: isCreating
+                    ? null
+                    : () async {
+                        final name = nameController.text.trim();
+                        if (name.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Vui lòng nhập tên sổ sách!'), backgroundColor: Colors.orange),
+                          );
+                          return;
+                        }
 
-              setState(() {
-                _ledgers.add(name);
-                _selectedLedger = name;
-              });
-              TransactionService.instance.setCurrentLedger(name);
-              await _saveLedgers();
+                        setDialogState(() => isCreating = true);
 
-              if (!ctx.mounted) return;
-              Navigator.pop(ctx);
+                        try {
+                          final uid = widget.currentUser.uid ?? 'default';
+                          await LedgerRepository.instance.createLedger(name: name, uid: uid);
+                          await _loadLedgers(); // Cập nhật lại UI list
 
-              if (!mounted) return;
-              showAppAlertDialog(
-                context: context,
-                title: 'Thành công',
-                message: 'Đã tạo sổ sách "$name" thành công!',
-                isSuccess: true,
-              );
-            },
-            child: const Text('Tạo sổ mới', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
+                          if (!ctx.mounted) return;
+                          Navigator.pop(ctx); // Đóng dialog
+
+                          if (!mounted) return;
+                          showAppAlertDialog(
+                            context: context,
+                            title: 'Thành công',
+                            message: 'Đã tạo sổ sách "$name" thành công!',
+                            isSuccess: true,
+                          );
+                        } catch (e) {
+                          debugPrint('Error creating ledger: $e');
+                          setDialogState(() => isCreating = false);
+                          
+                          if (e.toString().contains('Giới hạn gói Free')) {
+                            if (!ctx.mounted) return;
+                            Navigator.pop(ctx); // Đóng dialog nhập tên sổ
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+                            );
+                          }
+                        }
+                      },
+                child: isCreating
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: darkBeige))
+                    : const Text('Tạo sổ mới', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   void _showLedgerPickerSheet() {
     final lang = widget.selectedLanguage;
+    final uid = widget.currentUser.uid ?? 'default';
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -578,48 +604,69 @@ class _ProfileTabState extends State<ProfileTab> {
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
-                    ..._ledgers.map((ledger) {
-                      final isSel = _selectedLedger == ledger;
+                    ..._userLedgers.map((lMap) {
+                      final id = lMap['id'] as String;
+                      final name = lMap['name'] as String;
+                      final isSel = _activeLedgerId == id;
+
                       return ListTile(
                         leading: const Icon(Icons.menu_book_rounded, color: accentBeige),
                         title: Text(
-                          AppTranslations.trLedger(lang, ledger),
+                          name,
                           style: const TextStyle(fontWeight: FontWeight.w600),
                           overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: isSel ? Text(AppTranslations.tr(lang, 'in_use'), style: const TextStyle(color: accentBeige, fontSize: 12, fontWeight: FontWeight.bold)) : null,
                         trailing: isSel ? const Icon(Icons.check_circle, color: accentBeige) : null,
-                        onTap: () {
-                          setState(() => _selectedLedger = ledger);
-                          TransactionService.instance.setCurrentLedger(ledger);
+                        onTap: () async {
+                          await TransactionService.instance.setCurrentLedgerId(id, uid: uid);
+                          await _loadLedgers();
+                          if (!ctx.mounted) return;
                           Navigator.pop(ctx);
+                          if (!mounted) return;
                           showAppAlertDialog(
                             context: context,
                             title: AppTranslations.tr(lang, 'ledger_book'),
-                            message: '${AppTranslations.tr(lang, 'ledger_book')}: ${AppTranslations.trLedger(lang, ledger)}',
+                            message: '${AppTranslations.tr(lang, 'ledger_book')}: $name',
                             isSuccess: true,
                           );
                         },
                       );
                     }),
                     const Divider(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryBeige,
-                          foregroundColor: darkBeige,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        icon: const Icon(Icons.add_rounded),
-                        label: Text(AppTranslations.tr(lang, 'add_new_ledger'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _showAddNewLedgerDialog();
-                        },
-                      ),
+                    ListenableBuilder(
+                      listenable: ProService.instance,
+                      builder: (context, _) {
+                        final isProUser = ProService.instance.isPro || widget.currentUser.isAdmin;
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryBeige,
+                              foregroundColor: darkBeige,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            icon: const Icon(Icons.add_rounded),
+                            label: Text(
+                              isProUser ? 'Thêm sổ mới' : 'Thêm sổ mới (Nâng cấp PRO)',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              if (isProUser) {
+                                _showAddNewLedgerDialog();
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -635,7 +682,7 @@ class _ProfileTabState extends State<ProfileTab> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const LinkedCategoriesScreen(ledgerId: 'default_ledger'),
+        builder: (context) => LinkedCategoriesScreen(ledgerId: TransactionService.instance.currentLedgerId),
       ),
     );
   }
@@ -1132,7 +1179,7 @@ class _ProfileTabState extends State<ProfileTab> {
               SettingsTile(
                 leading: const Icon(Icons.menu_book_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'ledger_book'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
-                subtitle: Text(AppTranslations.trLedger(lang, _selectedLedger), style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                subtitle: Text(_activeLedgerName, style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showLedgerPickerSheet,
               ),
@@ -1279,6 +1326,34 @@ class _ProfileTabState extends State<ProfileTab> {
                 leading: const Icon(Icons.info_outline_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: const Text('v1.0.0 (Pro Ready)', style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // GROUP: ĐĂNG XUẤT TÀI KHOẢN
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'logout').toUpperCase()),
+          const SizedBox(height: 8),
+          SettingsTileGroup(
+            children: [
+              SettingsTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                ),
+                title: Text(
+                  AppTranslations.tr(lang, 'logout'),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: const Text('Đăng xuất tài khoản khỏi thiết bị này', style: TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: widget.onLogout,
               ),
             ],
           ),

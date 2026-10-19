@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../backend/database/db_helper.dart';
 import '../../backend/models/budget_model.dart';
 import '../../backend/models/category_model.dart';
 import '../../backend/services/category_repository.dart';
@@ -74,38 +75,74 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
   }
 
   Future<void> _loadCategories() async {
-    final categories = await CategoryRepository.instance.getCategoriesForLedger(widget.ledgerId, 'expense');
-    
-    // Các danh mục đã có ngân sách trong tháng này (ngoại trừ danh mục của editingBudget hiện tại)
-    final existingCategoriesForMonth = widget.existingBudgets
-        .where((b) => b.month == _month && b.id != widget.editingBudget?.id && b.categoryId != null)
-        .map((b) => b.categoryId)
-        .toSet();
+    try {
+      final categories = await CategoryRepository.instance.getCategoriesForLedger(widget.ledgerId, 'expense');
 
-    if (mounted) {
-      setState(() {
-        _availableCategories = categories.where((c) => !existingCategoriesForMonth.contains(c.name)).toList();
-        // Nếu đang sửa và danh mục hiện tại chưa có trong _availableCategories thì chèn vào
-        if (widget.editingBudget?.categoryId != null) {
-          final currentCatName = widget.editingBudget!.categoryId!;
-          if (!_availableCategories.any((c) => c.name == currentCatName)) {
-            _availableCategories.insert(
-              0,
-              CategoryModel(
-                name: currentCatName,
-                iconKey: 'category_rounded',
+      final existingCategoriesForMonth = widget.existingBudgets
+          .where((b) => b.month == _month && b.id != widget.editingBudget?.id && b.categoryId != null)
+          .map((b) => b.categoryId)
+          .toSet();
+
+      final filtered = categories.where((c) => !existingCategoriesForMonth.contains(c.name)).toList();
+
+      final fallbackList = DatabaseHelper.defaultExpenseCategories
+          .map((c) => CategoryModel(
+                name: c['name']!,
+                iconKey: c['iconKey']!,
                 type: 'expense',
                 sortOrder: 0,
-                isDefault: false,
+                isDefault: true,
                 isArchived: false,
                 createdAt: '',
                 updatedAt: '',
-              ),
-            );
+              ))
+          .where((c) => !existingCategoriesForMonth.contains(c.name))
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _availableCategories = filtered.isNotEmpty ? filtered : fallbackList;
+
+          if (widget.editingBudget?.categoryId != null) {
+            final currentCatName = widget.editingBudget!.categoryId!;
+            if (!_availableCategories.any((c) => c.name == currentCatName)) {
+              _availableCategories.insert(
+                0,
+                CategoryModel(
+                  name: currentCatName,
+                  iconKey: 'category_rounded',
+                  type: 'expense',
+                  sortOrder: 0,
+                  isDefault: false,
+                  isArchived: false,
+                  createdAt: '',
+                  updatedAt: '',
+                ),
+              );
+            }
           }
-        }
-        _isLoadingCategories = false;
-      });
+          _isLoadingCategories = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading categories in BudgetFormSheet: $e');
+      if (mounted) {
+        setState(() {
+          _availableCategories = DatabaseHelper.defaultExpenseCategories
+              .map((c) => CategoryModel(
+                    name: c['name']!,
+                    iconKey: c['iconKey']!,
+                    type: 'expense',
+                    sortOrder: 0,
+                    isDefault: true,
+                    isArchived: false,
+                    createdAt: '',
+                    updatedAt: '',
+                  ))
+              .toList();
+          _isLoadingCategories = false;
+        });
+      }
     }
   }
 
@@ -115,7 +152,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     final amount = parseMoney(_amountController.text).toDouble();
@@ -137,8 +174,8 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
       updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
 
-    widget.onSave(budget);
     Navigator.pop(context);
+    await widget.onSave(budget);
   }
 
   @override
@@ -150,12 +187,12 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
       (b) => b.month == _month && b.id != widget.editingBudget?.id && b.categoryId == null,
     );
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFF7EB),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    return Material(
+      color: const Color(0xFFFFF7EB),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Form(
@@ -395,6 +432,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
           ),
         ),
       ),
+    ),
     );
   }
 }

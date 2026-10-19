@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../backend/database/db_helper.dart';
 import '../../../backend/models/category_model.dart';
 import '../../../backend/services/category_repository.dart';
 import 'mousey_colors.dart';
@@ -34,7 +35,7 @@ class _CategoryGridState extends State<CategoryGrid> {
   @override
   void didUpdateWidget(covariant CategoryGrid oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isExpense != widget.isExpense) {
+    if (oldWidget.isExpense != widget.isExpense || oldWidget.ledgerId != widget.ledgerId) {
       _loadCategories();
     }
   }
@@ -73,21 +74,31 @@ class _CategoryGridState extends State<CategoryGrid> {
       );
     }
 
+    final defaultExpenseModels = DatabaseHelper.defaultExpenseCategories.map((c) => CategoryModel(
+      name: c['name']!,
+      iconKey: c['iconKey']!,
+      type: 'expense',
+      sortOrder: 0,
+      isDefault: true,
+      isArchived: false,
+      createdAt: '',
+      updatedAt: '',
+    )).toList();
+
+    final defaultIncomeModels = DatabaseHelper.defaultIncomeCategories.map((c) => CategoryModel(
+      name: c['name']!,
+      iconKey: c['iconKey']!,
+      type: 'income',
+      sortOrder: 0,
+      isDefault: true,
+      isArchived: false,
+      createdAt: '',
+      updatedAt: '',
+    )).toList();
+
     final displayCategories = _categories.isNotEmpty
         ? _categories
-        : (widget.isExpense
-            ? [
-                CategoryModel(name: 'Ăn uống', iconKey: 'fastfood_rounded', type: 'expense', sortOrder: 0, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-                CategoryModel(name: 'Hóa đơn', iconKey: 'receipt_rounded', type: 'expense', sortOrder: 1, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-                CategoryModel(name: 'Di chuyển', iconKey: 'directions_bus_rounded', type: 'expense', sortOrder: 2, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-                CategoryModel(name: 'Mua sắm', iconKey: 'shopping_bag_rounded', type: 'expense', sortOrder: 3, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-                CategoryModel(name: 'Khác', iconKey: 'category_rounded', type: 'expense', sortOrder: 4, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-              ]
-            : [
-                CategoryModel(name: 'Lương', iconKey: 'account_balance_wallet_rounded', type: 'income', sortOrder: 0, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-                CategoryModel(name: 'Thưởng', iconKey: 'card_giftcard_rounded', type: 'income', sortOrder: 1, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-                CategoryModel(name: 'Khác', iconKey: 'category_rounded', type: 'income', sortOrder: 2, isDefault: true, isArchived: false, createdAt: '', updatedAt: ''),
-              ]);
+        : (widget.isExpense ? defaultExpenseModels : defaultIncomeModels);
 
     return Expanded(
       child: Column(
