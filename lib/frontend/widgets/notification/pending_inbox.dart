@@ -30,6 +30,9 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
   List<CategoryModel> _incomeCategories = [];
   bool _isLoading = true;
 
+  final Map<String, String> _typeOverrides = {}; // id -> 'expense' | 'income'
+  final Map<String, String> _categoryOverrides = {}; // id -> category name
+
   @override
   void initState() {
     super.initState();
@@ -38,15 +41,44 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
+    final uid = DatabaseHelper.instance.currentUid;
+    if (uid != null && uid.isNotEmpty) {
+      try {
+        await DatabaseHelper.instance.ensureDefaultCategories(uid);
+      } catch (_) {}
+    }
+    
     final items = await DatabaseHelper.instance.getPendingTransactions(status: 'pending');
     final expCats = await CategoryRepository.instance.getCategories(type: 'expense');
     final incCats = await CategoryRepository.instance.getCategories(type: 'income');
 
+    final finalExpCats = expCats.isNotEmpty ? expCats : DatabaseHelper.defaultExpenseCategories.map((c) => CategoryModel(
+      name: c['name']!,
+      iconKey: c['iconKey']!,
+      type: 'expense',
+      sortOrder: 0,
+      isDefault: true,
+      isArchived: false,
+      createdAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toIso8601String(),
+    )).toList();
+
+    final finalIncCats = incCats.isNotEmpty ? incCats : DatabaseHelper.defaultIncomeCategories.map((c) => CategoryModel(
+      name: c['name']!,
+      iconKey: c['iconKey']!,
+      type: 'income',
+      sortOrder: 0,
+      isDefault: true,
+      isArchived: false,
+      createdAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toIso8601String(),
+    )).toList();
+
     if (mounted) {
       setState(() {
         _pendingItems = items;
-        _expenseCategories = expCats;
-        _incomeCategories = incCats;
+        _expenseCategories = finalExpCats;
+        _incomeCategories = finalIncCats;
         _isLoading = false;
       });
     }
@@ -97,9 +129,9 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     }
   }
 
-  void _showCategoryPicker(PendingTransactionModel item, Function(String) onSelect) {
-    // Luôn chọn mảng _expenseCategories nếu là 'expense', ngược lại 'income'
-    final List<CategoryModel> cats = item.type == 'expense' ? _expenseCategories : _incomeCategories;
+  void _showCategoryPicker(PendingTransactionModel item, bool isExpense, Function(String) onSelect) {
+    // Chọn mảng danh mục dựa theo loại hiện tại (isExpense)
+    final List<CategoryModel> cats = isExpense ? _expenseCategories : _incomeCategories;
 
     // Bổ sung tự động danh mục 'Chuyển tiền' (Không có trong Expense/Income thường)
     final transferCat = CategoryModel(
@@ -310,13 +342,14 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
   }
 
   Widget _buildPendingCard(PendingTransactionModel item) {
-    final isExpense = item.type == 'expense';
-    final isUnknown = item.type == 'unknown';
+    final typeOverride = _typeOverrides[item.id] ?? item.type;
+    final isExpense = typeOverride == 'expense';
+    final isUnknown = typeOverride == 'unknown';
     final signText = isUnknown ? '' : (isExpense ? '-' : '+');
     final amountColor = isUnknown ? Colors.blue.shade700 : (isExpense ? Colors.red.shade700 : Colors.green.shade700);
 
     final amountText = '$signText${item.amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ';
-    final currentCat = item.suggestedCategoryId ?? (isExpense ? 'Khác' : 'Khác');
+    final currentCat = _categoryOverrides[item.id] ?? item.suggestedCategoryId ?? (isExpense ? 'Khác' : 'Khác');
 
     Color confidenceColor;
     String confidenceLabel;
@@ -444,7 +477,12 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                                 title: const Text('Khoản Chi tiêu'),
                                 onTap: () {
                                   Navigator.pop(ctx);
-                                  _confirmItem(item, 'Khác', isExpenseOverride: true);
+                                  setState(() {
+                                    _typeOverrides[item.id] = 'expense';
+                                    if (_categoryOverrides[item.id] == null || _categoryOverrides[item.id] == 'Chuyển tiền') {
+                                      _categoryOverrides[item.id] = 'Khác';
+                                    }
+                                  });
                                 },
                               ),
                               ListTile(
@@ -452,7 +490,10 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                                 title: const Text('Khoản Thu nhập'),
                                 onTap: () {
                                   Navigator.pop(ctx);
-                                  _confirmItem(item, 'Khác', isExpenseOverride: false);
+                                  setState(() {
+                                    _typeOverrides[item.id] = 'income';
+                                    _categoryOverrides[item.id] = 'Khác';
+                                  });
                                 },
                               ),
                               ListTile(
@@ -460,7 +501,10 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                                 title: const Text('Chuyển khoản (Không tính vào tổng)'),
                                 onTap: () {
                                   Navigator.pop(ctx);
-                                  _confirmItem(item, 'Chuyển tiền', isExpenseOverride: true);
+                                  setState(() {
+                                    _typeOverrides[item.id] = 'expense';
+                                    _categoryOverrides[item.id] = 'Chuyển tiền';
+                                  });
                                 },
                               ),
                             ],
@@ -491,8 +535,10 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     ),
                   ),
                 InkWell(
-                  onTap: () => _showCategoryPicker(item, (newCat) {
-                    _confirmItem(item, newCat);
+                  onTap: () => _showCategoryPicker(item, isExpense, (newCat) {
+                    setState(() {
+                      _categoryOverrides[item.id] = newCat;
+                    });
                   }),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
@@ -562,7 +608,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  onPressed: () => _confirmItem(item, currentCat),
+                  onPressed: () => _confirmItem(item, currentCat, isExpenseOverride: isExpense),
                   child: const Text(
                     'Xác nhận',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
