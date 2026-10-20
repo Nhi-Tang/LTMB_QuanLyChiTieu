@@ -39,7 +39,8 @@ class BankNotificationService : NotificationListenerService() {
             "mobile.acb.com.vn",
             "com.vnpay.vpbankonline",
             "vn.com.msb.smartbooking",
-            "com.mservice.momotransfer"   // MoMo (đã xác nhận bằng log)
+            "com.mservice.momotransfer",   // MoMo
+            "vn.com.vng.zalopay"           // ZaloPay
         ).map { it.lowercase() }.toSet()
 
         fun isWhitelisted(packageName: String): Boolean =
@@ -60,7 +61,11 @@ class BankNotificationService : NotificationListenerService() {
         }
 
         fun maskSensitiveNumbers(text: String): String {
-            return text.replace(Regex("(?<!\\d)\\d{8,19}(?!\\d)"), "••••")
+            // Che các chuỗi số điện thoại / tài khoản từ 8 chữ số trở lên
+            var masked = text.replace(Regex("(?<!\\d)\\d{8,19}(?!\\d)"), "••••")
+            // Che luôn họ tên người trong giao dịch nếu in hoa 2 từ trở lên
+            masked = masked.replace(Regex("\\b[A-Z][A-Z\\s]{2,}[A-Z]\\b"), "***")
+            return masked
         }
     }
 

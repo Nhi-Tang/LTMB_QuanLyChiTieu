@@ -149,6 +149,66 @@ class CategorySuggestionService {
       return null;
     }
 
+    // Logic ghép giao dịch chuyển khoản nội bộ (Ví dụ MB -> ZaloPay)
+    // Nếu vừa có khoản chi và khoản thu cùng số tiền trong vòng 5 phút, gộp lại thành 1 khoản Chuyển Tiền
+    if (!isTestMode) {
+      final recentPendings = await DatabaseHelper.instance.getPendingTransactions(uid: uid);
+      final cutoff = DateTime.now().subtract(const Duration(minutes: 5));
+
+      final matchedList = recentPendings.where((p) {
+        if (p.id == pendingItem.id) return false;
+        if (p.amount != pendingItem.amount) return false;
+        if (p.type == pendingItem.type) return false; // Cần 1 thu 1 chi
+        
+        final pTime = DateTime.tryParse(p.occurredAt);
+        if (pTime == null) return false;
+        if (pTime.isBefore(cutoff)) return false;
+        
+        return true;
+      }).toList();
+
+      if (matchedList.isNotEmpty) {
+        final pair = matchedList.first;
+
+        // Xóa 2 bản nháp cũ
+        await DatabaseHelper.instance.deletePendingTransaction(pendingItem.id);
+        await DatabaseHelper.instance.deletePendingTransaction(pair.id);
+
+        // Xác định chiều từ đâu sang đâu
+        final sourceBank = pendingItem.type == 'expense' ? pendingItem.bankName : pair.bankName;
+        final targetBank = pendingItem.type == 'income' ? pendingItem.bankName : pair.bankName;
+
+        final transferItem = PendingTransactionModel(
+          id: const Uuid().v4(),
+          uid: uid,
+          type: 'expense', // Mặc định là chi tiêu nhưng sẽ đánh dấu là chuyển tiền ở suggest
+          amount: pendingItem.amount,
+          bankName: sourceBank,
+          accountLast4: '',
+          description: '$sourceBank → $targetBank',
+          occurredAt: now,
+          fingerprint: 'transfer_${pendingItem.id}_${pair.id}',
+          status: 'pending',
+          suggestedCategoryId: 'Chuyển tiền',
+          suggestionConfidence: 'high',
+          createdAt: now,
+        );
+
+        await DatabaseHelper.instance.insertPendingTransaction(transferItem, uid: uid);
+
+        final formattedAmount = formatMoney(transferItem.amount);
+        await InAppNotificationService.instance.add(
+          type: 'pending_tx',
+          title: 'Chuyển khoản nội bộ tự động',
+          body: '$formattedAmount đ · ${transferItem.description}',
+          dedupeKey: 'notif_pending_${transferItem.id}',
+          uid: uid,
+        );
+        
+        return transferItem;
+      }
+    }
+
     // Thêm thông báo nội bộ vào Trung tâm thông báo
     final formattedAmount = formatMoney(parsed.amount);
     final signText = parsed.type == 'expense' ? '-' : '+';

@@ -1,6 +1,11 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../../../../core/utils/account_masker.dart';
+import 'bank_parser.dart';
+import 'generic_bank_parser.dart';
+import 'momo_parser.dart';
+import 'zalopay_parser.dart';
+import 'mb_bank_parser.dart';
 
 class ParsedBankNotification {
   final String bankName;
@@ -53,32 +58,33 @@ class BankNotificationParser {
     return false;
   }
 
-  static String detectBankName(String packageName, String text) {
+  static BankParser _getParser(String packageName, String title, String text) {
     final pkg = packageName.toLowerCase();
     final txt = text.toLowerCase();
+    
+    if (pkg == 'com.mservice.momopay' || pkg == 'com.mservice.momotransfer') {
+      return MomoParser();
+    } else if (pkg == 'vn.com.vng.zalopay' || pkg == 'vn.zalopay.pay') {
+      return ZaloPayParser();
+    } else if (pkg.contains('mbmobile') || pkg.contains('mbbank') || txt.contains('mb bank') || txt.contains('mb:')) {
+      return MBBankParser();
+    } else if (pkg.contains('techcombank') || pkg.contains('tcb') || txt.contains('techcombank')) {
+      return GenericBankParser('Techcombank');
+    } else if (pkg.contains('vcb') || pkg.contains('vietcombank') || txt.contains('vietcombank')) {
+      return GenericBankParser('Vietcombank');
+    } else if (pkg.contains('bidv') || txt.contains('bidv')) {
+      return GenericBankParser('BIDV');
+    } else if (pkg.contains('vietinbank') || txt.contains('vietinbank')) {
+      return GenericBankParser('VietinBank');
+    } else if (pkg.contains('tpb') || pkg.contains('tpbank') || txt.contains('tpbank')) {
+      return GenericBankParser('TPBank');
+    } else if (pkg.contains('acb') || txt.contains('acb')) {
+      return GenericBankParser('ACB');
+    } else if (pkg.contains('vpbank') || txt.contains('vpbank')) {
+      return GenericBankParser('VPBank');
+    }
 
-    if (pkg.contains('techcombank') || pkg.contains('tcb') || txt.contains('techcombank') || txt.contains('tcb')) {
-      return 'Techcombank';
-    }
-    if (pkg.contains('vcb') || pkg.contains('vietcombank') || txt.contains('vietcombank') || txt.contains('vcb')) {
-      return 'Vietcombank';
-    }
-    if (pkg.contains('mbmobile') ||
-        pkg.contains('mbbank') ||
-        txt.contains('mbbank') ||
-        txt.contains('mb bank') ||
-        txt.contains('mb:') ||
-        txt.contains('mb ')) {
-      return 'MB Bank';
-    }
-    if (pkg.contains('bidv') || txt.contains('bidv')) return 'BIDV';
-    if (pkg.contains('vietinbank') || txt.contains('vietinbank')) return 'VietinBank';
-    if (pkg.contains('tpb') || pkg.contains('tpbank') || txt.contains('tpbank') || txt.contains('tpb')) return 'TPBank';
-    if (pkg.contains('acb') || txt.contains('acb')) return 'ACB';
-    if (pkg.contains('vpbank') || txt.contains('vpbank')) return 'VPBank';
-    if (pkg.contains('mservice') || pkg.contains('momo') || txt.contains('momo')) return 'MoMo';
-
-    return 'Ngân hàng';
+    return GenericBankParser('Ngân hàng');
   }
 
   static String detectType(String text) {
@@ -192,7 +198,23 @@ class BankNotificationParser {
   static String cleanDescription(String title, String text, String bankName, String accountLast4) {
     String extracted = '';
 
-    // Tìm từ khóa chỉ phần nội dung chuyển khoản: Ref:, ND:, DEN:, Noi dung:, Nội dung:, Mua do an...
+    // Lọc bỏ phần "lời nhắn:" hay "nội dung:" do người dùng tự nhập để tránh bị nhiễu
+    String cleanCoreText = text;
+    final userMessageMarkers = [
+      'kèm lời nhắn:', 'kem loi nhan:',
+      'nội dung:', 'noi dung:', 'nd:', 'ref:',
+      'tin nhắn:', 'tin nhan:',
+      'với nội dung', 'voi noi dung'
+    ];
+    for (var marker in userMessageMarkers) {
+      final idx = cleanCoreText.toLowerCase().indexOf(marker);
+      if (idx != -1) {
+        cleanCoreText = cleanCoreText.substring(0, idx);
+        break;
+      }
+    }
+
+    // Tìm từ khóa chỉ phần nội dung chuyển khoản
     final keywords = [
       RegExp(r'(?:ref|nd|noi dung|nội dung|den|đến|mô tả|mo ta|cho|từ|tu)\s*[:-]\s*(.*)', caseSensitive: false),
       RegExp(r'thanh toán\s+(.*)', caseSensitive: false),
@@ -266,33 +288,7 @@ class BankNotificationParser {
       return null;
     }
 
-    final amount = parseAmount(text);
-    if (amount <= 0) {
-      return null;
-    }
-
-    final bankName = detectBankName(packageName, text);
-    final type = detectType(text);
-    final accountLast4 = parseAccountLast4(text);
-    final description = cleanDescription(title, text, bankName, accountLast4);
-    final occurredAt = timestamp ?? DateTime.now();
-
-    final fingerprint = generateFingerprint(
-      bankName: bankName,
-      amount: amount,
-      type: type,
-      timestamp: occurredAt,
-      accountLast4: accountLast4,
-    );
-
-    return ParsedBankNotification(
-      bankName: bankName,
-      type: type,
-      amount: amount,
-      accountLast4: accountLast4,
-      description: description,
-      occurredAt: occurredAt,
-      fingerprint: fingerprint,
-    );
+    final parser = _getParser(packageName, title, text);
+    return parser.parseNotification(title: title, text: text, timestamp: timestamp);
   }
 }

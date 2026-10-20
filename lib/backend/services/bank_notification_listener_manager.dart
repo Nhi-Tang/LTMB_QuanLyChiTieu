@@ -30,7 +30,10 @@ class BankNotificationListenerManager {
 
           final packageName = event['packageName']?.toString() ?? '';
           final title = event['title']?.toString() ?? '';
-          final text = event['text']?.toString() ?? '';
+          final rawText = event['text']?.toString() ?? '';
+          final bigText = event['bigText']?.toString() ?? '';
+          final text = bigText.length > rawText.length ? bigText : rawText;
+
           final timestampMs = event['timestamp'] as num?;
           final timestamp = timestampMs != null
               ? DateTime.fromMillisecondsSinceEpoch(timestampMs.toInt())

@@ -269,7 +269,11 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
 
   Widget _buildPendingCard(PendingTransactionModel item) {
     final isExpense = item.type == 'expense';
-    final amountText = '${isExpense ? '-' : '+'}${item.amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ';
+    final isUnknown = item.type == 'unknown';
+    final signText = isUnknown ? '' : (isExpense ? '-' : '+');
+    final amountColor = isUnknown ? Colors.blue.shade700 : (isExpense ? Colors.red.shade700 : Colors.green.shade700);
+
+    final amountText = '$signText${item.amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ';
     final currentCat = item.suggestedCategoryId ?? (isExpense ? 'Khác' : 'Khác');
 
     Color confidenceColor;
@@ -371,7 +375,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isExpense ? Colors.red.shade700 : Colors.green.shade700,
+                    color: amountColor,
                   ),
                 ),
               ],
@@ -381,7 +385,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             // Category selector & Confidence Badge
             Row(
               children: [
-                if (item.bankName == 'MoMo') ...[
+                if (item.bankName == 'MoMo' || item.bankName == 'ZaloPay' || isUnknown) ...[
                   InkWell(
                     onTap: () {
                       showModalBottomSheet(
@@ -408,7 +412,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                               ),
                               ListTile(
                                 leading: const Icon(Icons.swap_horiz, color: Colors.blue),
-                                title: const Text('Chuyển tiền (Không tính vào tổng)'),
+                                title: const Text('Chuyển khoản (Không tính vào tổng)'),
                                 onTap: () {
                                   Navigator.pop(ctx);
                                   _confirmItem(item, 'Chuyển tiền', isExpenseOverride: true);
@@ -431,11 +435,11 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(isExpense ? Icons.arrow_upward : Icons.arrow_downward, size: 14, color: Colors.blue),
+                          Icon(isUnknown ? Icons.help_outline : (isExpense ? Icons.arrow_upward : Icons.arrow_downward), size: 14, color: Colors.blue),
                           const SizedBox(width: 4),
-                          const Text(
-                            'Đổi loại',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
+                          Text(
+                            isUnknown ? 'Xác định loại' : 'Đổi loại',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
                           ),
                           const Icon(Icons.arrow_drop_down, size: 16, color: Colors.blue),
                         ],
