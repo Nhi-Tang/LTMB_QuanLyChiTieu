@@ -58,7 +58,7 @@ class TransactionService extends ChangeNotifier {
     }
   }
 
-  Future<void> confirmPending(String pendingId, {String? categoryId, bool? isExpenseOverride}) async {
+  Future<void> confirmPending(String pendingId, {String? categoryId, String? kindOverride, bool? isExpenseOverride}) async {
     final dbHelper = DatabaseHelper.instance;
     final pendings = await dbHelper.getPendingTransactions(uid: dbHelper.currentUid);
     
@@ -72,9 +72,45 @@ class TransactionService extends ChangeNotifier {
     }
     if (item == null) return;
 
-    final isExpense = isExpenseOverride ?? (item.type == 'expense');
+    final typeOverride = kindOverride ?? item.type;
+    
+    bool isExpense;
+    String finalKind;
+
+    if (typeOverride == 'expense') {
+      isExpense = true;
+      finalKind = 'expense';
+    } else if (typeOverride == 'transfer_out') {
+      isExpense = true;
+      finalKind = 'transfer_out';
+    } else if (typeOverride == 'transfer_internal') {
+      isExpense = item.type == 'expense' || item.type == 'transfer_out';
+      finalKind = 'transfer_internal';
+    } else if (typeOverride == 'income') {
+      isExpense = false;
+      finalKind = 'income';
+    } else if (typeOverride == 'received') {
+      isExpense = false;
+      finalKind = 'received';
+    } else {
+      isExpense = isExpenseOverride ?? (item.type == 'expense' || item.type == 'transfer_out');
+      finalKind = isExpense ? 'expense' : 'income';
+    }
+
+    if (isExpenseOverride != null) {
+      isExpense = isExpenseOverride;
+      if (isExpense && finalKind != 'transfer_internal' && finalKind != 'transfer_out') {
+        finalKind = 'expense';
+      } else if (!isExpense && finalKind != 'income' && finalKind != 'received') {
+        finalKind = 'income';
+      }
+    }
+
     final defaultCat = isExpense ? 'Khác' : 'Khác';
     final category = categoryId ?? item.suggestedCategoryId ?? defaultCat;
+    if (category == 'Chuyển tiền') {
+      finalKind = 'transfer_internal';
+    }
 
     final realTx = TransactionItem(
       id: const Uuid().v4(),
@@ -85,6 +121,7 @@ class TransactionService extends ChangeNotifier {
       date: DateTime.tryParse(item.occurredAt) ?? DateTime.now(),
       uid: item.uid,
       ledgerId: _currentLedgerId, // Đảm bảo lấy ID sổ lưu bền đang active
+      kind: finalKind,
     );
 
     // Mở đúng DB và ghi giao dịch

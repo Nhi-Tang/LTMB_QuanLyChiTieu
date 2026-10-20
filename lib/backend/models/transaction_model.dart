@@ -10,6 +10,8 @@ class TransactionItem {
   final bool isSynced;
   final String? uid;
   final String? ledgerId;
+  final String kind; // 'income', 'received', 'expense', 'transfer_out', 'transfer_internal'
+  final String? transferGroupId;
 
   TransactionItem({
     required this.id,
@@ -23,7 +25,10 @@ class TransactionItem {
     this.isSynced = false,
     this.uid,
     this.ledgerId,
-  }) : updatedAt = updatedAt ?? DateTime.now().millisecondsSinceEpoch;
+    String? kind,
+    this.transferGroupId,
+  }) : kind = kind ?? (isExpense ? (category.toLowerCase().contains('chuyển tiền') ? 'transfer_out' : 'expense') : 'income'),
+       updatedAt = updatedAt ?? DateTime.now().millisecondsSinceEpoch;
 
   Map<String, dynamic> toMap() {
     return {
@@ -38,22 +43,39 @@ class TransactionItem {
       'isSynced': isSynced ? 1 : 0,
       'uid': uid,
       'ledgerId': ledgerId ?? 'Sổ cá nhân 1',
+      'kind': kind,
+      'transferGroupId': transferGroupId,
     };
   }
 
   factory TransactionItem.fromMap(Map<String, dynamic> map) {
+    final isExp = (map['is_expense'] as int? ?? 1) == 1;
+    final cat = map['category'] as String? ?? 'Khác';
+    String defaultKind;
+    if (isExp) {
+      if (cat.toLowerCase().contains('chuyển tiền')) {
+        defaultKind = 'transfer_out';
+      } else {
+        defaultKind = 'expense';
+      }
+    } else {
+      defaultKind = 'income';
+    }
+
     return TransactionItem(
       id: map['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
       title: map['title'] as String? ?? '',
-      category: map['category'] as String? ?? 'Khác',
+      category: cat,
       amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
-      isExpense: (map['is_expense'] as int? ?? 1) == 1,
+      isExpense: isExp,
       date: DateTime.tryParse(map['date'] as String? ?? '') ?? DateTime.now(),
       updatedAt: map['updatedAt'] as int? ?? DateTime.now().millisecondsSinceEpoch,
       isDeleted: (map['isDeleted'] as int? ?? 0) == 1,
       isSynced: (map['isSynced'] as int? ?? 0) == 1,
       uid: map['uid'] as String?,
       ledgerId: map['ledgerId'] as String? ?? 'Sổ cá nhân 1',
+      kind: map['kind'] as String? ?? defaultKind,
+      transferGroupId: map['transferGroupId'] as String?,
     );
   }
 
@@ -69,6 +91,8 @@ class TransactionItem {
     bool? isSynced,
     String? uid,
     String? ledgerId,
+    String? kind,
+    String? transferGroupId,
   }) {
     return TransactionItem(
       id: id ?? this.id,
@@ -82,6 +106,8 @@ class TransactionItem {
       isSynced: isSynced ?? this.isSynced,
       uid: uid ?? this.uid,
       ledgerId: ledgerId ?? this.ledgerId,
+      kind: kind ?? this.kind,
+      transferGroupId: transferGroupId ?? this.transferGroupId,
     );
   }
 }

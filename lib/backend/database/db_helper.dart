@@ -52,7 +52,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 18,
+      version: 19,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -162,7 +162,9 @@ class DatabaseHelper {
         isDeleted INTEGER NOT NULL DEFAULT 0,
         isSynced INTEGER NOT NULL DEFAULT 0,
         uid TEXT,
-        ledgerId TEXT DEFAULT 'Sổ cá nhân 1'
+        ledgerId TEXT DEFAULT 'Sổ cá nhân 1',
+        kind TEXT DEFAULT 'expense',
+        transferGroupId TEXT
       )
     ''');
     try { await db.execute("CREATE INDEX IF NOT EXISTS idx_tx_uid ON transactions(uid);"); } catch (_) {}
@@ -596,6 +598,19 @@ class DatabaseHelper {
       try {
         await db.execute("UPDATE budgets SET isDeleted = 0 WHERE isDeleted IS NULL;");
         await db.execute("UPDATE budgets SET ledgerId = 'Sổ cá nhân 1' WHERE ledgerId IS NULL OR ledgerId = '';");
+      } catch (_) {}
+    }
+    if (oldVersion < 19) {
+      // Migration v19: Thêm cột kind và transferGroupId cho transactions
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN kind TEXT DEFAULT 'expense';");
+      } catch (_) {}
+      try {
+        await db.execute("ALTER TABLE transactions ADD COLUMN transferGroupId TEXT;");
+      } catch (_) {}
+      try {
+        await db.execute("UPDATE transactions SET kind = 'expense' WHERE is_expense = 1 AND (kind IS NULL OR kind = '');");
+        await db.execute("UPDATE transactions SET kind = 'income' WHERE is_expense = 0 AND (kind IS NULL OR kind = '');");
       } catch (_) {}
     }
   }

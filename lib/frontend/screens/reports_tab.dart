@@ -129,8 +129,12 @@ class _ReportsTabState extends State<ReportsTab> {
   // Dynamic Filtering based on selected type (Chi tiêu / Thu nhập) and Category Filter
   List<TransactionItem> get _filteredTransactions {
     return widget.transactions.where((t) {
-      if (_reportTypeIndex == 0 && !t.isExpense) return false;
-      if (_reportTypeIndex == 1 && t.isExpense) return false;
+      if (t.isDeleted) return false;
+      if (_reportTypeIndex == 0) {
+        if (t.kind != 'expense' && t.kind != 'transfer_out') return false;
+      } else {
+        if (t.kind != 'income' && t.kind != 'received') return false;
+      }
       if (_selectedCategoryFilter != 'Tất cả' && t.category != _selectedCategoryFilter) {
         return false;
       }

@@ -4,6 +4,7 @@ import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
 import '../../backend/services/bank_notification_listener_manager.dart';
 import '../../backend/services/transaction_service.dart';
+import '../../backend/services/totals_calculator.dart';
 import '../../core/widgets/notch_tab_bar.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
@@ -88,32 +89,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Calculate totals
-  double get _totalIncome {
-    double sum = 0.0;
-    for (var t in _transactions) {
-      if (!t.isExpense &&
-          t.date.year == _selectedMonth.year &&
-          t.date.month == _selectedMonth.month) {
-        sum += t.amount;
-      }
-    }
-    return sum;
+  List<TransactionItem> get _filteredTransactions {
+    return _transactions.where((t) =>
+      !t.isDeleted &&
+      t.date.year == _selectedMonth.year &&
+      t.date.month == _selectedMonth.month
+    ).toList();
   }
 
-  double get _totalExpense {
-    double sum = 0.0;
-    for (var t in _transactions) {
-      if (t.isExpense &&
-          t.date.year == _selectedMonth.year &&
-          t.date.month == _selectedMonth.month) {
-        sum += t.amount;
-      }
-    }
-    return sum;
-  }
-
-  double get _totalBalance => _totalIncome - _totalExpense;
+  // Calculate totals using TotalsCalculator
+  double get _totalIncome => TotalsCalculator.calculateTotalIncome(_filteredTransactions);
+  double get _totalExpense => TotalsCalculator.calculateTotalExpense(_filteredTransactions);
+  double get _totalBalance => TotalsCalculator.calculateBalance(_transactions);
 
   void _showAddTransactionModal({bool defaultExpense = true, TransactionItem? editingTransaction}) {
     NewTransactionSheet.show(

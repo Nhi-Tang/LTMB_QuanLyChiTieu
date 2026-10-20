@@ -63,4 +63,20 @@ void main() {
     expect(mbResult.description, isNot(contains('NGUYEN VAN A')));
     expect(mbResult.description, contains('***')); // Tên bị che
   });
+
+  test('ZaloPay to MB incoming transfer test', () {
+    const mbIncomeText = 'TK 11xxx005|GD: +5,000VND 20/10/26 15:11 |SD: 325,696VND|TU: ZALOPAY - 99ZP26293M••••|ND: NGUYEN VAN A';
+    
+    final mbResult = BankNotificationParser.parseNotification(
+      packageName: 'com.mbmobile',
+      title: 'MB Bank',
+      text: mbIncomeText,
+    );
+
+    expect(mbResult, isNotNull);
+    expect(mbResult!.bankName, 'MB Bank');
+    expect(mbResult.type, 'income');
+    expect(mbResult.amount, 5000);
+    expect(mbResult.description, contains('ZaloPay → MB Bank'));
+  });
 }

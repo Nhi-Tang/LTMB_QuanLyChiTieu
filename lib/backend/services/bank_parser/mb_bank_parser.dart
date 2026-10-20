@@ -7,24 +7,21 @@ class MBBankParser extends BankParser {
   @override
   String detectType(String title, String text) {
     final upper = text.toUpperCase();
-    if (upper.contains('GD: +') || upper.contains('GD:  +') || upper.contains('GD:+')) {
+    if (upper.contains('GD: +') || upper.contains('GD:  +') || upper.contains('GD:+') || upper.contains('TU:') || upper.contains('TỪ:')) {
       return 'income';
-    } else if (upper.contains('GD: -') || upper.contains('GD:  -') || upper.contains('GD:-')) {
+    } else if (upper.contains('GD: -') || upper.contains('GD:  -') || upper.contains('GD:-') || upper.contains('DEN:') || upper.contains('ĐẾN:')) {
       return 'expense';
     }
     
-    // Nếu rớt ra ngoài định dạng (hiếm) thì kiểm tra chuỗi thường
     return super.detectTypeFallback(text);
   }
 
   @override
   int parseAmount(String title, String text) {
-    // Tách các trường bằng dấu |
     final parts = text.split('|');
     for (var part in parts) {
       final p = part.trim().toUpperCase();
       if (p.startsWith('GD:')) {
-        // Lấy đoạn "GD: -5,000VND 20/10/26 15:11"
         final currencyAmountRegex = RegExp(r'([\d]{1,3}(?:[.,]\d{3})+|\d+)\s*(VND|Đ|D)?', caseSensitive: false);
         final match = currencyAmountRegex.firstMatch(p);
         if (match != null) {
@@ -57,22 +54,42 @@ class MBBankParser extends BankParser {
   @override
   String cleanDescription(String title, String text, String accountLast4) {
     String denStr = '';
+    String tuStr = '';
     String ndStr = '';
 
     final parts = text.split('|');
     for (var part in parts) {
       final p = part.trim();
-      if (p.toUpperCase().startsWith('DEN:')) {
+      final pUp = p.toUpperCase();
+      if (pUp.startsWith('DEN:')) {
         denStr = p.substring(4).trim();
-      } else if (p.toUpperCase().startsWith('ND:')) {
+      } else if (pUp.startsWith('TU:') || pUp.startsWith('TỪ:')) {
+        tuStr = p.substring(p.indexOf(':') + 1).trim();
+      } else if (pUp.startsWith('ND:')) {
         ndStr = p.substring(3).trim();
       }
     }
 
-    // Làm gọn tên đối tác (Ví dụ ZALOPAY - 99ZP...)
+    if (tuStr.isNotEmpty) {
+      tuStr = maskAccountNumbers(tuStr);
+      if (tuStr.toUpperCase().contains('ZALOPAY')) {
+        tuStr = 'ZaloPay';
+      } else if (tuStr.toUpperCase().contains('MOMO')) {
+        tuStr = 'MoMo';
+      } else if (tuStr.toUpperCase().contains('VNPAY')) {
+        tuStr = 'VNPAY';
+      } else if (tuStr.toUpperCase().contains('SHOPEEPAY')) {
+        tuStr = 'ShopeePay';
+      }
+
+      if (tuStr == 'ZaloPay' || tuStr == 'MoMo') {
+        return '$tuStr → MB Bank';
+      }
+      return 'Từ: $tuStr';
+    }
+
     if (denStr.isNotEmpty) {
       denStr = maskAccountNumbers(denStr);
-      // Ánh xạ sang tên ví thân thiện nếu có
       if (denStr.toUpperCase().contains('ZALOPAY')) {
         denStr = 'ZaloPay';
       } else if (denStr.toUpperCase().contains('MOMO')) {
@@ -84,15 +101,12 @@ class MBBankParser extends BankParser {
       }
     }
 
-    // Che tên riêng trong Nội dung (MB Bank hay ghép <HỌ TÊN> người nhận vào giữa)
     if (ndStr.isNotEmpty) {
-      // ND: MBCT NGUYEN VAN A chuyen tien... -> ND: MBCT *** chuyen tien...
       ndStr = ndStr.replaceAll(RegExp(r'\b[A-Z][A-Z\s]{2,}[A-Z]\b'), '***');
     }
 
     String result = '';
     if (denStr.isNotEmpty && ndStr.isNotEmpty) {
-      // Thay đổi mũi tên cho sang trọng nếu là chuyển vào ví
       if (denStr == 'ZaloPay' || denStr == 'MoMo') {
          result = 'MB Bank → $denStr - $ndStr'; 
       } else {

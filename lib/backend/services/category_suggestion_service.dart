@@ -161,6 +161,7 @@ class CategorySuggestionService {
         if (p.id == pendingItem.id) return false;
         if (p.amount != pendingItem.amount) return false;
         if (p.type == pendingItem.type) return false; // Cần 1 thu 1 chi
+        if (p.bankName == pendingItem.bankName) return false; // Không ghép 2 giao dịch cùng một ngân hàng/nguồn
         
         final pTime = DateTime.tryParse(p.occurredAt);
         if (pTime == null) return false;
@@ -172,9 +173,9 @@ class CategorySuggestionService {
       if (matchedList.isNotEmpty) {
         final pair = matchedList.first;
 
-        // Xóa 2 bản nháp cũ
-        await DatabaseHelper.instance.deletePendingTransaction(pendingItem.id);
-        await DatabaseHelper.instance.deletePendingTransaction(pair.id);
+        // Đánh dấu 2 bản nháp gốc là 'merged' và ẩn đi
+        await DatabaseHelper.instance.updatePendingTransactionStatus(pendingItem.id, 'merged');
+        await DatabaseHelper.instance.updatePendingTransactionStatus(pair.id, 'merged');
 
         // Xác định chiều từ đâu sang đâu
         final sourceBank = pendingItem.type == 'expense' ? pendingItem.bankName : pair.bankName;
@@ -183,7 +184,7 @@ class CategorySuggestionService {
         final transferItem = PendingTransactionModel(
           id: const Uuid().v4(),
           uid: uid,
-          type: 'unknown', // Sử dụng cờ unknown để UI cho phép Đổi loại (Thu/Chi/Chuyển tiền)
+          type: 'unknown',
           amount: pendingItem.amount,
           bankName: sourceBank,
           accountLast4: '',
@@ -199,12 +200,21 @@ class CategorySuggestionService {
         await DatabaseHelper.instance.insertPendingTransaction(transferItem, uid: uid);
 
         final formattedAmount = formatMoney(transferItem.amount);
+        final transferTitle = 'Chuyển khoản nội bộ tự động';
+        final transferBody = 'Đã chuyển $formattedAmount đ từ $sourceBank sang $targetBank';
+
         await InAppNotificationService.instance.add(
           type: 'pending_tx',
-          title: 'Chuyển khoản nội bộ tự động',
-          body: '$formattedAmount đ · ${transferItem.description}',
+          title: transferTitle,
+          body: transferBody,
           dedupeKey: 'notif_pending_${transferItem.id}',
           uid: uid,
+        );
+
+        await DailyReminderService.instance.showInstantNotification(
+          title: transferTitle,
+          body: transferBody,
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         );
         
         return transferItem;
@@ -213,8 +223,9 @@ class CategorySuggestionService {
 
     // Thêm thông báo nội bộ vào Trung tâm thông báo
     final formattedAmount = formatMoney(parsed.amount);
-    final signText = parsed.type == 'expense' ? '-' : '+';
-    final notifTitle = 'Biến động số dư từ ${parsed.bankName}';
+    final isInc = parsed.type == 'income';
+    final notifTitle = isInc ? 'Tài khoản vừa tăng' : 'Tài khoản vừa giảm';
+    final signText = isInc ? '+' : '-';
     final notifBody = '$signText$formattedAmount đ · ${parsed.description}';
 
     await InAppNotificationService.instance.add(

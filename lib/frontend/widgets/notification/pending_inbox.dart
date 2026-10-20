@@ -85,9 +85,11 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
   }
 
   Future<void> _confirmItem(PendingTransactionModel item, String chosenCategory, {bool? isExpenseOverride}) async {
+    final typeOverride = _typeOverrides[item.id] ?? item.type;
     await TransactionService.instance.confirmPending(
       item.id,
       categoryId: chosenCategory,
+      kindOverride: typeOverride,
       isExpenseOverride: isExpenseOverride,
     );
 
