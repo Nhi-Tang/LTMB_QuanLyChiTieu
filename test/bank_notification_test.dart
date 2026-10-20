@@ -14,7 +14,7 @@ void main() {
     });
 
     test('VCB Real Sample Privacy Verification', () {
-      const text = 'Số dư TK VCB 1039165413 lúc 17:30. Số dư 1,102,600. Ref: Mua do an tai Highlands Coffee';
+      const text = 'Số dư TK VCB 1039165413 -50,000VND lúc 17:30. Số dư 1,102,600VND. Ref: Mua do an tai Highlands Coffee';
       final result = BankNotificationParser.parseNotification(
         packageName: 'com.VCB',
         title: 'Vietcombank',
@@ -23,6 +23,7 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.accountLast4, '5413');
+      expect(result.amount, 50000);
       expect(result.description, contains('Highlands Coffee'));
       expect(result.description, isNot(contains('1039165413')));
       expect(result.description, isNot(contains('1,102,600')));
@@ -73,6 +74,34 @@ void main() {
       expect(result!.bankName, 'MoMo');
       expect(result.type, 'expense');
       expect(result.amount, 85000);
+    });
+
+    test('Parse MoMo money receive notification', () {
+      const text = 'Bạn đã nhận được 2.000.000đ từ Nguyen Van A lúc 12:30. Số dư ví 5.000.000đ';
+      final result = BankNotificationParser.parseNotification(
+        packageName: 'com.mservice.momopay',
+        title: 'MoMo',
+        text: text,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.bankName, 'MoMo');
+      expect(result.type, 'income');
+      expect(result.amount, 2000000);
+    });
+
+    test('Parse MoMo receive notification variant', () {
+      const text = 'Quý khách đã nhận được 500.000đ từ TRAN VAN C. Nguồn: Ví MoMo';
+      final result = BankNotificationParser.parseNotification(
+        packageName: 'com.mservice.momopay',
+        title: 'MoMo',
+        text: text,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.bankName, 'MoMo');
+      expect(result.type, 'income');
+      expect(result.amount, 500000);
     });
 
     test('Filter non-transactions like OTP', () {

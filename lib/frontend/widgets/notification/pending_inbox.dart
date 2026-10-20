@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../backend/database/db_helper.dart';
 import '../../../backend/models/pending_transaction_model.dart';
-import '../../../backend/models/transaction_model.dart';
+import '../../../backend/services/transaction_service.dart';
 import '../../../backend/services/category_repository.dart';
 import '../../../backend/models/category_model.dart';
 import '../../theme/app_colors.dart';
@@ -53,22 +53,11 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     }
   }
 
-  Future<void> _confirmItem(PendingTransactionModel item, String chosenCategory) async {
-    final realTx = TransactionItem(
-      id: const Uuid().v4(),
-      title: item.description,
-      category: chosenCategory,
-      amount: item.amount.toDouble(),
-      isExpense: item.type == 'expense',
-      date: DateTime.tryParse(item.occurredAt) ?? DateTime.now(),
-      uid: item.uid,
-    );
-
-    await DatabaseHelper.instance.insertTransaction(realTx, uid: item.uid);
-    await DatabaseHelper.instance.updatePendingTransactionStatus(
+  Future<void> _confirmItem(PendingTransactionModel item, String chosenCategory, {bool? isExpenseOverride}) async {
+    await TransactionService.instance.confirmPending(
       item.id,
-      'confirmed',
       categoryId: chosenCategory,
+      isExpenseOverride: isExpenseOverride,
     );
 
     widget.onTransactionsUpdated?.call();
@@ -392,6 +381,68 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             // Category selector & Confidence Badge
             Row(
               children: [
+                if (item.bankName == 'MoMo') ...[
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (ctx) => SafeArea(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.arrow_upward, color: Colors.red),
+                                title: const Text('Khoản Chi tiêu'),
+                                onTap: () {
+                                  Navigator.pop(ctx);
+                                  _confirmItem(item, 'Khác', isExpenseOverride: true);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.arrow_downward, color: Colors.green),
+                                title: const Text('Khoản Thu nhập'),
+                                onTap: () {
+                                  Navigator.pop(ctx);
+                                  _confirmItem(item, 'Khác', isExpenseOverride: false);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.swap_horiz, color: Colors.blue),
+                                title: const Text('Chuyển tiền (Không tính vào tổng)'),
+                                onTap: () {
+                                  Navigator.pop(ctx);
+                                  _confirmItem(item, 'Chuyển tiền', isExpenseOverride: true);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.blue),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(isExpense ? Icons.arrow_upward : Icons.arrow_downward, size: 14, color: Colors.blue),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'Đổi loại',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
+                          ),
+                          const Icon(Icons.arrow_drop_down, size: 16, color: Colors.blue),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
                 InkWell(
                   onTap: () => _showCategoryPicker(item, (newCat) {
                     _confirmItem(item, newCat);

@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import '../database/db_helper.dart';
 import '../models/transaction_model.dart';
+import '../models/pending_transaction_model.dart';
 
 class TransactionService extends ChangeNotifier {
   static final TransactionService instance = TransactionService._init();
@@ -54,6 +56,48 @@ class TransactionService extends ChangeNotifier {
       }
       notifyListeners();
     }
+  }
+
+  Future<void> confirmPending(String pendingId, {String? categoryId, bool? isExpenseOverride}) async {
+    final dbHelper = DatabaseHelper.instance;
+    final pendings = await dbHelper.getPendingTransactions(uid: dbHelper.currentUid);
+    
+    // Tìm giao dịch nháp
+    PendingTransactionModel? item;
+    for (var p in pendings) {
+      if (p.id == pendingId) {
+        item = p;
+        break;
+      }
+    }
+    if (item == null) return;
+
+    final isExpense = isExpenseOverride ?? (item.type == 'expense');
+    final defaultCat = isExpense ? 'Khác' : 'Khác';
+    final category = categoryId ?? item.suggestedCategoryId ?? defaultCat;
+
+    final realTx = TransactionItem(
+      id: const Uuid().v4(),
+      title: item.description,
+      category: category,
+      amount: item.amount.toDouble(),
+      isExpense: isExpense,
+      date: DateTime.tryParse(item.occurredAt) ?? DateTime.now(),
+      uid: item.uid,
+      ledgerId: _currentLedgerId, // Đảm bảo lấy ID sổ lưu bền đang active
+    );
+
+    // Mở đúng DB và ghi giao dịch
+    await dbHelper.insertTransaction(realTx, uid: item.uid, ledgerId: _currentLedgerId);
+    
+    // Cập nhật trạng thái bản nháp
+    await dbHelper.updatePendingTransactionStatus(
+      item.id,
+      'confirmed',
+      categoryId: category,
+    );
+
+    notifyUpdated();
   }
 
   Future<List<TransactionItem>> getTransactions({String? uid, String? ledgerId}) async {

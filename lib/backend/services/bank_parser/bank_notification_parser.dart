@@ -84,18 +84,19 @@ class BankNotificationParser {
   static String detectType(String text) {
     final txt = text.toLowerCase();
 
-    if (txt.contains('nhận được') ||
-        txt.contains('nhan duoc') ||
-        txt.contains('nhận tiền') ||
-        txt.contains('nhan tien') ||
+    if (txt.contains('nhận') ||
+        txt.contains('nhan') ||
+        txt.contains('cộng') ||
+        txt.contains('cong') ||
         txt.contains('hoàn tiền') ||
         txt.contains('hoan tien') ||
         txt.contains('tiền vào') ||
         txt.contains('tien vao') ||
-        txt.contains('cộng') ||
         txt.contains('co:') ||
         txt.contains('có:')) {
-      return 'income';
+      if (!txt.contains('trừ') && !txt.contains('tru') && !txt.contains('thanh toán') && !txt.contains('thanh toan') && !txt.contains('chuyển đi') && !txt.contains('chuyen di')) {
+        return 'income';
+      }
     }
 
     if (txt.contains('+')) {
@@ -108,20 +109,30 @@ class BankNotificationParser {
   static int parseAmount(String text) {
     String cleanText = text;
 
-    // 1. Loại bỏ phần Số dư / SD trước khi lấy số tiền giao dịch
-    final soDuRegex = RegExp(r'(số dư|so du|sd)\s*[:-]?\s*[\d.,]+\s*(vnd|đ|d)?\.?', caseSensitive: false);
-    cleanText = cleanText.replaceAll(soDuRegex, ' ');
+    // 0. Loại bỏ hoàn toàn các cụm từ chứa số dư / ví / tài khoản / mã giao dịch kèm số tiền
+    cleanText = cleanText.replaceAll(RegExp(r'(số dư|so du|sd|ví|vi)[^.!?]*?[\d.,]+\s*(vnd|đ|d)?\.?', caseSensitive: false), ' ');
+    cleanText = cleanText.replaceAll(RegExp(r'(tài khoản|tai khoan|tk|mã gd|ma gd|magd|ref|ref no)\s*[:-]?\s*\*?\w+', caseSensitive: false), ' ');
 
-    // 2. Loại bỏ số tài khoản (TK ...123456)
-    final tkRegex = RegExp(r'(tk|tài khoản|tai khoan|acc|account)\s*[:-]?\s*\*?\d+', caseSensitive: false);
-    cleanText = cleanText.replaceAll(tkRegex, ' ');
+    // 0.1. Loại bỏ thời gian (VD: 12:30 hoặc 12h30)
+    cleanText = cleanText.replaceAll(RegExp(r'\b\d{1,2}:\d{2}\b'), ' ');
+    cleanText = cleanText.replaceAll(RegExp(r'\b\d{1,2}h\d{0,2}\b', caseSensitive: false), ' ');
 
-    // 3. Loại bỏ mã giao dịch / Ref ID dài
-    final refRegex = RegExp(r'(mã gd|ma gd|magd|ref|ref no)\s*[:-]?\s*\w+', caseSensitive: false);
-    cleanText = cleanText.replaceAll(refRegex, ' ');
+    // 0.2. Loại bỏ ngày tháng (VD: 19/10/2026 hoặc 19-10)
+    cleanText = cleanText.replaceAll(RegExp(r'\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b'), ' ');
 
-    // 4. Ưu tiên tìm số tiền đi kèm ký hiệu +, -, GD:, VND, đ, d
-    final explicitAmountRegex = RegExp(r'([+-]|gd\s*[:-]?)\s*([\d]{1,3}(?:[.,]\d{3})+|\d+)\s*(vnd|đ|d)?', caseSensitive: false);
+    // 1. Ưu tiên số tiền đi kèm đơn vị tiền tệ rõ ràng (vnd, đ, d)
+    final currencyAmountRegex = RegExp(r'([\d]{1,3}(?:[.,]\d{3})+|\d+)\s*(vnd|đ|d)\b', caseSensitive: false);
+    for (var match in currencyAmountRegex.allMatches(cleanText)) {
+      String rawNum = match.group(1) ?? '';
+      rawNum = rawNum.replaceAll('.', '').replaceAll(',', '');
+      int? val = int.tryParse(rawNum);
+      if (val != null && val > 0) {
+        return val;
+      }
+    }
+
+    // 2. Tìm số tiền đi kèm ký hiệu +, -
+    final explicitAmountRegex = RegExp(r'([+-])\s*([\d]{1,3}(?:[.,]\d{3})+|\d+)', caseSensitive: false);
     final explicitMatch = explicitAmountRegex.firstMatch(cleanText);
     if (explicitMatch != null) {
       String rawNum = explicitMatch.group(2) ?? '';
@@ -132,11 +143,9 @@ class BankNotificationParser {
       }
     }
 
-    // 5. Biểu thức chính quy bắt số tiền tổng quát
-    final amountRegex = RegExp(r'([\d]{1,3}(?:[.,]\d{3})+|\d+)\s*(vnd|đ|d)?', caseSensitive: false);
-    final matches = amountRegex.allMatches(cleanText);
-
-    for (var match in matches) {
+    // 3. Fallback: số có định dạng phân cách hàng nghìn (VD: 50.000 hoặc 1.000.000)
+    final formattedAmountRegex = RegExp(r'\b([\d]{1,3}(?:[.,]\d{3})+)\b');
+    for (var match in formattedAmountRegex.allMatches(cleanText)) {
       String rawNum = match.group(1) ?? '';
       rawNum = rawNum.replaceAll('.', '').replaceAll(',', '');
       int? val = int.tryParse(rawNum);
@@ -144,6 +153,7 @@ class BankNotificationParser {
         return val;
       }
     }
+
     return 0;
   }
 
@@ -184,9 +194,13 @@ class BankNotificationParser {
 
     // Tìm từ khóa chỉ phần nội dung chuyển khoản: Ref:, ND:, DEN:, Noi dung:, Nội dung:, Mua do an...
     final keywords = [
-      RegExp(r'(?:ref|nd|noi dung|nội dung|den|đến|mô tả|mo ta)\s*[:-]\s*(.*)', caseSensitive: false),
+      RegExp(r'(?:ref|nd|noi dung|nội dung|den|đến|mô tả|mo ta|cho|từ|tu)\s*[:-]\s*(.*)', caseSensitive: false),
       RegExp(r'thanh toán\s+(.*)', caseSensitive: false),
       RegExp(r'thanh toan\s+(.*)', caseSensitive: false),
+      RegExp(r'chuyển tiền\s+(.*)', caseSensitive: false),
+      RegExp(r'chuyen tien\s+(.*)', caseSensitive: false),
+      RegExp(r'nhận được\s+(.*)', caseSensitive: false),
+      RegExp(r'nhan duoc\s+(.*)', caseSensitive: false),
     ];
 
     for (var kw in keywords) {

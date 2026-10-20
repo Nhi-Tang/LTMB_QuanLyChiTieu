@@ -28,26 +28,22 @@ class BankNotificationService : NotificationListenerService() {
 
         private var instance: BankNotificationService? = null
 
-        // TODO: Thêm package name ngân hàng mới tại đây khi cần mở rộng
         private val ALLOWED_PACKAGES = setOf(
             "com.vcb", "com.vcb.vietcombank", "com.vcb.digibank",
             "com.mbmobile",
-            "com.techncombank.iamb", "vn.com.techcombank.bb.app", "com.techcombank.mobile", "com.techcombank",
+            // TODO: kiểm tra lại các package Techcombank bằng log thật
+            "vn.com.techcombank.bb.app", "com.techcombank.mobile",
             "com.vnpay.bidv",
             "com.vietinbank.ipay",
             "com.tpb.mb.gprsandroid",
             "mobile.acb.com.vn",
             "com.vnpay.vpbankonline",
-            "com.mservice.momopay",
-            "vn.com.msb.smartBooking"
-        )
+            "vn.com.msb.smartbooking",
+            "com.mservice.momotransfer"   // MoMo (đã xác nhận bằng log)
+        ).map { it.lowercase() }.toSet()
 
-        fun isWhitelisted(packageName: String): Boolean {
-            val pkg = packageName.lowercase()
-            return ALLOWED_PACKAGES.any { whitelisted ->
-                pkg == whitelisted || pkg.contains(whitelisted) || whitelisted.contains(pkg)
-            }
-        }
+        fun isWhitelisted(packageName: String): Boolean =
+            packageName.lowercase() in ALLOWED_PACKAGES
 
         fun sendEvent(data: Map<String, Any?>): Boolean {
             return try {
@@ -64,7 +60,7 @@ class BankNotificationService : NotificationListenerService() {
         }
 
         fun maskSensitiveNumbers(text: String): String {
-            return text.replace(Regex("(?<![\\d.,])\\d{8,19}(?![\\d.,])"), "••••")
+            return text.replace(Regex("(?<!\\d)\\d{8,19}(?!\\d)"), "••••")
         }
     }
 
@@ -162,7 +158,13 @@ class BankNotificationService : NotificationListenerService() {
             }
 
             val jsonObj = JSONObject()
-            data.forEach { (k, v) -> jsonObj.put(k, v) }
+            data.forEach { (k, v) ->
+                if ((k == "title" || k == "text" || k == "bigText") && v is String) {
+                    jsonObj.put(k, maskSensitiveNumbers(v))
+                } else {
+                    jsonObj.put(k, v)
+                }
+            }
             newArray.put(jsonObj)
 
             prefs.edit().putString(QUEUE_KEY, newArray.toString()).apply()
