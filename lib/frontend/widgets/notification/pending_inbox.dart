@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../../../backend/database/db_helper.dart';
 import '../../../backend/models/pending_transaction_model.dart';
 import '../../../backend/services/transaction_service.dart';
@@ -99,48 +98,91 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
   }
 
   void _showCategoryPicker(PendingTransactionModel item, Function(String) onSelect) {
-    final cats = item.type == 'expense' ? _expenseCategories : _incomeCategories;
+    // Luôn chọn mảng _expenseCategories nếu là 'expense', ngược lại 'income'
+    final List<CategoryModel> cats = item.type == 'expense' ? _expenseCategories : _incomeCategories;
+
+    // Bổ sung tự động danh mục 'Chuyển tiền' (Không có trong Expense/Income thường)
+    final transferCat = CategoryModel(
+      name: 'Chuyển tiền',
+      iconKey: 'swap_horiz',
+      type: 'expense',
+      sortOrder: 999,
+      isDefault: true,
+      isArchived: false,
+      createdAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toIso8601String(),
+    );
+
+    // Mở rộng mảng
+    final displayCats = [...cats, transferCat];
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return Material(
-          color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          clipBehavior: Clip.antiAlias,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Chọn danh mục cho giao dịch',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: cats.length,
-                    itemBuilder: (ctx, index) {
-                      final cat = cats[index];
-                      return ListTile(
-                        leading: Icon(CategoryModel.getIconData(cat.iconKey), color: AppColors.primary),
-                        title: Text(cat.name),
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          onSelect(cat.name);
-                        },
-                      );
-                    },
+        return Container(
+          height: MediaQuery.of(ctx).size.height * 0.6,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Chọn danh mục (${item.type == 'expense' ? 'Chi tiêu' : 'Thu nhập'})',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.darkBeige),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: displayCats.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Chưa có danh mục nào.\nVui lòng thêm ở màn hình Cài đặt.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: displayCats.length,
+                        itemBuilder: (ctx, index) {
+                          final cat = displayCats[index];
+                          return ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            leading: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(CategoryModel.getIconData(cat.iconKey), color: AppColors.primary, size: 22),
+                            ),
+                            title: Text(
+                              cat.name,
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                            ),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              onSelect(cat.name);
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
         );
       },
@@ -383,9 +425,12 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             const SizedBox(height: 12),
 
             // Category selector & Confidence Badge
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (item.bankName == 'MoMo' || item.bankName == 'ZaloPay' || isUnknown) ...[
+                if (item.bankName == 'MoMo' || item.bankName == 'ZaloPay' || isUnknown)
                   InkWell(
                     onTap: () {
                       showModalBottomSheet(
@@ -426,7 +471,6 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -446,7 +490,6 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                       ),
                     ),
                   ),
-                ],
                 InkWell(
                   onTap: () => _showCategoryPicker(item, (newCat) {
                     _confirmItem(item, newCat);
@@ -464,12 +507,15 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                       children: [
                         const Icon(Icons.category_rounded, size: 14, color: AppColors.darkBeige),
                         const SizedBox(width: 4),
-                        Text(
-                          currentCat,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkBeige,
+                        Flexible(
+                          child: Text(
+                            currentCat,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkBeige,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.darkBeige),
@@ -477,7 +523,6 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(

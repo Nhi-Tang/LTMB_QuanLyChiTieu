@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../database/db_helper.dart';
@@ -145,6 +146,7 @@ class CategorySuggestionService {
 
     final saved = await DatabaseHelper.instance.insertPendingTransaction(pendingItem, uid: uid);
     if (!saved) {
+      debugPrint('🚫 [Parser] REASON: DUPLICATE_FINGERPRINT | fp=${pendingItem.fingerprint}');
       // Bị trùng lặp fingerprint
       return null;
     }
@@ -181,7 +183,7 @@ class CategorySuggestionService {
         final transferItem = PendingTransactionModel(
           id: const Uuid().v4(),
           uid: uid,
-          type: 'expense', // Mặc định là chi tiêu nhưng sẽ đánh dấu là chuyển tiền ở suggest
+          type: 'unknown', // Sử dụng cờ unknown để UI cho phép Đổi loại (Thu/Chi/Chuyển tiền)
           amount: pendingItem.amount,
           bankName: sourceBank,
           accountLast4: '',

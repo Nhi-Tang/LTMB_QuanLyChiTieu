@@ -216,62 +216,72 @@ class _ReportsTabState extends State<ReportsTab> {
           // Filter Bar
           Row(
             children: [
-              InkWell(
-                onTap: _showTimeRangePicker,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE5E0D3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_month_outlined, size: 18, color: Color(0xFF4A463D)),
-                      const SizedBox(width: 6),
-                      Text(
-                        AppTranslations.tr(lang, _timeRange),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF222222),
+              Expanded(
+                child: InkWell(
+                  onTap: _showTimeRangePicker,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE5E0D3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_month_outlined, size: 18, color: Color(0xFF4A463D)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            AppTranslations.tr(lang, _timeRange),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF222222),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF4A463D)),
-                    ],
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF4A463D)),
+                      ],
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 10),
-              InkWell(
-                onTap: _showCategoryFilterPicker,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFFFF7EB) : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFE5D3AF) : const Color(0xFFE5E0D3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF4A463D)),
-                      const SizedBox(width: 6),
-                      Text(
-                        _selectedCategoryFilter != 'Tất cả'
-                            ? AppTranslations.trCategory(lang, _selectedCategoryFilter)
-                            : AppTranslations.tr(lang, 'filter'),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF222222),
-                        ),
+              Expanded(
+                child: InkWell(
+                  onTap: _showCategoryFilterPicker,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFFFF7EB) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFE5D3AF) : const Color(0xFFE5E0D3),
                       ),
-                    ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF4A463D)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _selectedCategoryFilter != 'Tất cả'
+                                ? AppTranslations.trCategory(lang, _selectedCategoryFilter)
+                                : AppTranslations.tr(lang, 'filter'),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF222222),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

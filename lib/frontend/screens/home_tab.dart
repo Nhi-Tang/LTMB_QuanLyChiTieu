@@ -407,84 +407,92 @@ class _HomeTabState extends State<HomeTab> {
 
               const SizedBox(width: 8),
 
-              Row(
-                children: [
-                  // Month Picker
-                  GestureDetector(
-                    onTap: widget.onSelectMonth,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFECE7DB)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today_rounded, size: 14, color: HomeTab.darkBeige),
-                          const SizedBox(width: 6),
-                          Text(
-                            _formatMonthYear(widget.selectedMonth),
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: HomeTab.darkBeige,
-                            ),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Month Picker
+                    Flexible(
+                      child: GestureDetector(
+                        onTap: widget.onSelectMonth,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: const Color(0xFFECE7DB)),
                           ),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down, size: 18, color: HomeTab.darkBeige),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(width: 8),
-
-                  // Bell icon with dynamic badge
-                  GestureDetector(
-                    onTap: _openNotificationCenter,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.85),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFECE7DB)),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const Icon(Icons.notifications_none_rounded, color: HomeTab.darkBeige, size: 22),
-                          if (totalBadge > 0)
-                            Positioned(
-                              right: 2,
-                              top: 2,
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.calendar_today_rounded, size: 14, color: HomeTab.darkBeige),
+                              const SizedBox(width: 6),
+                              Flexible(
                                 child: Text(
-                                  totalBadge > 9 ? '9+' : '$totalBadge',
+                                  _formatMonthYear(widget.selectedMonth),
                                   style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
+                                    color: HomeTab.darkBeige,
                                   ),
-                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ),
-                        ],
+                              const SizedBox(width: 4),
+                              const Icon(Icons.keyboard_arrow_down, size: 18, color: HomeTab.darkBeige),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(width: 8),
+                    // Bell icon with dynamic badge
+                    GestureDetector(
+                      onTap: _openNotificationCenter,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFFECE7DB)),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const Icon(Icons.notifications_none_rounded, color: HomeTab.darkBeige, size: 22),
+                            if (totalBadge > 0)
+                              Positioned(
+                                right: 2,
+                                top: 2,
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    totalBadge > 9 ? '9+' : '$totalBadge',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

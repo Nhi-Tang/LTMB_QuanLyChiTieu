@@ -6,10 +6,10 @@ class MBBankParser extends BankParser {
 
   @override
   String detectType(String title, String text) {
-    // MB Bank luôn có định dạng: TK xxx|GD: +10,000VND hoặc GD: -5,000VND
-    if (text.contains('GD: +') || text.contains('GD:  +') || text.contains('+')) {
+    final upper = text.toUpperCase();
+    if (upper.contains('GD: +') || upper.contains('GD:  +') || upper.contains('GD:+')) {
       return 'income';
-    } else if (text.contains('GD: -') || text.contains('GD:  -') || text.contains('-')) {
+    } else if (upper.contains('GD: -') || upper.contains('GD:  -') || upper.contains('GD:-')) {
       return 'expense';
     }
     

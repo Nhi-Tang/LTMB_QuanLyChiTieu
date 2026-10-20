@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:quanlychitieu/backend/services/bank_parser/bank_notification_parser.dart';
 
 abstract class BankParser {
@@ -26,11 +27,13 @@ abstract class BankParser {
     DateTime? timestamp,
   }) {
     if (BankNotificationParser.isNonTransaction(title, text)) {
+      debugPrint('🚫 [Parser] REASON: NON_TRANSACTION_KEYWORD | title=$title');
       return null;
     }
 
     final amount = parseAmount(title, text);
     if (amount <= 0) {
+      debugPrint('🚫 [Parser] REASON: INVALID_OR_ZERO_AMOUNT (parsed=$amount) | text=$text');
       return null;
     }
 
