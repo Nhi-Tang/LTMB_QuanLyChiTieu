@@ -548,13 +548,17 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Row(
-          children: [
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
             Icon(Icons.admin_panel_settings, color: Colors.white),
             SizedBox(width: 8),
-            Text(
-              'PiggySmart - Admin',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            Flexible(
+              child: Text(
+                'Mousey - Admin',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -761,6 +765,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             fontSize: 13,
                                             color: Colors.grey[600],
                                           ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
                                         ),
                                         const SizedBox(height: 4),
                                         Row(
@@ -773,16 +779,19 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                               color: user.isActive ? Colors.green : Colors.red,
                                             ),
                                             const SizedBox(width: 4),
-                                            Text(
-                                              user.isActive ? 'Đang hoạt động' : 'Đã khóa',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: user.isActive ? Colors.green : Colors.red,
-                                                fontWeight: FontWeight.w500,
+                                            Flexible(
+                                              child: Text(
+                                                user.isActive ? 'Đang hoạt động' : 'Đã khóa',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: user.isActive ? Colors.green : Colors.red,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
                                             if (isSelf) ...[
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: 6),
                                               Text(
                                                 '(Bạn)',
                                                 style: TextStyle(
@@ -810,7 +819,10 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             color: Colors.blue[700],
                                             onPressed: () => _showUserFormDialog(userToEdit: user),
                                             tooltip: 'Sửa',
+                                            constraints: const BoxConstraints(),
+                                            padding: const EdgeInsets.all(6),
                                           ),
+                                          const SizedBox(width: 4),
                                           // Lock/Unlock Switch
                                           IconButton(
                                             icon: Icon(
@@ -822,13 +834,18 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             color: user.isActive ? Colors.orange : Colors.green,
                                             onPressed: () => _toggleUserStatus(user),
                                             tooltip: user.isActive ? 'Khóa TK' : 'Mở khóa',
+                                            constraints: const BoxConstraints(),
+                                            padding: const EdgeInsets.all(6),
                                           ),
+                                          const SizedBox(width: 4),
                                           // Delete
                                           IconButton(
                                             icon: const Icon(Icons.delete_outline, size: 20),
                                             color: Colors.red[700],
                                             onPressed: () => _deleteUser(user),
                                             tooltip: 'Xóa',
+                                            constraints: const BoxConstraints(),
+                                            padding: const EdgeInsets.all(6),
                                           ),
                                         ],
                                       ),

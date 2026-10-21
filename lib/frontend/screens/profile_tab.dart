@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
-import '../../backend/services/export_service.dart';
 import '../../backend/services/sync_service.dart';
 import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
@@ -15,6 +14,7 @@ import '../widgets/mousey_avatar.dart';
 import '../widgets/notification/notification_settings_screen.dart';
 import '../widgets/notification/pending_inbox.dart';
 import '../widgets/pro_gate.dart';
+import '../widgets/export_options_bottom_sheet.dart';
 import 'pro_upgrade_screen.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -698,74 +698,10 @@ class _ProfileTabState extends State<ProfileTab> {
       return;
     }
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            const Icon(Icons.file_download_outlined, color: accentBeige, size: 28),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                AppTranslations.tr(lang, 'export_report_title'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppTranslations.tr(lang, 'export_report_subtitle'),
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE8F5E9),
-                child: Icon(Icons.table_chart_rounded, color: Colors.green),
-              ),
-              title: Text(AppTranslations.tr(lang, 'export_csv_title'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              subtitle: Text(AppTranslations.tr(lang, 'export_csv_sub'), style: const TextStyle(fontSize: 11, color: Colors.grey)),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await ExportService.exportToCsv();
-                if (!mounted) return;
-                showAppAlertDialog(
-                  context: context,
-                  title: 'Thành công',
-                  message: AppTranslations.tr(lang, 'export_csv_success'),
-                  isSuccess: true,
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE3F2FD),
-                child: Icon(Icons.description_rounded, color: Colors.blue),
-              ),
-              title: Text(AppTranslations.tr(lang, 'export_excel_title'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              subtitle: Text(AppTranslations.tr(lang, 'export_excel_sub'), style: const TextStyle(fontSize: 11, color: Colors.grey)),
-              onTap: () async {
-                Navigator.pop(ctx);
-                await ExportService.exportToExcel();
-                if (!mounted) return;
-                showAppAlertDialog(
-                  context: context,
-                  title: 'Thành công',
-                  message: AppTranslations.tr(lang, 'export_excel_success'),
-                  isSuccess: true,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+    ExportOptionsBottomSheet.show(
+      context,
+      selectedLanguage: lang,
+      currentLedgerId: TransactionService.instance.currentLedgerId,
     );
   }
 
