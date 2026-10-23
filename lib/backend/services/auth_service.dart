@@ -118,10 +118,7 @@ class AuthService {
         );
       } on FirebaseAuthException catch (e) {
         if (e.code == 'email-already-in-use') {
-          credential = await _firebaseAuth.signInWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
+          throw Exception('Số điện thoại hoặc email này đã được đăng ký. Vui lòng đăng nhập.');
         } else {
           rethrow;
         }
@@ -196,6 +193,25 @@ class AuthService {
       );
     }
 
+    // Save/update user document in Cloud Firestore so Admin can see all registered users
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
+        'name': userModel.name,
+        'email': userModel.email,
+        'role': userModel.role,
+        'isActive': userModel.isActive,
+        'createdAt': userModel.createdAt,
+        'photoUrl': userModel.photoUrl,
+        'provider': userModel.provider,
+        'plan': userModel.plan,
+        'proExpiredAt': userModel.proExpiredAt,
+        'lastLoginAt': userModel.lastLoginAt,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      developer.log('Error writing user profile to Firestore: $e');
+    }
+
     await _dbHelper.insertOrUpdateUser(userModel);
     return userModel;
   }
@@ -238,7 +254,9 @@ class AuthService {
     } else if (error.contains('invalid-credential') || error.contains('wrong-password') || error.contains('user-not-found') || error.contains('invalid-email')) {
       return 'Email/SĐT hoặc mật khẩu không chính xác.';
     } else if (error.contains('email-already-in-use')) {
-      return 'Email này đã được sử dụng bởi tài khoản khác.';
+      return 'Số điện thoại hoặc email này đã được đăng ký. Vui lòng đăng nhập.';
+    } else if (error.contains('weak-password')) {
+      return 'Mật khẩu quá yếu (cần ít nhất 6 ký tự).';
     }
     return error.replaceAll('Exception: ', '');
   }

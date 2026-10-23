@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
 import 'auth_screen.dart';
@@ -42,6 +43,39 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
   Future<void> _loadUsers() async {
     setState(() => _isLoading = true);
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('users').get();
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final isActiveVal = data['isActive'];
+        bool isActiveBool = true;
+        if (isActiveVal is bool) {
+          isActiveBool = isActiveVal;
+        } else if (isActiveVal is int) {
+          isActiveBool = isActiveVal == 1;
+        }
+
+        final user = UserModel(
+          id: doc.id.hashCode,
+          name: data['name'] as String? ?? 'User',
+          email: data['email'] as String? ?? '',
+          password: data['password'] as String? ?? '',
+          role: data['role'] as String? ?? 'user',
+          isActive: isActiveBool,
+          createdAt: data['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+          uid: doc.id,
+          photoUrl: data['photoUrl'] as String?,
+          provider: data['provider'] as String? ?? 'password',
+          plan: data['plan'] as String? ?? 'free',
+          proExpiredAt: data['proExpiredAt'] as String?,
+          lastLoginAt: data['lastLoginAt'] as String?,
+        );
+        await _dbHelper.insertOrUpdateUser(user);
+      }
+    } catch (e) {
+      debugPrint('Error syncing users from Firestore: $e');
+    }
+
     final users = _searchQuery.isEmpty
         ? await _dbHelper.getAllUsers()
         : await _dbHelper.searchUsers(_searchQuery);

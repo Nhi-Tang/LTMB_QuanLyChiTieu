@@ -13,7 +13,6 @@ import '../widgets/category_link/linked_categories_screen.dart';
 import '../widgets/mousey_avatar.dart';
 import '../widgets/notification/notification_settings_screen.dart';
 import '../widgets/notification/pending_inbox.dart';
-import '../widgets/pro_gate.dart';
 import '../widgets/export_options_bottom_sheet.dart';
 import 'pro_upgrade_screen.dart';
 
@@ -1068,39 +1067,43 @@ class _ProfileTabState extends State<ProfileTab> {
                 },
               ),
               const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
-              ProGate(
-                featureTitle: 'Tự động đọc thông báo ngân hàng',
-                child: SettingsTile(
-                  leading: const Icon(Icons.notifications_active_outlined, color: accentBeige),
-                  title: Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Cài đặt đọc thông báo ngân hàng',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+              SettingsTile(
+                leading: const Icon(Icons.notifications_active_outlined, color: accentBeige),
+                title: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Cài đặt đọc thông báo ngân hàng',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFECB3),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE65100))),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFECB3),
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                    ],
-                  ),
-                  subtitle: const Text('Vietcombank, MB, Techcombank, MoMo,...', style: TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
-                  trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-                  onTap: () {
+                      child: const Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE65100))),
+                    ),
+                  ],
+                ),
+                subtitle: const Text('Vietcombank, MB, Techcombank, MoMo,...', style: TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
+                      MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
                     );
-                  },
-                ),
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
+                  );
+                },
               ),
             ],
           ),
