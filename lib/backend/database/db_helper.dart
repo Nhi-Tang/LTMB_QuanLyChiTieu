@@ -1259,12 +1259,13 @@ class DatabaseHelper {
   Future<int> deleteSavingsGoal(String goalId) async {
     final db = await instance.database;
     final nowEpoch = DateTime.now().millisecondsSinceEpoch;
-    await db.update(
-      'savings_transactions',
-      {},
-      where: 'goal_id = ?',
-      whereArgs: [goalId],
-    );
+    try {
+      await db.delete(
+        'savings_transactions',
+        where: 'goal_id = ?',
+        whereArgs: [goalId],
+      );
+    } catch (_) {}
     final res = await db.update(
       'savings_goals',
       {
