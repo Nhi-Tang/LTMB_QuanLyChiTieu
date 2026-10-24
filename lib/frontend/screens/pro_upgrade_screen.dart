@@ -1,23 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/services/pro_service.dart';
 import '../../core/constants/pricing.dart';
 import '../theme/app_colors.dart';
+import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/mousey_avatar.dart';
 import '../widgets/pro/plan_card.dart';
 import 'vietqr_payment_screen.dart';
 
 class ProUpgradeScreen extends StatefulWidget {
-  const ProUpgradeScreen({super.key});
+  final String selectedLanguage;
+
+  const ProUpgradeScreen({super.key, this.selectedLanguage = 'Tiếng Việt'});
 
   @override
   State<ProUpgradeScreen> createState() => _ProUpgradeScreenState();
 }
 
 class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
-  // 'monthly' or 'yearly'
   String _selectedPlan = 'yearly';
   bool _isLoading = false;
+  late String _lang;
+
+  @override
+  void initState() {
+    super.initState();
+    _lang = widget.selectedLanguage;
+    _loadLang();
+  }
+
+  Future<void> _loadLang() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString('mousey_language') ?? widget.selectedLanguage;
+    if (mounted) {
+      setState(() {
+        _lang = saved;
+      });
+    }
+  }
 
   Future<void> _handleStartTrial() async {
     setState(() => _isLoading = true);
@@ -54,7 +75,6 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
       }
 
       if (!mounted) return;
-      // Navigate to VietQR Payment Screen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -76,6 +96,8 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = _lang;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -86,7 +108,6 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Gradient Header with Close Button
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
@@ -116,9 +137,9 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                         size: 52,
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Nâng Cấp Mousey PRO',
-                        style: TextStyle(
+                      Text(
+                        AppTranslations.tr(lang, 'pro_upgrade_title'),
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -126,9 +147,9 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Trải nghiệm trọn vẹn sức mạnh quản lý tài chính thông minh',
-                        style: TextStyle(
+                      Text(
+                        AppTranslations.tr(lang, 'pro_upgrade_subtitle'),
+                        style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                         ),
@@ -139,10 +160,9 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 4 Benefit Points
-                const Text(
-                  'Quyền lợi độc quyền PRO',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.tr(lang, 'pro_benefits'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -151,30 +171,29 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 const SizedBox(height: 12),
                 _buildBenefitItem(
                   icon: Icons.menu_book_rounded,
-                  title: 'Thêm không giới hạn Sổ sách quản lý',
-                  subtitle: 'Quản lý riêng biệt quỹ cá nhân, gia đình, công việc',
+                  title: AppTranslations.tr(lang, 'benefit_1_title'),
+                  subtitle: AppTranslations.tr(lang, 'benefit_1_sub'),
                 ),
                 _buildBenefitItem(
                   icon: Icons.table_chart_rounded,
-                  title: 'Xuất báo cáo Excel (.xlsx) & CSV',
-                  subtitle: 'Dễ dàng lưu trữ và phân tích dữ liệu chuyên sâu',
+                  title: AppTranslations.tr(lang, 'benefit_2_title'),
+                  subtitle: AppTranslations.tr(lang, 'benefit_2_sub'),
                 ),
                 _buildBenefitItem(
                   icon: Icons.notifications_active_rounded,
-                  title: 'Lời nhắc ghi chép thông minh',
-                  subtitle: 'Tự động nhắc khi có thông báo số dư ngân hàng',
+                  title: AppTranslations.tr(lang, 'benefit_3_title'),
+                  subtitle: AppTranslations.tr(lang, 'benefit_3_sub'),
                 ),
                 _buildBenefitItem(
                   icon: Icons.cloud_sync_rounded,
-                  title: 'Sao lưu và đồng bộ Cloud an toàn',
-                  subtitle: 'Đồng bộ dữ liệu thời gian thực giữa các thiết bị',
+                  title: AppTranslations.tr(lang, 'benefit_4_title'),
+                  subtitle: AppTranslations.tr(lang, 'benefit_4_sub'),
                 ),
                 const SizedBox(height: 24),
 
-                // Plan Selection Cards
-                const Text(
-                  'Chọn gói đăng ký phù hợp',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.tr(lang, 'choose_plan'),
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -182,25 +201,25 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 ),
                 const SizedBox(height: 12),
                 PlanCard(
-                  title: 'Gói Năm (Khuyên dùng)',
+                  title: AppTranslations.tr(lang, 'yearly_plan'),
                   price: '200.000đ',
-                  period: 'năm',
-                  savings: 'Tiết kiệm ${PricingConstants.yearlyDiscountPercentage}% (~16.600đ/tháng)',
+                  period: lang == 'English' ? 'year' : (lang == '한국어' ? '년' : 'năm'),
+                  savings: AppTranslations.tr(lang, 'yearly_saving'),
                   isBestValue: true,
+                  bestValueLabel: AppTranslations.tr(lang, 'best_value'),
                   isSelected: _selectedPlan == 'yearly',
                   onTap: () => setState(() => _selectedPlan = 'yearly'),
                 ),
                 const SizedBox(height: 12),
                 PlanCard(
-                  title: 'Gói Tháng',
+                  title: AppTranslations.tr(lang, 'monthly_plan'),
                   price: '20.000đ',
-                  period: 'tháng',
+                  period: lang == 'English' ? 'month' : (lang == '한국어' ? '월' : 'tháng'),
                   isSelected: _selectedPlan == 'monthly',
                   onTap: () => setState(() => _selectedPlan = 'monthly'),
                 ),
                 const SizedBox(height: 32),
 
-                // Action Buttons
                 ListenableBuilder(
                   listenable: ProService.instance,
                   builder: (context, _) {
@@ -221,9 +240,9 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                                 ),
                               ),
                               onPressed: _isLoading ? null : _handleStartTrial,
-                              child: const Text(
-                                'Dùng thử miễn phí 7 ngày',
-                                style: TextStyle(
+                              child: Text(
+                                AppTranslations.tr(lang, 'start_trial_btn'),
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -245,7 +264,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                             ),
                             onPressed: _isLoading ? null : _handleUpgrade,
                             child: Text(
-                              trialUsed ? 'Nâng cấp ngay (${_selectedPlan == 'yearly' ? '200.000đ/năm' : '20.000đ/tháng'})' : 'Đăng ký ngay (${_selectedPlan == 'yearly' ? '200.000đ/năm' : '20.000đ/tháng'})',
+                              '${AppTranslations.tr(lang, 'subscribe_now')} (${_selectedPlan == 'yearly' ? '200.000đ/${lang == 'English' ? 'year' : 'năm'}' : '20.000đ/${lang == 'English' ? 'month' : 'tháng'}'})',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -257,53 +276,9 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
-
-                // Footer Links
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        showAppAlertDialog(
-                          context: context,
-                          title: 'Khôi phục giao dịch',
-                          message: 'Đã kiểm tra tài khoản. Không tìm thấy gói cước cần khôi phục.',
-                          isSuccess: true,
-                        );
-                      },
-                      child: const Text(
-                        'Khôi phục giao dịch',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                      ),
-                    ),
-                    const Text('•', style: TextStyle(color: AppColors.textSecondary)),
-                    TextButton(
-                      onPressed: () {
-                        showAppAlertDialog(
-                          context: context,
-                          title: 'Điều khoản dịch vụ',
-                          message: 'Bằng việc đăng ký, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của Mousey.',
-                          isSuccess: true,
-                        );
-                      },
-                      child: const Text(
-                        'Điều khoản dịch vụ',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withValues(alpha: 0.3),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            ),
         ],
       ),
     );
@@ -317,8 +292,9 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.cardGradientStart,
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.border),
             ),
             child: Icon(icon, color: AppColors.primary, size: 22),
           ),

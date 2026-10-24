@@ -85,6 +85,9 @@ class _HomeTabState extends State<HomeTab> {
     if (oldWidget.selectedMonth != widget.selectedMonth) {
       BudgetService.instance.loadBudgets(_monthStr);
     }
+    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
+      setState(() {});
+    }
   }
 
   String get _monthStr {

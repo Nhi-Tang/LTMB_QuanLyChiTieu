@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:bcrypt/bcrypt.dart';
 import '../models/app_notification_model.dart';
 import '../models/budget_model.dart';
 import '../models/pending_transaction_model.dart';
@@ -52,7 +53,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 19,
+      version: 20,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -267,10 +268,11 @@ class DatabaseHelper {
     final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM users')) ?? 0;
     if (count == 0) {
       final now = DateTime.now().toIso8601String();
+      final adminHash = BCrypt.hashpw('admin123', BCrypt.gensalt());
       await db.insert('users', {
         'name': 'Quản trị viên (Admin)',
         'email': 'admin@piggysmart.com',
-        'password': 'admin123',
+        'password': adminHash,
         'role': 'admin',
         'isActive': 1,
         'createdAt': now,
@@ -278,16 +280,36 @@ class DatabaseHelper {
         'plan': 'pro',
       });
 
+      final userHash = BCrypt.hashpw('user123', BCrypt.gensalt());
       await db.insert('users', {
         'name': 'Nguyễn Văn A',
         'email': 'user@piggysmart.com',
-        'password': 'user123',
+        'password': userHash,
         'role': 'user',
         'isActive': 1,
         'createdAt': now,
         'provider': 'password',
         'plan': 'free',
       });
+    }
+
+    await _hashExistingPlaintextPasswords(db);
+  }
+
+  Future<void> _hashExistingPlaintextPasswords(Database db) async {
+    try {
+      final users = await db.query('users');
+      for (var u in users) {
+        final id = u['id'];
+        final pass = u['password'] as String? ?? '';
+        if (pass.isNotEmpty && !pass.startsWith('\$2')) {
+          final hashed = BCrypt.hashpw(pass, BCrypt.gensalt());
+          await db.update('users', {'password': hashed}, where: 'id = ?', whereArgs: [id]);
+          debugPrint('🔐 [DatabaseHelper] Hashed legacy plaintext password for user id=$id');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error hashing plaintext passwords: $e');
     }
   }
 
@@ -611,6 +633,20 @@ class DatabaseHelper {
       try {
         await db.execute("UPDATE transactions SET kind = 'expense' WHERE is_expense = 1 AND (kind IS NULL OR kind = '');");
         await db.execute("UPDATE transactions SET kind = 'income' WHERE is_expense = 0 AND (kind IS NULL OR kind = '');");
+      } catch (_) {}
+    }
+    if (oldVersion < 20) {
+      // Migration v20: Mã hóa mật khẩu user bằng bcrypt nếu chưa được mã hóa
+      try {
+        final users = await db.query('users');
+        for (var u in users) {
+          final id = u['id'];
+          final pass = u['password'] as String? ?? '';
+          if (pass.isNotEmpty && !pass.startsWith('\$2')) {
+            final hashed = BCrypt.hashpw(pass, BCrypt.gensalt());
+            await db.update('users', {'password': hashed}, where: 'id = ?', whereArgs: [id]);
+          }
+        }
       } catch (_) {}
     }
   }
@@ -953,7 +989,14 @@ class DatabaseHelper {
   Future<int> registerUser(UserModel user) async {
     final db = await instance.database;
     try {
-      final userToInsert = user.copyWith(role: user.email == 'admin@piggysmart.com' ? 'admin' : 'user');
+      String passToSave = user.password;
+      if (passToSave.isNotEmpty && !passToSave.startsWith('\$2')) {
+        passToSave = BCrypt.hashpw(passToSave, BCrypt.gensalt());
+      }
+      final userToInsert = user.copyWith(
+        password: passToSave,
+        role: user.email == 'admin@piggysmart.com' ? 'admin' : 'user',
+      );
       return await db.insert('users', userToInsert.toMap());
     } catch (e) {
       if (e.toString().contains('UNIQUE constraint failed')) {
@@ -967,12 +1010,30 @@ class DatabaseHelper {
     final db = await instance.database;
     final result = await db.query(
       'users',
-      where: 'email = ? AND password = ?',
-      whereArgs: [emailOrPhone.trim().toLowerCase(), password],
+      where: 'email = ?',
+      whereArgs: [emailOrPhone.trim().toLowerCase()],
     );
 
     if (result.isNotEmpty) {
-      return UserModel.fromMap(result.first);
+      final userMap = result.first;
+      final storedHash = userMap['password'] as String? ?? '';
+      bool isValid = false;
+      try {
+        if (storedHash.startsWith('\$2')) {
+          isValid = BCrypt.checkpw(password, storedHash);
+        } else {
+          isValid = (storedHash == password);
+          if (isValid) {
+            final newHash = BCrypt.hashpw(password, BCrypt.gensalt());
+            await db.update('users', {'password': newHash}, where: 'id = ?', whereArgs: [userMap['id']]);
+          }
+        }
+      } catch (_) {
+        isValid = (storedHash == password);
+      }
+      if (isValid) {
+        return UserModel.fromMap(userMap);
+      }
     }
     return null;
   }
@@ -989,9 +1050,13 @@ class DatabaseHelper {
 
   Future<int> updatePasswordByEmail(String email, String newPassword) async {
     final db = await instance.database;
+    String passToSave = newPassword;
+    if (passToSave.isNotEmpty && !passToSave.startsWith('\$2')) {
+      passToSave = BCrypt.hashpw(passToSave, BCrypt.gensalt());
+    }
     return await db.update(
       'users',
-      {'password': newPassword},
+      {'password': passToSave},
       where: 'email = ?',
       whereArgs: [email.trim().toLowerCase()],
     );
@@ -1001,9 +1066,14 @@ class DatabaseHelper {
 
   Future<int> insertOrUpdateUser(UserModel user) async {
     final db = await instance.database;
+    String passToSave = user.password;
+    if (passToSave.isNotEmpty && !passToSave.startsWith('\$2')) {
+      passToSave = BCrypt.hashpw(passToSave, BCrypt.gensalt());
+    }
+    final userToSave = user.copyWith(password: passToSave);
     return await db.insert(
       'users',
-      user.toMap(),
+      userToSave.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }

@@ -45,9 +45,17 @@ class _ProfileTabState extends State<ProfileTab> {
   bool _dailyReminderEnabled = true;
 
   bool _isSyncing = false;
-  String _syncStatus = 'Đã đồng bộ';
-  String _lastSyncText = 'Chưa đồng bộ';
+  String _syncStateKey = 'synced'; // 'synced', 'syncing', 'error'
+  String? _lastSyncTimeFormatted;
   int _pendingCount = 0;
+
+  @override
+  void didUpdateWidget(covariant ProfileTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
+      setState(() {});
+    }
+  }
 
   static const Color primaryBeige = Color(0xFFFCF1D0);
   static const Color darkBeige = Color(0xFF5D4222);
@@ -104,7 +112,7 @@ class _ProfileTabState extends State<ProfileTab> {
       if (ts != null && mounted) {
         final dt = DateTime.fromMillisecondsSinceEpoch(ts);
         setState(() {
-          _lastSyncText = '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+          _lastSyncTimeFormatted = '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
         });
       }
     }
@@ -114,7 +122,7 @@ class _ProfileTabState extends State<ProfileTab> {
     if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
+        MaterialPageRoute(builder: (context) => ProUpgradeScreen(selectedLanguage: widget.selectedLanguage)),
       );
       return;
     }
@@ -124,7 +132,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
     setState(() {
       _isSyncing = true;
-      _syncStatus = 'Đang đồng bộ...';
+      _syncStateKey = 'syncing';
     });
     try {
       await SyncService.instance.syncAll();
@@ -132,10 +140,10 @@ class _ProfileTabState extends State<ProfileTab> {
       if (mounted) {
         setState(() {
           _isSyncing = false;
-          _syncStatus = 'Đã đồng bộ';
+          _syncStateKey = 'synced';
           if (ts != null) {
             final dt = DateTime.fromMillisecondsSinceEpoch(ts);
-            _lastSyncText = '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+            _lastSyncTimeFormatted = '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
           }
         });
         showAppAlertDialog(
@@ -149,7 +157,7 @@ class _ProfileTabState extends State<ProfileTab> {
       if (mounted) {
         setState(() {
           _isSyncing = false;
-          _syncStatus = 'Lỗi đồng bộ';
+          _syncStateKey = 'error';
         });
         showAppAlertDialog(
           context: context,
@@ -649,7 +657,7 @@ class _ProfileTabState extends State<ProfileTab> {
                             ),
                             icon: const Icon(Icons.add_rounded),
                             label: Text(
-                              isProUser ? 'Thêm sổ mới' : 'Thêm sổ mới (Nâng cấp PRO)',
+                              isProUser ? AppTranslations.tr(lang, 'add_ledger_btn') : AppTranslations.tr(lang, 'add_new_ledger'),
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             onPressed: () {
@@ -977,15 +985,15 @@ class _ProfileTabState extends State<ProfileTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Nâng cấp Mousey PRO 👑',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF3B2A17)),
+                            Text(
+                              AppTranslations.tr(lang, 'upgrade_pro_title'),
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF3B2A17)),
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
-                            const Text(
-                              'Mở khóa sổ sách không giới hạn, xuất Excel & đồng bộ cloud',
-                              style: TextStyle(fontSize: 11, color: Color(0xFF8A7A66)),
+                            Text(
+                              AppTranslations.tr(lang, 'upgrade_pro_desc'),
+                              style: const TextStyle(fontSize: 11, color: Color(0xFF8A7A66)),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
@@ -1006,7 +1014,7 @@ class _ProfileTabState extends State<ProfileTab> {
                             MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
                           );
                         },
-                        child: const Text('Nâng cấp', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(AppTranslations.tr(lang, 'upgrade'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -1035,7 +1043,7 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 24),
 
           // GROUP: TỰ ĐỘNG THU CHI & NGÂN HÀNG
-          _SectionHeaderTitle('TỰ ĐỘNG THU CHI & NGÂN HÀNG'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'auto_finance_banking')),
           const SizedBox(height: 8),
           SettingsTileGroup(
             children: [
@@ -1043,8 +1051,8 @@ class _ProfileTabState extends State<ProfileTab> {
                 leading: const Icon(Icons.mark_email_unread_outlined, color: accentBeige),
                 title: Row(
                   children: [
-                    const Expanded(
-                      child: Text('Giao dịch chờ xác nhận', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
+                    Expanded(
+                      child: Text(AppTranslations.tr(lang, 'pending_confirmation'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                     ),
                     if (_pendingCount > 0)
                       Container(
@@ -1060,10 +1068,14 @@ class _ProfileTabState extends State<ProfileTab> {
                       ),
                   ],
                 ),
-                subtitle: const Text('Duyệt giao dịch ngân hàng đọc tự động', style: TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                subtitle: Text(AppTranslations.tr(lang, 'approve_bank_tx_sub'), style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
-                  PendingInboxSheet.show(context, onTransactionsUpdated: _loadPendingCount);
+                  PendingInboxSheet.show(
+                    context,
+                    selectedLanguage: widget.selectedLanguage,
+                    onTransactionsUpdated: _loadPendingCount,
+                  );
                 },
               ),
               const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
@@ -1071,10 +1083,10 @@ class _ProfileTabState extends State<ProfileTab> {
                 leading: const Icon(Icons.notifications_active_outlined, color: accentBeige),
                 title: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Cài đặt đọc thông báo ngân hàng',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        AppTranslations.tr(lang, 'bank_notification_settings'),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -1101,7 +1113,11 @@ class _ProfileTabState extends State<ProfileTab> {
                   }
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => NotificationSettingsScreen(
+                        selectedLanguage: widget.selectedLanguage,
+                      ),
+                    ),
                   );
                 },
               ),
@@ -1191,14 +1207,18 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 24),
 
           // GROUP: ĐỒNG BỘ DỮ LIỆU ĐÁM MÂY (CLOUD SYNC)
-          _SectionHeaderTitle('ĐỒNG BỘ DỮ LIỆU ĐÁM MÂY'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'cloud_sync_section')),
           const SizedBox(height: 8),
           SettingsTileGroup(
             children: [
               SettingsTile(
                 leading: const Icon(Icons.cloud_sync_rounded, color: accentBeige),
-                title: const Text('Trạng thái đồng bộ', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
-                subtitle: Text('Trạng thái: $_syncStatus · Lần cuối: $_lastSyncText', style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                title: Text(AppTranslations.tr(lang, 'sync_status_title'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
+                subtitle: (() {
+                  final translatedStatus = AppTranslations.tr(lang, 'sync_state_$_syncStateKey');
+                  final lastSyncStr = _lastSyncTimeFormatted ?? AppTranslations.tr(lang, 'never');
+                  return Text('${AppTranslations.tr(lang, 'sync_status_title')}: $translatedStatus · ${AppTranslations.tr(lang, 'last_sync_label')}: $lastSyncStr', style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis);
+                })(),
                 trailing: _isSyncing
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: accentBeige))
                     : ElevatedButton(
@@ -1210,7 +1230,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: _syncNow,
-                        child: const Text('Đồng bộ ngay', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        child: Text(AppTranslations.tr(lang, 'sync_now'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
               ),
             ],
@@ -1219,7 +1239,7 @@ class _ProfileTabState extends State<ProfileTab> {
           const SizedBox(height: 24),
 
           // GROUP: QUẢN LÝ TÀI KHOẢN & BẢO MẬT
-          _SectionHeaderTitle('QUẢN LÝ TÀI KHOẢN & BẢO MẬT'),
+          _SectionHeaderTitle(AppTranslations.tr(lang, 'account_security_section')),
           const SizedBox(height: 8),
           SettingsTileGroup(
             children: [
@@ -1232,8 +1252,8 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                   child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
                 ),
-                title: const Text('Xoá toàn bộ dữ liệu', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
-                subtitle: const Text('Xoá giao dịch, tài khoản & danh mục tuỳ chỉnh', style: TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                title: Text(AppTranslations.tr(lang, 'delete_all_data'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
+                subtitle: Text(AppTranslations.tr(lang, 'delete_all_data_sub'), style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showDeleteMyDataDialog,
               ),
@@ -1290,7 +1310,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
                   overflow: TextOverflow.ellipsis,
                 ),
-                subtitle: const Text('Đăng xuất tài khoản khỏi thiết bị này', style: TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                subtitle: Text(AppTranslations.tr(lang, 'logout_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: widget.onLogout,
               ),

@@ -3,15 +3,18 @@ import '../../backend/database/db_helper.dart';
 import '../../backend/models/savings_goal_model.dart';
 import '../../backend/models/savings_transaction_model.dart';
 import '../../core/utils/money_input_formatter.dart';
+import '../utils/app_translations.dart';
 import 'app_alert_dialog.dart';
 
 class AddEditSavingsGoalDialog extends StatefulWidget {
   final SavingsGoalModel? goalToEdit;
+  final String selectedLanguage;
   final VoidCallback onSaved;
 
   const AddEditSavingsGoalDialog({
     super.key,
     this.goalToEdit,
+    this.selectedLanguage = 'Tiếng Việt',
     required this.onSaved,
   });
 
@@ -79,6 +82,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = widget.selectedLanguage;
     final isEditing = widget.goalToEdit != null;
     const accentBeige = Color(0xFFE5D3AF);
 
@@ -97,7 +101,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              isEditing ? 'Sửa mục tiêu tiết kiệm' : 'Thêm mục tiêu tiết kiệm',
+              isEditing ? AppTranslations.tr(lang, 'edit_savings_goal') : AppTranslations.tr(lang, 'add_savings_goal'),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -115,7 +119,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Tên mục tiêu',
+                    labelText: AppTranslations.tr(lang, 'goal_name'),
                     hintText: 'VD: Mua laptop, Du lịch Đà Lạt...',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -127,7 +131,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [MoneyInputFormatter()],
                   decoration: InputDecoration(
-                    labelText: 'Số tiền cần đạt (đ)',
+                    labelText: AppTranslations.tr(lang, 'target_amount'),
                     hintText: 'VD: 20.000.000',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -145,7 +149,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [MoneyInputFormatter()],
                     decoration: InputDecoration(
-                      labelText: 'Số tiền đã có sẵn ban đầu (đ)',
+                      labelText: AppTranslations.tr(lang, 'initial_amount'),
                       hintText: 'VD: 2.000.000',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -192,61 +196,44 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                               Expanded(
                                 child: Text(
                                   _selectedDeadline == null
-                                      ? 'Hạn hoàn thành (Tùy chọn)'
+                                      ? AppTranslations.tr(lang, 'deadline_optional')
                                       : 'Hạn: ${_selectedDeadline!.day}/${_selectedDeadline!.month}/${_selectedDeadline!.year}',
                                   style: TextStyle(
                                     color: _selectedDeadline == null ? Colors.grey[600] : Colors.black87,
                                     fontWeight: _selectedDeadline != null ? FontWeight.bold : FontWeight.normal,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        if (_selectedDeadline != null)
-                          InkWell(
-                            onTap: () => setState(() => _selectedDeadline = null),
-                            child: const Icon(Icons.clear, size: 18, color: Colors.grey),
-                          ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text('Chọn Icon:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey)),
+                Text(AppTranslations.tr(lang, 'choose_icon'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
                 const SizedBox(height: 8),
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: _availableIcons.map((ic) {
-                    final isSel = _selectedIcon == ic;
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: _availableIcons.map((iconPath) {
+                    final isSelected = _selectedIcon == iconPath;
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedIcon = ic),
+                      onTap: () => setState(() => _selectedIcon = iconPath),
                       child: Container(
-                        width: 52,
-                        height: 52,
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+                          color: isSelected ? accentBeige.withValues(alpha: 0.4) : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSel ? const Color(0xFFD4A55A) : Colors.transparent,
-                            width: 2.5,
+                            color: isSelected ? accentBeige : Colors.transparent,
+                            width: 2,
                           ),
                         ),
                         child: ClipOval(
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Image.asset(
-                              ic,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
-                                Icons.category_rounded,
-                                size: 24,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
+                          child: Image.asset(iconPath, width: 32, height: 32, fit: BoxFit.cover),
                         ),
                       ),
                     );
@@ -260,7 +247,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          child: Text(AppTranslations.tr(lang, 'cancel'), style: const TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -326,7 +313,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
               widget.onSaved();
             }
           },
-          child: Text(isEditing ? 'LƯU' : 'TẠO MỤC TIÊU', style: const TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
+          child: Text(isEditing ? AppTranslations.tr(lang, 'save') : AppTranslations.tr(lang, 'create_goal_btn'), style: const TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
         ),
       ],
     );

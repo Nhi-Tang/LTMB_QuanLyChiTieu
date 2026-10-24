@@ -32,6 +32,14 @@ class _SavingsTabState extends State<SavingsTab> {
   static const Color accentBeigy = Color(0xFFE5D3AF);
 
   @override
+  void didUpdateWidget(covariant SavingsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
+      setState(() {});
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     _loadGoals();
@@ -69,6 +77,7 @@ class _SavingsTabState extends State<SavingsTab> {
     showDialog(
       context: context,
       builder: (ctx) => AddEditSavingsGoalDialog(
+        selectedLanguage: widget.selectedLanguage,
         onSaved: () => _loadGoals(),
       ),
     );
@@ -132,9 +141,9 @@ class _SavingsTabState extends State<SavingsTab> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'TỔNG TIỀN ĐÃ TIẾT KIỆM',
-                  style: TextStyle(
+                Text(
+                  AppTranslations.tr(lang, 'total_savings'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,

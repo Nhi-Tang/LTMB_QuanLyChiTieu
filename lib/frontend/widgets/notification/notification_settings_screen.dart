@@ -9,7 +9,9 @@ import 'pending_inbox.dart';
 import 'permission_guide_screen.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen({super.key});
+  final String selectedLanguage;
+
+  const NotificationSettingsScreen({super.key, this.selectedLanguage = 'Tiếng Việt'});
 
   @override
   State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
@@ -234,7 +236,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             ),
             onPressed: () {
               Navigator.pop(ctx);
-              PendingInboxSheet.show(context);
+              PendingInboxSheet.show(
+      context,
+      selectedLanguage: widget.selectedLanguage,
+    );
             },
             child: const Text('Xem Hộp thư Chờ xác nhận'),
           ),

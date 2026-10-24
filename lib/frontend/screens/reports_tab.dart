@@ -26,6 +26,14 @@ class _ReportsTabState extends State<ReportsTab> {
   bool _showAllCategories = false;
   int _trendMonthRange = 6; // 3t, 6t, 12t, 24t
 
+  @override
+  void didUpdateWidget(covariant ReportsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
+      setState(() {});
+    }
+  }
+
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'Ăn uống':

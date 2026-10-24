@@ -259,8 +259,8 @@ class _AuthScreenState extends State<AuthScreen> {
         if (!mounted) return;
 
         await _showAlertDialog(
-          title: 'Đăng ký thành công',
-          message: 'Đăng ký tài khoản thành công!',
+          title: 'Thông báo',
+          message: 'Đăng ký tài khoản thành công, vui lòng đăng nhập.',
           isSuccess: true,
         );
 
@@ -643,17 +643,17 @@ class _AuthScreenState extends State<AuthScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: Center(
-                                  child: Text(
-                                    'G',
-                                    style: TextStyle(
-                                      color: Color(0xFF4285F4),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 18,
-                                    ),
+                              Container(
+                                width: 24,
+                                height: 24,
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'G',
+                                  style: TextStyle(
+                                    color: Color(0xFF4285F4),
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 18,
+                                    height: 1.0,
                                   ),
                                 ),
                               ),

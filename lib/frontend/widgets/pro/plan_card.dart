@@ -7,6 +7,7 @@ class PlanCard extends StatelessWidget {
   final String period;
   final String? savings;
   final bool isBestValue;
+  final String? bestValueLabel;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -17,6 +18,7 @@ class PlanCard extends StatelessWidget {
     required this.period,
     this.savings,
     this.isBestValue = false,
+    this.bestValueLabel,
     required this.isSelected,
     required this.onTap,
   });
@@ -88,9 +90,9 @@ class PlanCard extends StatelessWidget {
                             color: AppColors.primary,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'TIẾT KIỆM NHẤT',
-                            style: TextStyle(
+                          child: Text(
+                            bestValueLabel ?? 'TIẾT KIỆM NHẤT',
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 8,
                               fontWeight: FontWeight.bold,

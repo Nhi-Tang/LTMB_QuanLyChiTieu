@@ -93,6 +93,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       case 'pending_tx':
         PendingInboxSheet.show(
           context,
+          selectedLanguage: widget.selectedLanguage,
           onTransactionsUpdated: widget.onTransactionsUpdated,
         );
         break;
@@ -100,7 +101,10 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BudgetsScreen(ledgerId: widget.ledgerId),
+            builder: (context) => BudgetsScreen(
+              ledgerId: widget.ledgerId,
+              selectedLanguage: widget.selectedLanguage,
+            ),
           ),
         );
         break;

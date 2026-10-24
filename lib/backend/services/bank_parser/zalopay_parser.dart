@@ -1,9 +1,57 @@
 import 'bank_parser.dart';
+import 'bank_notification_parser.dart';
 import 'direction_resolver.dart';
 import 'package:quanlychitieu/core/utils/account_masker.dart';
 
 class ZaloPayParser extends BankParser {
   ZaloPayParser() : super('ZaloPay');
+
+  @override
+  ParsedBankNotification? parseNotification({
+    required String title,
+    required String text,
+    DateTime? timestamp,
+  }) {
+    if (!_isRealTransaction(title, text)) {
+      return null;
+    }
+    return super.parseNotification(title: title, text: text, timestamp: timestamp);
+  }
+
+  bool _isRealTransaction(String title, String text) {
+    final combined = '${title.toLowerCase()} ${text.toLowerCase()}';
+    
+    // Các từ khóa quảng cáo, ưu đãi, voucher, mã giảm giá -> Bỏ qua
+    final promoKeywords = [
+      'khuyến mãi', 'khuyen mai', 'ưu đãi', 'uu dai', 'voucher', 'giảm giá', 
+      'giam gia', 'tặng', 'tang', 'mã giảm', 'ma giam', 'điểm tích lũy', 
+      'trúng thưởng', 'quà tặng', 'nhận ngay', 'nhan ngay', 'chương trình',
+      'thông báo mới', 'nạp ngay', 'sưu tầm', 'sưu tam'
+    ];
+
+    for (var kw in promoKeywords) {
+      if (combined.contains(kw) && !combined.contains('thành công') && !combined.contains('thanh cong')) {
+        return false;
+      }
+    }
+
+    // Yêu cầu bắt buộc phải có từ khóa tài chính / giao dịch
+    final transactionKeywords = [
+      'chuyển', 'chuyen', 'nhận', 'nhan', 'thanh toán', 'thanh toan', 
+      'nạp', 'nap', 'rút', 'rut', 'giao dịch', 'giao dich', 'trừ', 'tru',
+      'số dư', 'so du', 'biến động'
+    ];
+
+    bool hasTransactionKeyword = false;
+    for (var kw in transactionKeywords) {
+      if (combined.contains(kw)) {
+        hasTransactionKeyword = true;
+        break;
+      }
+    }
+
+    return hasTransactionKeyword;
+  }
 
   @override
   String detectType(String title, String text) {

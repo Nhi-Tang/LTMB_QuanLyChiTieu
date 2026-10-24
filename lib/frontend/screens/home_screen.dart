@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
@@ -40,9 +41,26 @@ class _HomeScreenState extends State<HomeScreen> {
     _currentUser = widget.currentUser;
     final now = DateTime.now();
     _selectedMonth = DateTime(now.year, now.month, 1);
+    _loadPreferences();
     _loadTransactions();
     _transactionService.addListener(_loadTransactions);
     BankNotificationListenerManager.instance.startListening(uid: _currentUser.uid);
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lang = prefs.getString('mousey_language_${_currentUser.uid}') ?? prefs.getString('mousey_language') ?? 'Tiếng Việt';
+    if (mounted) {
+      setState(() {
+        _selectedLanguage = lang;
+      });
+    }
+  }
+
+  Future<void> _saveLanguage(String lang) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('mousey_language_${_currentUser.uid}', lang);
+    await prefs.setString('mousey_language', lang);
   }
 
   @override
@@ -208,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {
                       _selectedLanguage = newLanguage;
                     });
+                    _saveLanguage(newLanguage);
                   },
                   onLogout: () => _logout(context),
                 ),
