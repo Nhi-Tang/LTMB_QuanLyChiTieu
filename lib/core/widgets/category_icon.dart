@@ -41,7 +41,7 @@ class CategoryIcon extends StatelessWidget {
             fit: BoxFit.cover,
             errorBuilder: (ctx, err, stack) {
               return Image.asset(
-                'assets/icon/18 • Khác.png',
+                'assets/icon/cat_khac.png',
                 width: imageSize,
                 height: imageSize,
                 fit: BoxFit.cover,
