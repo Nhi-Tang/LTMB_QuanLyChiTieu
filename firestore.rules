@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      // Mỗi người chỉ đọc được document của chính mình
+      allow read: if isOwner(userId);
+
+      // Khi tạo mới: Client không được tự ý set các trường nhạy cảm (role, plan, proExpiredAt, trialUsed)
+      allow create: if isOwner(userId)
+                    && !request.resource.data.keys().hasAny(['role', 'plan', 'proExpiredAt', 'trialUsed']);
+
+      // Khi cập nhật: Client KHÔNG được thay đổi các trường nhạy cảm như 'role', 'plan', 'proExpiredAt', 'trialUsed'
+      allow update: if isOwner(userId)
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'plan', 'proExpiredAt', 'trialUsed']);
+    }
+
+    match /users/{userId}/orders/{orderId} {
+      // Người dùng chỉ đọc đơn hàng của mình, việc ghi/tạo đơn hàng do Backend API quản lý
+      allow read: if isOwner(userId);
+      allow write: false;
+    }
+
+    match /users/{userId}/subscriptions/{subId} {
+      // Người dùng chỉ đọc thông tin gói đăng ký của mình, việc ghi do Backend API quản lý
+      allow read: if isOwner(userId);
+      allow write: false;
+    }
+
+    // Chỉ backend (Admin SDK) đọc/ghi: chỉ mục mã thanh toán và log webhook
+    match /payment_codes/{code} {
+      allow read, write: if false;
+    }
+    match /payment_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId}/transactions/{txId} {
+      allow read, write: if isOwner(userId)
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 0
+        && request.resource.data.updatedAt is number
+        && (!request.resource.data.keys().hasAny(['note']) || request.resource.data.note is string && request.resource.data.note.size() <= 500);
+    }
+
+    match /users/{userId}/savings_goals/{goalId} {
+      allow read, write: if isOwner(userId)
+        && request.resource.data.targetAmount is number
+        && request.resource.data.targetAmount >= 0
+        && request.resource.data.updatedAt is number;
+    }
+
+    match /users/{userId}/budgets/{budgetId} {
+      allow read, write: if isOwner(userId)
+        && request.resource.data.amountLimit is number
+        && request.resource.data.amountLimit > 0
+        && request.resource.data.updatedAt is number;
+    }
+  }
+}
