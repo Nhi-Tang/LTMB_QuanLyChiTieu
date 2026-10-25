@@ -766,7 +766,7 @@ class _HomeTabState extends State<HomeTab> {
                                     MoneyText(
                                       amount: s.spent,
                                       prefix: '',
-                                      suffix: ' / ${s.limit.toInt()} đ',
+                                      suffix: ' / ${formatMoney(s.limit)} đ',
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
