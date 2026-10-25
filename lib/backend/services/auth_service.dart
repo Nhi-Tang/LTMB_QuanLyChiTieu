@@ -53,7 +53,6 @@ class AuthService {
       if (firebaseUser == null) throw Exception('Đăng nhập Firebase thất bại.');
 
       final idToken = await getIdToken(forceRefresh: true);
-      developer.log('🔥 FIREBASE_ID_TOKEN: $idToken', name: 'MouseyAuth');
       UserModel localUser = await _syncWithBackendOrLocal(firebaseUser, idToken, 'google.com');
       return localUser;
     } catch (e) {
