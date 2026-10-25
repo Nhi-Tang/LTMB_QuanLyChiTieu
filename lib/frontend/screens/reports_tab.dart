@@ -190,9 +190,9 @@ class _ReportsTabState extends State<ReportsTab> {
     final categories = _dynamicCategories;
     if (categories.isEmpty || _totalReportAmount == 0) {
       if (_reportTypeIndex == 1) {
-        return AppTranslations.tr(lang, 'piggy_quote_no_income');
+        return AppTranslations.tr(lang, 'mousey_quote_no_income');
       }
-      return AppTranslations.tr(lang, 'piggy_quote_no_expense');
+      return AppTranslations.tr(lang, 'mousey_quote_no_expense');
     }
     final top = categories.first;
     final translatedCategory = AppTranslations.trCategory(lang, top['name'] as String);
@@ -396,7 +396,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '— ${AppTranslations.tr(lang, 'piggy_friend')}',
+                      '— ${AppTranslations.tr(lang, 'mousey_friend')}',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,

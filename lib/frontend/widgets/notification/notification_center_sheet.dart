@@ -329,7 +329,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/icon/piggy.jpg',
+            'assets/avatar/avatar.jpg',
             width: 80,
             height: 80,
             errorBuilder: (ctx, err, stack) => const Icon(

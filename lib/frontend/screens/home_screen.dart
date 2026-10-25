@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentTabIndex = 0;
   late DateTime _selectedMonth;
   late UserModel _currentUser;
-  String _selectedAvatarKey = 'piggy';
+  String _selectedAvatarKey = 'mousey';
   String _selectedLanguage = 'Tiếng Việt';
 
   // Transactions list

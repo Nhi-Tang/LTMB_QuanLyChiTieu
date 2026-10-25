@@ -326,7 +326,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/icon/piggy.jpg',
+            'assets/avatar/avatar.jpg',
             width: 80,
             height: 80,
             errorBuilder: (context, error, stackTrace) => const Icon(

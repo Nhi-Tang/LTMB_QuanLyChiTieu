@@ -63,7 +63,7 @@ Widget buildUserAvatar({
   }
 
   switch (avatarKey) {
-    case 'piggy':
+    case 'piggy': // key avatar cũ đã lưu ở bản trước
     case 'mousey':
       return MouseyAvatar(size: size);
     case 'cat':

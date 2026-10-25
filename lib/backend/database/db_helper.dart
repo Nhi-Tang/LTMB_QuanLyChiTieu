@@ -38,7 +38,7 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('piggysmart.db');
+    _database = await _initDB('mousey.db');
     return _database!;
   }
 
@@ -50,10 +50,11 @@ class DatabaseHelper {
 
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+    await _migrateLegacyDbFile(dbPath, path);
 
     final db = await openDatabase(
       path,
-      version: 22,
+      version: 23,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -64,14 +65,30 @@ class DatabaseHelper {
       },
     );
 
-    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
+    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@mousey.com' AND role != 'admin'");
 
     return db;
   }
 
+  /// Bản cũ lưu dữ liệu ở piggysmart.db: đổi tên sang file mới để người dùng không mất dữ liệu
+  static Future<void> _migrateLegacyDbFile(String dbPath, String newPath) async {
+    if (kIsWeb) return;
+    try {
+      final legacyPath = join(dbPath, 'piggysmart.db');
+      if (await File(newPath).exists() || !await File(legacyPath).exists()) return;
+      for (final suffix in ['', '-journal', '-wal', '-shm']) {
+        final f = File('$legacyPath$suffix');
+        if (await f.exists()) await f.rename('$newPath$suffix');
+      }
+      debugPrint('🗄️ [DatabaseHelper] Migrated legacy piggysmart.db -> ${basename(newPath)}');
+    } catch (e) {
+      debugPrint('🗄️ [DatabaseHelper] Legacy DB migration failed: $e');
+    }
+  }
+
   Future<void> _createDB(Database db, int version) async {
     await ensureSchema(db);
-    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
+    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@mousey.com' AND role != 'admin'");
   }
 
   Future<void> ensureSchema(Database db) async {
@@ -271,7 +288,7 @@ class DatabaseHelper {
       final adminHash = BCrypt.hashpw('admin123', BCrypt.gensalt());
       await db.insert('users', {
         'name': 'Quản trị viên (Admin)',
-        'email': 'admin@piggysmart.com',
+        'email': 'admin@mousey.com',
         'password': adminHash,
         'role': 'admin',
         'isActive': 1,
@@ -283,7 +300,7 @@ class DatabaseHelper {
       final userHash = BCrypt.hashpw('user123', BCrypt.gensalt());
       await db.insert('users', {
         'name': 'Nguyễn Văn A',
-        'email': 'user@piggysmart.com',
+        'email': 'user@mousey.com',
         'password': userHash,
         'role': 'user',
         'isActive': 1,
@@ -350,7 +367,7 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     debugPrint('🗄️ [DatabaseHelper] _onUpgrade from $oldVersion to $newVersion');
     await ensureSchema(db);
-    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@piggysmart.com' AND role != 'admin'");
+    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@mousey.com' AND role != 'admin'");
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS user_change (
@@ -652,6 +669,12 @@ class DatabaseHelper {
     if (oldVersion < 22) {
       // Migration v22: bản v21 có thể đã tạo budget_alerts thiếu cột createdAt/uid
       await _ensureBudgetAlertsColumns(db);
+    }
+    if (oldVersion < 23) {
+      // Migration v23: đổi thương hiệu PiggySmart -> Mousey cho email lưu trên máy
+      try {
+        await db.rawUpdate("UPDATE OR IGNORE users SET email = REPLACE(email, '@piggysmart.com', '@mousey.com') WHERE email LIKE '%@piggysmart.com'");
+      } catch (_) {}
     }
   }
 
@@ -1019,7 +1042,7 @@ class DatabaseHelper {
       }
       final userToInsert = user.copyWith(
         password: passToSave,
-        role: user.email == 'admin@piggysmart.com' ? 'admin' : 'user',
+        role: user.email == 'admin@mousey.com' ? 'admin' : 'user',
       );
       return await db.insert('users', userToInsert.toMap());
     } catch (e) {

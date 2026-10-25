@@ -8,9 +8,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(
-    title="PiggySmart API",
+    title="Mousey API",
     version="1.0.0",
-    description="Backend API cho ứng dụng quản lý chi tiêu PiggySmart",
+    description="Backend API cho ứng dụng quản lý chi tiêu Mousey",
 )
 
 app.add_middleware(
@@ -26,7 +26,7 @@ app.include_router(subscription.router)
 
 @app.get("/")
 async def root():
-    return {"message": "PiggySmart API is running successfully!"}
+    return {"message": "Mousey API is running successfully!"}
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

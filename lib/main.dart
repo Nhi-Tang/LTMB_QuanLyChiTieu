@@ -77,7 +77,7 @@ class AuthGate extends StatelessWidget {
                 password: '',
                 photoUrl: firebaseUser.photoURL,
                 provider: firebaseUser.providerData.isNotEmpty ? firebaseUser.providerData.first.providerId : 'password',
-                role: firebaseUser.email == 'admin@mousey.com' || firebaseUser.email == 'admin@piggysmart.com' ? 'admin' : 'user',
+                role: firebaseUser.email == 'admin@mousey.com' ? 'admin' : 'user',
                 plan: 'free',
                 createdAt: DateTime.now().toIso8601String(),
               );

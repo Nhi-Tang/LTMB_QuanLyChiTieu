@@ -66,7 +66,7 @@ class AuthService {
       String email = emailOrPhone.trim();
       if (!email.contains('@')) {
         final allUsers = await _dbHelper.getAllUsers();
-        final match = allUsers.where((u) => u.email == emailOrPhone || u.email == '$emailOrPhone@mousey.local' || u.email == '$emailOrPhone@piggysmart.local').toList();
+        final match = allUsers.where((u) => u.email == emailOrPhone || u.email == '$emailOrPhone@mousey.local').toList();
         if (match.isNotEmpty) {
           email = match.first.email;
           if (!email.contains('@')) {
@@ -164,7 +164,7 @@ class AuthService {
       password: '',
       photoUrl: firebaseUser.photoURL,
       provider: provider,
-      role: firebaseUser.email == 'admin@mousey.com' || firebaseUser.email == 'admin@piggysmart.com' ? 'admin' : 'user',
+      role: firebaseUser.email == 'admin@mousey.com' ? 'admin' : 'user',
       plan: 'free',
       lastLoginAt: now,
       createdAt: now,

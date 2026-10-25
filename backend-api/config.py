@@ -15,7 +15,7 @@ ALLOW_UNVERIFIED_TOKEN = _bool("ALLOW_UNVERIFIED_TOKEN", False)
 ENABLE_MOCK_PAY = _bool("ENABLE_MOCK_PAY", False)
 ADMIN_EMAILS = {
     e.strip().lower()
-    for e in os.getenv("ADMIN_EMAILS", "admin@mousey.com,admin@piggysmart.com").split(",")
+    for e in os.getenv("ADMIN_EMAILS", "admin@mousey.com").split(",")
     if e.strip()
 }
 

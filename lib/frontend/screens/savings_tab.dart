@@ -119,7 +119,7 @@ class _SavingsTabState extends State<SavingsTab> {
                   children: [
                     Expanded(
                       child: Text(
-                        AppTranslations.tr(lang, 'piggy_savings_badge'),
+                        AppTranslations.tr(lang, 'mousey_savings_badge'),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -176,7 +176,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          AppTranslations.tr(lang, 'piggy_quote_home'),
+                          AppTranslations.tr(lang, 'mousey_quote_home'),
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
