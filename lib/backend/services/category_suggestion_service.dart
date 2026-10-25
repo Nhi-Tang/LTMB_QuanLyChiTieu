@@ -5,6 +5,7 @@ import '../database/db_helper.dart';
 import '../models/pending_transaction_model.dart';
 import '../models/transaction_model.dart';
 import 'bank_parser/bank_notification_parser.dart';
+import 'budget_alert_service.dart';
 import 'in_app_notification_service.dart';
 import 'daily_reminder_service.dart';
 import '../../core/utils/money_input_formatter.dart';
@@ -255,6 +256,7 @@ class CategorySuggestionService {
         uid: uid,
       );
       await DatabaseHelper.instance.insertTransaction(realTx, uid: uid);
+      await BudgetAlertService.instance.checkAndAlertForDate(realTx.date, uid: uid);
     }
 
     return pendingItem;

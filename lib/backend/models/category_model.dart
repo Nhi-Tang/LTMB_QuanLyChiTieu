@@ -108,115 +108,115 @@ class CategoryModel {
       case 'an uong':
       case 'fastfood_rounded':
       case 'food_icon':
-        return 'assets/icon/food_icon.jpg';
+        return 'assets/icon/01 • Ăn uống .png';
       case 'hóa đơn':
       case 'hoa don':
       case 'receipt_rounded':
       case 'bill_icon':
-        return 'assets/icon/bill_icon.jpg';
+        return 'assets/icon/04 • Hoá đơn .png';
       case 'di chuyển':
       case 'di chuyen':
       case 'directions_bus_rounded':
       case 'move_icon':
-        return 'assets/icon/move_icon.jpg';
+        return 'assets/icon/05 • Di chuyển .png';
       case 'mua sắm':
       case 'mua sam':
       case 'shopping_bag_rounded':
       case 'shopping_icon':
-        return 'assets/icon/shopping_icon.jpg';
+        return 'assets/icon/03 • Mua sắm .png';
       case 'giải trí':
       case 'giai tri':
       case 'sports_esports_rounded':
       case 'game_icon':
-        return 'assets/icon/game_icon.jpg';
+        return 'assets/icon/02 • Giải trí .png';
       case 'sức khoẻ':
       case 'suc khoe':
       case 'medical_services_rounded':
       case 'health_icon':
-        return 'assets/icon/health_icon.jpg';
+        return 'assets/icon/06 • Sức khoẻ .png';
       case 'làm đẹp':
       case 'lam dep':
       case 'content_cut_rounded':
       case 'beauty_icon':
       case 'beautify_icon':
-        return 'assets/icon/beautify_icon.jpg';
+        return 'assets/icon/07 • Làm đẹp.png';
       case 'quần áo':
       case 'quan ao':
       case 'checkroom_rounded':
       case 'clothes_icon':
-        return 'assets/icon/clothes_icon.jpg';
+        return 'assets/icon/08 • Quần áo.png';
       case 'học tập':
       case 'hoc tap':
       case 'school_rounded':
       case 'study_icon':
-        return 'assets/icon/study_icon.jpg';
+        return 'assets/icon/09 • Học tập.png';
       case 'thú cưng':
       case 'thu cung':
       case 'pets_rounded':
       case 'pets_icon':
-        return 'assets/icon/pets_icon.jpg';
+        return 'assets/icon/10 • Thú cưng.png';
       case 'con cái':
       case 'con cai':
       case 'child_care_rounded':
       case 'chil_icon':
       case 'concai_icon':
-        return 'assets/icon/chil_icon.jpg';
+        return 'assets/icon/11 • Con cái.png';
       case 'hỗ trợ gia đình':
       case 'ho tro gia dinh':
       case 'family_restroom_rounded':
       case 'hotrogiadinh_icon':
-        return 'assets/icon/hotrogiadinh_icon.jpg';
+        return 'assets/icon/12 • Hỗ trợ gia đình.png';
       case 'bảo hiểm':
       case 'bao hiem':
       case 'security_rounded':
       case 'baohiem_tk_icon':
-        return 'assets/icon/baohiem_tk_icon.jpg';
+        return 'assets/icon/13 • Bảo hiểm.png';
       case 'thuế':
       case 'thue':
       case 'account_balance_rounded':
       case 'thue_icon':
-        return 'assets/icon/thue_icon.jpg';
+        return 'assets/icon/14 • Thuế.png';
       case 'công việc':
       case 'cong viec':
       case 'work_rounded':
       case 'congviec_icon':
-        return 'assets/icon/congviec_icon.jpg';
+        return 'assets/icon/15 • Công việc.png';
       case 'nhà ở':
       case 'nha o':
       case 'home_rounded':
       case 'nha_icon':
-        return 'assets/icon/nha_icon.jpg';
+        return 'assets/icon/16 • Nhà ở.png';
       case 'tiền nợ':
       case 'tien no':
       case 'money_off_rounded':
       case 'tienno_icon':
-        return 'assets/icon/tienno_icon.jpg';
+        return 'assets/icon/17 • Tiền nợ.png';
       case 'lương':
       case 'luong':
       case 'account_balance_wallet_rounded':
       case 'luong_icon':
-        return 'assets/icon/luong_icon.jpg';
+        return 'assets/icon/19 • Lương.png';
       case 'thưởng':
       case 'thuong':
       case 'card_giftcard_rounded':
       case 'qua_icon':
-        return 'assets/icon/qua_icon.jpg';
+        return 'assets/icon/20 • Thưởng.png';
       case 'đầu tư':
       case 'dau tu':
       case 'trending_up_rounded':
       case 'dautu_icon':
-        return 'assets/icon/dautu_icon.jpg';
+        return 'assets/icon/22 • Đầu tư.png';
       case 'bán hàng':
       case 'ban hang':
       case 'storefront_rounded':
       case 'banhang_icon':
-        return 'assets/icon/banhang_icon.jpg';
+        return 'assets/icon/21 • Bán hàng.png';
       case 'khác':
       case 'khac':
       case 'category_rounded':
       case 'khac_icon':
       default:
-        return 'assets/icon/khac_icon.jpg';
+        return 'assets/icon/18 • Khác.png';
     }
   }
 

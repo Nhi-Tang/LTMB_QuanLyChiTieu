@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../backend/services/budget_service.dart';
 import '../../core/widgets/money_text.dart';
+import '../../core/widgets/category_icon.dart';
 
 class BudgetCard extends StatelessWidget {
   final BudgetStatus status;
@@ -22,56 +23,13 @@ class BudgetCard extends StatelessWidget {
     switch (level) {
       case 'exceeded':
         return const Color(0xFFE53935); // Đỏ
+      case 'reached':
+        return const Color(0xFFF4511E); // Cam đậm
       case 'warning':
         return const Color(0xFFF57C00); // Vàng/Cam
       case 'ok':
       default:
         return const Color(0xFF43A047); // Xanh lá
-    }
-  }
-
-  IconData _getCategoryIcon(String? categoryId) {
-    if (categoryId == null || categoryId.isEmpty) {
-      return Icons.account_balance_wallet_rounded;
-    }
-    switch (categoryId) {
-      case 'Ăn uống':
-        return Icons.fastfood_rounded;
-      case 'Hóa đơn':
-        return Icons.receipt_rounded;
-      case 'Di chuyển':
-        return Icons.directions_bus_rounded;
-      case 'Mua sắm':
-        return Icons.shopping_bag_rounded;
-      case 'Giải trí':
-        return Icons.sports_esports_rounded;
-      case 'Sức khoẻ':
-        return Icons.medical_services_rounded;
-      case 'Làm đẹp':
-        return Icons.content_cut_rounded;
-      case 'Quần áo':
-        return Icons.checkroom_rounded;
-      case 'Học tập':
-        return Icons.school_rounded;
-      case 'Thú cưng':
-        return Icons.pets_rounded;
-      case 'Con cái':
-        return Icons.child_care_rounded;
-      case 'Hỗ trợ gia đình':
-        return Icons.family_restroom_rounded;
-      case 'Bảo hiểm':
-        return Icons.security_rounded;
-      case 'Thuế':
-        return Icons.account_balance_rounded;
-      case 'Công việc':
-        return Icons.work_rounded;
-      case 'Nhà ở':
-        return Icons.home_rounded;
-      case 'Tiền nợ':
-      case 'Tiền Nợ':
-        return Icons.money_off_rounded;
-      default:
-        return Icons.category_rounded;
     }
   }
 
@@ -107,18 +65,9 @@ class BudgetCard extends StatelessWidget {
             // Top row: Icon, Category Name, Actions (Edit/Delete)
             Row(
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFCF1D0),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getCategoryIcon(budget.categoryId),
-                    color: const Color(0xFF5D4222),
-                    size: 22,
-                  ),
+                CategoryIcon(
+                  categoryOrIconKey: budget.categoryId ?? 'total',
+                  size: 42,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

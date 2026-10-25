@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/savings_goal_model.dart';
 import '../../core/widgets/money_text.dart';
+import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/mousey_avatar.dart';
@@ -27,9 +28,8 @@ class _SavingsTabState extends State<SavingsTab> {
   List<SavingsGoalModel> _goals = [];
   bool _isLoading = true;
 
-  static const Color primaryBeigy = Color(0xFFFCF1D0);
-  static const Color darkBeigy = Color(0xFF5D4222);
-  static const Color accentBeigy = Color(0xFFE5D3AF);
+  static const Color darkBeigy = AppColors.textPrimary;
+  static const Color accentBeigy = AppColors.accent;
 
   @override
   void didUpdateWidget(covariant SavingsTab oldWidget) {
@@ -98,18 +98,14 @@ class _SavingsTabState extends State<SavingsTab> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  primaryBeigy,
-                  Color(0xFFFCF1D0),
-                  accentBeigy,
-                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [Color(0xFF9282FF), Color(0xFF5748AE)],
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: darkBeigy.withValues(alpha: 0.12),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -124,11 +120,11 @@ class _SavingsTabState extends State<SavingsTab> {
                     Expanded(
                       child: Text(
                         AppTranslations.tr(lang, 'piggy_savings_badge'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
-                          color: darkBeigy,
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -143,11 +139,11 @@ class _SavingsTabState extends State<SavingsTab> {
                 const SizedBox(height: 4),
                 Text(
                   AppTranslations.tr(lang, 'total_savings'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
-                    color: darkBeigy,
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -156,7 +152,7 @@ class _SavingsTabState extends State<SavingsTab> {
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
-                    color: darkBeigy,
+                    color: Colors.white,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -164,7 +160,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -184,7 +180,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF222222),
+                            color: AppColors.textPrimary,
                             height: 1.35,
                           ),
                         ),
@@ -255,7 +251,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: const Color(0xFFECE7DB)),
+                        border: Border.all(color: const Color(0xFFEFE8F6)),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -270,7 +266,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            AppTranslations.tr(lang, 'no_savings_goals'),
+                            AppTranslations.tr(lang, 'Chưa có mục tiêu nào'),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -279,7 +275,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            AppTranslations.tr(lang, 'add_first_transaction'),
+                            AppTranslations.tr(lang, 'Thêm mục tiêu đầu tiên'),
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
@@ -341,7 +337,7 @@ class _SavingsTabState extends State<SavingsTab> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFFECE7DB)),
+                              border: Border.all(color: const Color(0xFFCCC6E1)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,7 +348,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                       width: 44,
                                       height: 44,
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFFFFF7EB),
+                                        color: Color(0xFFE6E8F2),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
@@ -418,7 +414,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                   child: LinearProgressIndicator(
                                     value: progress.clamp(0.0, 1.0),
                                     minHeight: 10,
-                                    backgroundColor: const Color(0xFFF2EFE6),
+                                    backgroundColor: const Color(0xFFCCC6E1),
                                     valueColor: const AlwaysStoppedAnimation<Color>(accentBeigy),
                                   ),
                                 ),
@@ -427,7 +423,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF7EB),
+                                      color: const Color(0xFFEAEAF9),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(

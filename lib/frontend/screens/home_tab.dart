@@ -30,9 +30,9 @@ class HomeTab extends StatefulWidget {
   final VoidCallback onAddIncome;
   final VoidCallback onAddExpense;
 
-  static const Color primaryBeige = Color(0xFFFCF1D0);
-  static const Color darkBeige = Color(0xFF5D4222);
-  static const Color accentBeige = Color(0xFFE5D3AF);
+  static const Color primaryBeige = AppColors.primaryBeige;
+  static const Color darkBeige = AppColors.darkBeige;
+  static const Color accentBeige = AppColors.accentBeige;
 
   const HomeTab({
     super.key,
@@ -146,7 +146,7 @@ class _HomeTabState extends State<HomeTab> {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
-                color: Color(0xFFFFF7EB),
+                color: Color(0xFF9282FF),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: SingleChildScrollView(
@@ -202,7 +202,7 @@ class _HomeTabState extends State<HomeTab> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFECE7DB)),
+                        border: Border.all(color: const Color(0xFF9A80E3)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,8 +278,7 @@ class _HomeTabState extends State<HomeTab> {
                                 ? null
                                 : () async {
                                     Navigator.pop(sheetCtx);
-                                    await DatabaseHelper.instance.deleteTransaction(item.id);
-                                    TransactionService.instance.notifyUpdated();
+                                    await TransactionService.instance.removeTransaction(item.id, uid: item.uid, date: item.date);
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Đã xóa giao dịch thành công!'), backgroundColor: Colors.red),
@@ -316,8 +315,7 @@ class _HomeTabState extends State<HomeTab> {
                                       amount: newAmount,
                                     );
 
-                                    await DatabaseHelper.instance.insertTransaction(updatedTx, uid: item.uid);
-                                    TransactionService.instance.notifyUpdated();
+                                    await TransactionService.instance.updateTransaction(updatedTx, uid: item.uid);
 
                                     if (!sheetCtx.mounted) return;
                                     Navigator.pop(sheetCtx);
@@ -502,20 +500,19 @@ class _HomeTabState extends State<HomeTab> {
 
           const SizedBox(height: 16),
 
-          // Total Balance Hero Card (Accent Beige theme)
+          // Total Balance Hero Card (Gradient theme)
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFFFF3E0), Color(0xFFFBEAD2)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                colors: [Color(0xFF9282FF), Color(0xFF5748AE)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFEAD8BA)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -526,10 +523,10 @@ class _HomeTabState extends State<HomeTab> {
               children: [
                 Text(
                   AppTranslations.tr(lang, 'total_balance').toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF8C6D4A),
+                    color: Colors.white.withValues(alpha: 0.9),
                     letterSpacing: 1.0,
                   ),
                 ),
@@ -539,7 +536,7 @@ class _HomeTabState extends State<HomeTab> {
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF5D4222),
+                    color: Colors.white,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -555,9 +552,9 @@ class _HomeTabState extends State<HomeTab> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.75),
+                            color: Colors.white.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFF0E2CD)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
                           ),
                           child: Row(
                             children: [
@@ -714,6 +711,8 @@ class _HomeTabState extends State<HomeTab> {
                         Color barColor = const Color(0xFF4CAF50);
                         if (s.level == 'exceeded') {
                           barColor = Colors.red;
+                        } else if (s.level == 'reached') {
+                          barColor = Colors.deepOrange;
                         } else if (s.level == 'warning') {
                           barColor = Colors.orange;
                         }

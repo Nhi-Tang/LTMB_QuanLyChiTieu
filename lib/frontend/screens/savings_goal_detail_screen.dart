@@ -29,7 +29,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
   List<SavingsTransactionModel> _transactions = [];
   bool _isLoading = true;
 
-  static const Color accentBeige = Color(0xFFE5D3AF);
+  static const Color accentPurple = Color(0xFF9282FF);
 
   @override
   void initState() {
@@ -102,7 +102,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: isDeposit ? accentBeige : Colors.red[700],
+                          color: isDeposit ? accentPurple : Colors.red[700],
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -120,7 +120,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   inputFormatters: [MoneyInputFormatter()],
                   decoration: InputDecoration(
                     labelText: 'Số tiền (đ)',
-                    prefixIcon: Icon(Icons.attach_money, color: isDeposit ? accentBeige : Colors.red),
+                    prefixIcon: Icon(Icons.attach_money, color: isDeposit ? accentPurple : Colors.red),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
@@ -139,7 +139,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   height: 52,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDeposit ? accentBeige : Colors.red[700],
+                      backgroundColor: isDeposit ? accentPurple : Colors.red[700],
                       foregroundColor: isDeposit ? const Color(0xFF5D4222) : Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -233,7 +233,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
             const SizedBox(height: 12),
             const Text(
               'Chúc mừng bạn!',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: accentBeige),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: accentPurple),
             ),
             const SizedBox(height: 8),
             Text(
@@ -244,7 +244,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: accentBeige,
+                backgroundColor: accentPurple,
                 foregroundColor: const Color(0xFF5D4222),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -401,7 +401,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: _goal.isCompleted ? accentBeige : Colors.grey[600],
+                                color: _goal.isCompleted ? accentPurple : Colors.grey[600],
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -417,7 +417,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       Flexible(
                         child: MoneyText(
                           amount: _goal.currentAmount,
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: accentBeige),
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: accentPurple),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -437,7 +437,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       value: progress.clamp(0.0, 1.0),
                       minHeight: 14,
                       backgroundColor: const Color(0xFFF2EFE6),
-                      valueColor: const AlwaysStoppedAnimation<Color>(accentBeige),
+                      valueColor: const AlwaysStoppedAnimation<Color>(accentPurple),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -463,7 +463,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.check_circle_rounded, color: accentBeige, size: 20),
+                          Icon(Icons.check_circle_rounded, color: accentPurple, size: 20),
                           SizedBox(width: 8),
                           Text(
                             'Đã hoàn thành mục tiêu',
@@ -478,7 +478,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: accentBeige,
+                              backgroundColor: accentPurple,
                               foregroundColor: const Color(0xFF5D4222),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -537,7 +537,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.insights_rounded, color: accentBeige, size: 24),
+                  const Icon(Icons.insights_rounded, color: accentPurple, size: 24),
                   const SizedBox(width: 10),
                   Flexible(
                     child: Text(
@@ -562,14 +562,14 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
 
             // Transactions History List
             _isLoading
-                ? const Center(child: CircularProgressIndicator(color: accentBeige))
+                ? const Center(child: CircularProgressIndicator(color: accentPurple))
                 : _transactions.isEmpty
                     ? Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFECE7DB)),
+                          border: Border.all(color: const Color(0xFFD4CCE2)),
                         ),
                         child: const Center(
                           child: Text('Chưa có lịch sử giao dịch tiết kiệm nào.', style: TextStyle(color: Colors.grey)),
@@ -588,7 +588,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFFECE7DB)),
+                              border: Border.all(color: const Color(0xFFD4CCE2)),
                             ),
                             child: Row(
                               children: [
@@ -602,7 +602,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                                   child: Center(
                                     child: Icon(
                                       tx.isDeposit ? Icons.arrow_downward : Icons.arrow_upward,
-                                      color: tx.isDeposit ? accentBeige : Colors.red,
+                                      color: tx.isDeposit ? accentPurple : Colors.red,
                                       size: 20,
                                     ),
                                   ),
@@ -635,7 +635,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
-                                      color: tx.isDeposit ? accentBeige : Colors.red,
+                                      color: tx.isDeposit ? accentPurple : Colors.red,
                                     ),
                                   ),
                                 ),

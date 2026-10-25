@@ -140,26 +140,22 @@ class _HomeScreenState extends State<HomeScreen> {
       NotchTabItemData(
         keyName: 'home',
         label: AppTranslations.tr(lang, 'home'),
-        assetPath: 'assets/icon/nha_icon.jpg',
-        icon: Icons.home_rounded,
+        assetPath: 'assets/icon/01 • Trang chủ.png',
       ),
       NotchTabItemData(
         keyName: 'savings',
         label: AppTranslations.tr(lang, 'savings'),
-        assetPath: 'assets/icon/tietkiem_icon.jpg',
-        icon: Icons.savings_rounded,
+        assetPath: 'assets/icon/03 • Tiết kiệm.png',
       ),
       NotchTabItemData(
         keyName: 'reports',
         label: AppTranslations.tr(lang, 'reports'),
-        assetPath: 'assets/icon/baocao_tabbar_icon.jpg',
-        icon: Icons.pie_chart_rounded,
+        assetPath: 'assets/icon/02 • Báo cáo.png',
       ),
       NotchTabItemData(
         keyName: 'profile',
         label: AppTranslations.tr(lang, 'profile'),
-        assetPath: 'assets/icon/canhan_icon.jpg',
-        icon: Icons.person_rounded,
+        assetPath: 'assets/icon/04 • Cá nhân.png',
       ),
     ];
 

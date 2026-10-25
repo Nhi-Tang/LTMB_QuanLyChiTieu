@@ -53,7 +53,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 20,
+      version: 21,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -169,6 +169,15 @@ class DatabaseHelper {
       )
     ''');
     try { await db.execute("CREATE INDEX IF NOT EXISTS idx_tx_uid ON transactions(uid);"); } catch (_) {}
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS budget_alerts (
+        budgetId TEXT NOT NULL,
+        month TEXT NOT NULL,
+        level TEXT NOT NULL,
+        PRIMARY KEY (budgetId, month, level)
+      )
+    ''');
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS categories (
@@ -647,6 +656,18 @@ class DatabaseHelper {
             await db.update('users', {'password': hashed}, where: 'id = ?', whereArgs: [id]);
           }
         }
+      } catch (_) {}
+    }
+    if (oldVersion < 21) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS budget_alerts (
+            budgetId TEXT NOT NULL,
+            month TEXT NOT NULL,
+            level TEXT NOT NULL,
+            PRIMARY KEY (budgetId, month, level)
+          )
+        ''');
       } catch (_) {}
     }
   }
@@ -1483,6 +1504,15 @@ class DatabaseHelper {
       'budget_alerts',
       where: 'budgetId = ? AND month = ?',
       whereArgs: [budgetId, month],
+    );
+  }
+
+  Future<int> clearBudgetAlertLevel(String budgetId, String month, String level) async {
+    final db = await instance.database;
+    return await db.delete(
+      'budget_alerts',
+      where: 'budgetId = ? AND month = ? AND level = ?',
+      whereArgs: [budgetId, month, level],
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../database/db_helper.dart';
 import '../models/transaction_model.dart';
 import '../models/pending_transaction_model.dart';
+import 'budget_alert_service.dart';
 
 class TransactionService extends ChangeNotifier {
   static final TransactionService instance = TransactionService._init();
@@ -126,6 +127,7 @@ class TransactionService extends ChangeNotifier {
 
     // Mở đúng DB và ghi giao dịch
     await dbHelper.insertTransaction(realTx, uid: item.uid, ledgerId: _currentLedgerId);
+    await BudgetAlertService.instance.checkAndAlertForDate(realTx.date, uid: item.uid);
     
     // Cập nhật trạng thái bản nháp
     await dbHelper.updatePendingTransactionStatus(
@@ -143,12 +145,23 @@ class TransactionService extends ChangeNotifier {
 
   Future<int> addTransaction(TransactionItem item, {String? uid, String? ledgerId}) async {
     final res = await _dbHelper.insertTransaction(item, uid: uid, ledgerId: ledgerId ?? _currentLedgerId);
+    await BudgetAlertService.instance.checkAndAlertForDate(item.date, uid: uid);
     notifyListeners();
     return res;
   }
 
-  Future<int> removeTransaction(String id, {String? uid}) async {
+  /// Cập nhật giao dịch đã có (insertTransaction ghi đè theo id) và kiểm tra lại ngân sách
+  Future<int> updateTransaction(TransactionItem item, {String? uid}) async {
+    final res = await _dbHelper.insertTransaction(item, uid: uid);
+    await BudgetAlertService.instance.checkAndAlertForDate(item.date, uid: uid);
+    notifyListeners();
+    return res;
+  }
+
+  /// [date] là ngày của giao dịch bị xóa, dùng để kiểm tra lại ngân sách đúng tháng
+  Future<int> removeTransaction(String id, {String? uid, DateTime? date}) async {
     final res = await _dbHelper.deleteTransaction(id, uid: uid);
+    await BudgetAlertService.instance.checkAndAlertForDate(date ?? DateTime.now(), uid: uid);
     notifyListeners();
     return res;
   }

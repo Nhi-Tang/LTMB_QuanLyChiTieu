@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../backend/database/db_helper.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../core/widgets/money_text.dart';
@@ -175,8 +174,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                 ),
                 onPressed: () async {
                   Navigator.pop(ctx);
-                  await DatabaseHelper.instance.deleteTransaction(item.id);
-                  TransactionService.instance.notifyUpdated();
+                  await TransactionService.instance.removeTransaction(item.id, uid: item.uid, date: item.date);
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Đã xóa giao dịch thành công!'), backgroundColor: Colors.red),

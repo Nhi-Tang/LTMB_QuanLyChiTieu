@@ -40,10 +40,16 @@ class CategoryIcon extends StatelessWidget {
             height: imageSize,
             fit: BoxFit.cover,
             errorBuilder: (ctx, err, stack) {
-              return Icon(
-                fallbackIcon,
-                size: size * 0.6,
-                color: iconColor ?? AppColors.darkBeige,
+              return Image.asset(
+                'assets/icon/18 • Khác.png',
+                width: imageSize,
+                height: imageSize,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  fallbackIcon,
+                  size: size * 0.6,
+                  color: iconColor ?? AppColors.darkBeige,
+                ),
               );
             },
           ),

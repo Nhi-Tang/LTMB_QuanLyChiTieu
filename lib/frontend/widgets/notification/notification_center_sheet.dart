@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../backend/database/db_helper.dart';
 import '../../../backend/models/app_notification_model.dart';
@@ -98,6 +99,9 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
         );
         break;
       case 'budget':
+      case 'budget_warning':
+      case 'budget_reached':
+      case 'budget_exceeded':
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -151,7 +155,12 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       case 'pending_tx':
         return Icons.mark_email_unread_rounded;
       case 'budget':
+      case 'budget_warning':
         return Icons.pie_chart_rounded;
+      case 'budget_reached':
+        return Icons.error_outline_rounded;
+      case 'budget_exceeded':
+        return Icons.warning_amber_rounded;
       case 'pro':
         return Icons.workspace_premium_rounded;
       case 'savings':
@@ -168,7 +177,12 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       case 'pending_tx':
         return Colors.blue.shade700;
       case 'budget':
+      case 'budget_warning':
         return Colors.orange.shade800;
+      case 'budget_reached':
+        return Colors.deepOrange.shade700;
+      case 'budget_exceeded':
+        return Colors.red.shade700;
       case 'pro':
         return Colors.amber.shade900;
       case 'savings':
@@ -391,7 +405,15 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                         children: [
                           Expanded(
                             child: Text(
-                              notif.title,
+                              () {
+                                if (notif.type.startsWith('budget_')) {
+                                  try {
+                                    final params = jsonDecode(notif.body) as Map<String, dynamic>;
+                                    return AppTranslations.formatBudgetAlertTitle(widget.selectedLanguage, notif.type, params);
+                                  } catch (_) {}
+                                }
+                                return notif.title;
+                              }(),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: notif.isRead ? FontWeight.w600 : FontWeight.bold,
@@ -415,7 +437,15 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        notif.body,
+                        () {
+                          if (notif.type.startsWith('budget_')) {
+                            try {
+                              final params = jsonDecode(notif.body) as Map<String, dynamic>;
+                              return AppTranslations.formatBudgetAlertMessage(widget.selectedLanguage, notif.type, params, notif.dedupeKey ?? '');
+                            } catch (_) {}
+                          }
+                          return notif.body;
+                        }(),
                         style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.35),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import '../../core/utils/money_input_formatter.dart';
+
 class AppTranslations {
   static const Map<String, Map<String, String>> _keys = {
     'vi': {
@@ -135,6 +138,8 @@ class AppTranslations {
       'never': 'Chưa',
       'welcome_back': 'Chào mừng bạn trở lại',
       'sync_status_label': 'Trạng thái',
+      'budget_alerts_toggle': 'Cảnh báo ngân sách',
+      'budget_alerts_subtitle': 'Nhắc nhở thân thiện khi chi tiêu vượt hạn mức',
       'upgrade_pro_title': 'Nâng cấp Mousey PRO 👑',
       'upgrade_pro_desc': 'Mở khóa sổ sách không giới hạn, xuất Excel...',
       'upgrade': 'Nâng cấp',
@@ -891,6 +896,126 @@ class AppTranslations {
 
   static String trLedger(String langCode, String ledger) {
     return ledger;
+  }
+
+  static String formatBudgetAlertMessage(String langCode, String type, Map<String, dynamic> params, String dedupeKey) {
+    final code = _mapLanguageToCode(langCode);
+    final categoryKey = params['categoryKey'] ?? 'total';
+    final isTotal = categoryKey == 'total';
+    final categoryName = isTotal
+        ? (code == 'en' ? 'Total monthly spending' : (code == 'ja' ? '今月の総支出' : (code == 'zh' ? '本月总支出' : (code == 'ko' ? '이번 달 총 지출' : 'Tổng chi tháng này'))))
+        : trCategory(langCode, categoryKey);
+
+    final percent = params['percent'] ?? 80;
+    final remaining = formatMoney(params['remaining'] ?? 0);
+    final over = formatMoney(params['over'] ?? 0);
+    final daysLeft = params['daysLeft'] ?? 1;
+    final perDay = formatMoney(params['perDay'] ?? 0);
+
+    final hash = dedupeKey.hashCode.abs();
+    final variant = hash % 2;
+
+    if (type == 'budget_warning') {
+      if (code == 'en') {
+        return variant == 0
+            ? '$categoryName has used $percent% of its limit. You have $remaining left for $daysLeft days, about $perDay per day.'
+            : 'Heads up! $categoryName has reached $percent% of your monthly budget.';
+      } else if (code == 'ja') {
+        return variant == 0
+            ? '$categoryNameの予算の$percent%を使用しました。あと$daysLeft日分で$remaining円残っています（1日約$perDay円）。'
+            : 'ご注意ください、$categoryNameは今月の予算の$percent%に達しました。';
+      } else if (code == 'zh') {
+        return variant == 0
+            ? '$categoryName 已使用了 $percent% 的额度。还剩 $remaining 持续 $daysLeft 天，每天约 $perDay。'
+            : '注意啦，$categoryName 已达到本月预算的 $percent%。';
+      } else if (code == 'ko') {
+        return variant == 0
+            ? '$categoryName 예산의 $percent%를 사용하셨습니다. $daysLeft일 동안 $remaining원 남았습니다 (하루 약 $perDay원).'
+            : '참고하세요, $categoryName이(가) 이번 달 예산의 $percent%에 도달했습니다.';
+      } else {
+        return variant == 0
+            ? '$categoryName đã dùng $percent% hạn mức rồi nè. Còn $remaining cho $daysLeft ngày, khoảng $perDay mỗi ngày.'
+            : 'Cẩn thận nha, $categoryName đã cán mốc $percent% ngân sách tháng rồi đó.';
+      }
+    } else if (type == 'budget_reached') {
+      if (code == 'en') {
+        return variant == 0
+            ? '$categoryName has reached its limit for this month. Let\'s slow down a bit!'
+            : 'Your $categoryName budget is fully used. Time to be mindful!';
+      } else if (code == 'ja') {
+        return variant == 0
+            ? '$categoryNameは今月の予算上限に達しました。少しペースを落とししょう！'
+            : '$categoryNameの予算を使い切りました。少し気をつけましょう。';
+      } else if (code == 'zh') {
+        return variant == 0
+            ? '$categoryName 已达到本月限额。让我们稍微放慢脚步吧！'
+            : '$categoryName 预算已用完，请注意控制开支哦！';
+      } else if (code == 'ko') {
+        return variant == 0
+            ? '$categoryName 이번 달 예산 한도에 도달했습니다. 조금만 속도를 줄여볼까요?'
+            : '$categoryName 예산이 모두 소진되었습니다. 주의해 주세요!';
+      } else {
+        return variant == 0
+            ? '$categoryName đã chạm hạn mức tháng này rồi. Mình cùng chậm lại một chút nhé!'
+            : 'Hạn mức $categoryName tháng này đã đầy rồi nè, giữ ví chặt nha!';
+      }
+    } else if (type == 'budget_exceeded') {
+      if (code == 'en') {
+        return variant == 0
+            ? '$categoryName has exceeded its budget by $over. No worries, review your expenses or adjust the limit as needed.'
+            : 'Oops! $categoryName is over budget by $over. Let\'s adjust our spending or budget limit next time.';
+      } else if (code == 'ja') {
+        return variant == 0
+            ? '$categoryNameの予算を$overオーバーしました。支出を見直すか、予算を調整してみてください。'
+            : 'おっと、$categoryNameが予算を$over超過しました。次は調整しましょう。';
+      } else if (code == 'zh') {
+        return variant == 0
+            ? '$categoryName 超支了 $over。没关系，检查一下支出或适当调整预算吧。'
+            : '哎呀，$categoryName 超预算 $over 了。下次注意调整哦！';
+      } else if (code == 'ko') {
+        return variant == 0
+            ? '$categoryName 예산이 $over 초과되었습니다. 지출을 검토하거나 필요시 예산을 조정해보세요.'
+            : '이런, $categoryName 예산이 $over 초과되었습니다. 다음에는 조금 더 신경 써봐요!';
+      } else {
+        return variant == 0
+            ? '$categoryName đã vượt hạn mức $over rồi. Không sao đâu, xem lại các khoản chi hoặc điều chỉnh hạn mức cho phù hợp nhé.'
+            : 'Ơ kìa, $categoryName đã vượt ngân sách $over mất tiêu rồi. Lần sau mình căn chỉnh lại nghen!';
+      }
+    }
+    return jsonEncode(params);
+  }
+
+  static String formatBudgetAlertTitle(String langCode, String type, Map<String, dynamic> params) {
+    final code = _mapLanguageToCode(langCode);
+    final categoryKey = params['categoryKey'] ?? 'total';
+    final isTotal = categoryKey == 'total';
+    final percent = params['percent'] ?? 80;
+
+    if (code == 'en') {
+      final name = isTotal ? 'Total budget' : trCategory(langCode, categoryKey);
+      if (type == 'budget_exceeded') return '$name is over budget ($percent%)';
+      if (type == 'budget_reached') return '$name reached its limit ($percent%)';
+      return '$name at $percent% of budget';
+    } else if (code == 'ja') {
+      final name = isTotal ? '総予算' : trCategory(langCode, categoryKey);
+      if (type == 'budget_exceeded') return '$nameが予算超過（$percent%）';
+      if (type == 'budget_reached') return '$nameが上限に到達（$percent%）';
+      return '$nameが予算の$percent%に到達';
+    } else if (code == 'zh') {
+      final name = isTotal ? '总预算' : trCategory(langCode, categoryKey);
+      if (type == 'budget_exceeded') return '$name 已超支（$percent%）';
+      if (type == 'budget_reached') return '$name 已达上限（$percent%）';
+      return '$name 已用 $percent% 预算';
+    } else if (code == 'ko') {
+      final name = isTotal ? '총 예산' : trCategory(langCode, categoryKey);
+      if (type == 'budget_exceeded') return '$name 예산 초과 ($percent%)';
+      if (type == 'budget_reached') return '$name 한도 도달 ($percent%)';
+      return '$name 예산 $percent% 사용';
+    }
+    final name = isTotal ? 'Ngân sách tổng' : trCategory(langCode, categoryKey);
+    if (type == 'budget_exceeded') return '$name đã vượt hạn mức ($percent%)';
+    if (type == 'budget_reached') return '$name đã chạm hạn mức ($percent%)';
+    return '$name đã dùng $percent% ngân sách';
   }
 
   static String _mapLanguageToCode(String lang) {

@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../database/db_helper.dart';
 import '../models/budget_model.dart';
 import 'in_app_notification_service.dart';
 import 'transaction_service.dart';
+import 'daily_reminder_service.dart';
+import '../../frontend/utils/app_translations.dart';
 
 class BudgetStatus {
   final BudgetModel budget;
@@ -10,7 +14,7 @@ class BudgetStatus {
   final double limit;
   final double remaining;
   final double percent;
-  final String level; // 'ok' (<80%), 'warning' (80-99%), 'exceeded' (>=100%)
+  final String level; // 'ok' (<80%), 'warning' (80-99%), 'reached' (100-119%), 'exceeded' (>=120%)
   final double dailyRemaining;
   final double forecast;
 
@@ -67,14 +71,11 @@ class BudgetService extends ChangeNotifier {
 
     double totalSpent = 0.0;
     for (var t in transactions) {
-      if (!t.isExpense || t.isDeleted) continue;
+      if (t.isDeleted || (t.kind != 'expense' && t.kind != 'transfer_out')) continue;
       if (t.date.year != year || t.date.month != m) continue;
 
-      // Bỏ qua chuyển khoản hoặc đóng góp tiết kiệm nếu có phân loại riêng
-      if (t.category.toLowerCase().contains('chuyển tiền') ||
-          t.category.toLowerCase().contains('tiết kiệm')) {
-        continue;
-      }
+      // Tiền chuyển sang quỹ tiết kiệm không phải chi tiêu, không tính vào ngân sách
+      if (t.category.toLowerCase().contains('tiết kiệm')) continue;
 
       if (categoryId == null || categoryId.isEmpty) {
         totalSpent += t.amount;
@@ -115,8 +116,10 @@ class BudgetService extends ChangeNotifier {
       final percent = limit > 0 ? (spentAmount / limit) * 100.0 : (spentAmount > 0 ? 100.0 : 0.0);
 
       String level = 'ok';
-      if (percent >= 100.0) {
+      if (percent >= 120.0) {
         level = 'exceeded';
+      } else if (percent >= 100.0) {
+        level = 'reached';
       } else if (percent >= 80.0) {
         level = 'warning';
       }
@@ -139,12 +142,30 @@ class BudgetService extends ChangeNotifier {
     return statuses;
   }
 
-  /// Kiểm tra các ngưỡng ngân sách (80% cảnh báo, 100% vượt quá) và kích hoạt cảnh báo,
-  /// đảm bảo mỗi ngưỡng chỉ kích hoạt 1 lần trừ khi chi tiêu giảm xuống rồi vượt lại.
-  /// Trả về danh sách thông báo cảnh báo mới cho chuông thông báo.
-  Future<List<String>> checkAndTriggerAlerts(String ledgerId, String month) async {
+  static const List<String> _alertLevels = ['warning', 'reached', 'exceeded'];
+
+  /// Kiểm tra các ngưỡng ngân sách (80% warning, 100% reached, 120% exceeded) và kích hoạt cảnh báo.
+  /// Mỗi ngưỡng chỉ báo tối đa 1 lần/tháng/ngân sách; nhảy thẳng lên ngưỡng cao thì các ngưỡng thấp hơn
+  /// được đánh dấu đã báo để không phát cảnh báo "lùi" khi chi tiêu giảm nhẹ.
+  Future<List<String>> checkAndTriggerAlerts(String ledgerId, String month, {String? uid}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('budget_alerts_enabled') ?? true;
+    if (!enabled) return [];
+
+    final lang = (uid != null ? prefs.getString('mousey_language_$uid') : null) ??
+        prefs.getString('mousey_language') ??
+        'Tiếng Việt';
+
     final statuses = await getBudgetStatuses(ledgerId, month);
     final List<String> newAlertMessages = [];
+
+    final parts = month.split('-');
+    final year = int.tryParse(parts[0]) ?? DateTime.now().year;
+    final m = int.tryParse(parts[1]) ?? DateTime.now().month;
+    final totalDays = DateTime(year, m + 1, 0).day;
+    final now = DateTime.now();
+    int currentDay = (now.year == year && now.month == m) ? now.day : (DateTime(year, m).isAfter(now) ? 1 : totalDays);
+    final daysLeft = (totalDays - currentDay + 1).clamp(1, totalDays);
 
     for (var status in statuses) {
       final budgetId = status.budget.id;
@@ -152,39 +173,82 @@ class BudgetService extends ChangeNotifier {
 
       final existingAlerts = await _dbHelper.getBudgetAlerts(budgetId, month);
       final hasWarning = existingAlerts.any((a) => a['level'] == 'warning');
+      final hasReached = existingAlerts.any((a) => a['level'] == 'reached');
       final hasExceeded = existingAlerts.any((a) => a['level'] == 'exceeded');
 
-      final categoryName = status.budget.categoryId ?? 'Tổng ngân sách tháng';
+      final categoryName = status.budget.categoryId ?? 'Tổng';
+      final isTotal = status.budget.categoryId == null || status.budget.categoryId!.isEmpty;
+      final ratio = status.limit > 0 ? (status.spent / status.limit) : 0.0;
 
-      if (status.percent < 80.0) {
-        // Chi tiêu giảm xuống dưới 80%, xóa trạng thái cảnh báo để có thể kích hoạt lại sau
-        if (existingAlerts.isNotEmpty) {
-          await _dbHelper.clearBudgetAlerts(budgetId, month);
+      // Clean up higher level alerts if spent dropped below threshold
+      if (ratio < 1.2 && hasExceeded) {
+        await _dbHelper.clearBudgetAlertLevel(budgetId, month, 'exceeded');
+      }
+      if (ratio < 1.0 && hasReached) {
+        await _dbHelper.clearBudgetAlertLevel(budgetId, month, 'reached');
+      }
+      if (ratio < 0.8 && hasWarning) {
+        await _dbHelper.clearBudgetAlertLevel(budgetId, month, 'warning');
+      }
+
+      String? level;
+      if (ratio >= 1.2) {
+        level = 'exceeded';
+      } else if (ratio >= 1.0) {
+        level = 'reached';
+      } else if (ratio >= 0.8) {
+        level = 'warning';
+      }
+
+      if (level == null) continue;
+
+      final refreshedAlerts = await _dbHelper.getBudgetAlerts(budgetId, month);
+      final alreadyAlerted = refreshedAlerts.any((a) => a['level'] == level);
+
+      if (!alreadyAlerted) {
+        for (final l in _alertLevels.sublist(0, _alertLevels.indexOf(level) + 1)) {
+          if (!refreshedAlerts.any((a) => a['level'] == l)) {
+            await _dbHelper.insertBudgetAlert(budgetId, month, l);
+          }
         }
-      } else if (status.percent >= 100.0) {
-        if (!hasExceeded) {
-          await _dbHelper.insertBudgetAlert(budgetId, month, 'exceeded');
-          final msg = '⚠️ Ngân sách "$categoryName" đã vượt quá hạn mức (${status.percent.toStringAsFixed(1)}%)!';
-          newAlertMessages.add(msg);
-          await InAppNotificationService.instance.add(
-            type: 'budget',
-            title: 'Cảnh báo vượt ngân sách',
-            body: msg,
-            dedupeKey: 'notif_budget_exceeded_${budgetId}_$month',
-          );
-        }
-      } else if (status.percent >= 80.0) {
-        if (!hasWarning && !hasExceeded) {
-          await _dbHelper.insertBudgetAlert(budgetId, month, 'warning');
-          final msg = '⚡ Ngân sách "$categoryName" đã đạt 80% hạn mức (${status.percent.toStringAsFixed(1)}%)!';
-          newAlertMessages.add(msg);
-          await InAppNotificationService.instance.add(
-            type: 'budget',
-            title: 'Cảnh báo hạn mức ngân sách',
-            body: msg,
-            dedupeKey: 'notif_budget_warning_${budgetId}_$month',
-          );
-        }
+
+        final remaining = status.remaining.clamp(0.0, double.infinity);
+        final over = (status.spent - status.limit).clamp(0.0, double.infinity);
+        final perDay = daysLeft > 0 ? remaining / daysLeft : 0.0;
+        final percent = (ratio * 100).toInt();
+
+        final params = {
+          'categoryKey': isTotal ? 'total' : categoryName,
+          'percent': percent,
+          'spent': status.spent,
+          'limit': status.limit,
+          'over': over,
+          'remaining': remaining,
+          'daysLeft': daysLeft,
+          'perDay': perDay,
+        };
+
+        final dedupeKey = 'budget:$budgetId:$month:$level';
+        final notifType = 'budget_$level';
+        final title = AppTranslations.formatBudgetAlertTitle(lang, notifType, params);
+
+        final inserted = await InAppNotificationService.instance.add(
+          type: notifType,
+          title: title,
+          body: jsonEncode(params),
+          dedupeKey: dedupeKey,
+          uid: uid,
+        );
+        // Đã có thông báo trùng (cùng ngân sách/tháng/mức) thì không đẩy push lần nữa
+        if (inserted == null) continue;
+
+        await DailyReminderService.instance.showInstantNotification(
+          title: title,
+          body: AppTranslations.formatBudgetAlertMessage(lang, notifType, params, dedupeKey),
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        );
+
+        newAlertMessages.add(dedupeKey);
       }
     }
 

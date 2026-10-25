@@ -8,7 +8,7 @@ class MouseyAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryBeige = Color(0xFFFCF1D0);
+    const primaryBeige = Color(0xFFEFE8F6);
     return Container(
       width: size,
       height: size,
@@ -38,7 +38,7 @@ Widget buildUserAvatar({
   required String userName,
   double size = 50,
 }) {
-  const primaryBeige = Color(0xFFFCF1D0);
+  const primaryPurple = Color(0xFFEFE8F6);
 
   if (avatarKey.isNotEmpty &&
       (avatarKey.contains('/') || avatarKey.contains('\\')) &&
@@ -48,7 +48,7 @@ Widget buildUserAvatar({
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: primaryBeige, width: 2),
+        border: Border.all(color: primaryPurple, width: 2),
       ),
       child: ClipOval(
         child: Image.file(

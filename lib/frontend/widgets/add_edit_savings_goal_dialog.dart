@@ -4,6 +4,7 @@ import '../../backend/models/savings_goal_model.dart';
 import '../../backend/models/savings_transaction_model.dart';
 import '../../core/utils/money_input_formatter.dart';
 import '../utils/app_translations.dart';
+import 'package:quanlychitieu/frontend/theme/app_colors.dart';
 import 'app_alert_dialog.dart';
 
 class AddEditSavingsGoalDialog extends StatefulWidget {
@@ -84,7 +85,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
   Widget build(BuildContext context) {
     final lang = widget.selectedLanguage;
     final isEditing = widget.goalToEdit != null;
-    const accentBeige = Color(0xFFE5D3AF);
+    const accentPurple = Color(0xFFD4CCE2);
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -225,10 +226,10 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isSelected ? accentBeige.withValues(alpha: 0.4) : Colors.grey.shade100,
+                          color: isSelected ? accentPurple.withValues(alpha: 0.4) : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? accentBeige : Colors.transparent,
+                            color: isSelected ? accentPurple : Colors.transparent,
                             width: 2,
                           ),
                         ),
@@ -251,8 +252,8 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: accentBeige,
-            foregroundColor: const Color(0xFF5D4222),
+            backgroundColor: accentPurple,
+            foregroundColor: AppColors.textPrimary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: () async {
@@ -313,7 +314,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
               widget.onSaved();
             }
           },
-          child: Text(isEditing ? AppTranslations.tr(lang, 'save') : AppTranslations.tr(lang, 'create_goal_btn'), style: const TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
+          child: Text(isEditing ? AppTranslations.tr(lang, 'save') : AppTranslations.tr(lang, 'create_goal_btn'), style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         ),
       ],
     );

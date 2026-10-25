@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/sync_service.dart';
@@ -7,6 +8,7 @@ import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../backend/services/ledger_repository.dart';
 import '../../core/widgets/settings_tile.dart';
+import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/category_link/linked_categories_screen.dart';
@@ -43,6 +45,7 @@ class ProfileTab extends StatefulWidget {
 class _ProfileTabState extends State<ProfileTab> {
   // Profile Settings state
   bool _dailyReminderEnabled = true;
+  bool _budgetAlertsEnabled = true;
 
   bool _isSyncing = false;
   String _syncStateKey = 'synced'; // 'synced', 'syncing', 'error'
@@ -57,9 +60,9 @@ class _ProfileTabState extends State<ProfileTab> {
     }
   }
 
-  static const Color primaryBeige = Color(0xFFFCF1D0);
-  static const Color darkBeige = Color(0xFF5D4222);
-  static const Color accentBeige = Color(0xFFE5D3AF);
+  static const Color primaryBeige = AppColors.primaryBeige;
+  static const Color darkBeige = AppColors.darkBeige;
+  static const Color accentBeige = AppColors.accentBeige;
 
   @override
   void initState() {
@@ -67,6 +70,16 @@ class _ProfileTabState extends State<ProfileTab> {
     _loadSyncInfo();
     _loadPendingCount();
     _loadLedgers();
+    _loadBudgetAlertsSetting();
+  }
+
+  Future<void> _loadBudgetAlertsSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _budgetAlertsEnabled = prefs.getBool('budget_alerts_enabled') ?? true;
+      });
+    }
   }
 
   List<Map<String, dynamic>> _userLedgers = [];
@@ -924,7 +937,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFFF8E1), Color(0xFFFFECB3)],
+                      colors: [Color(0xFFEFE8F6), Color(0xFFBDA9D4)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -964,7 +977,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFF3E6C4), Color(0xFFE8D5A3)],
+                      colors: [Color(0xFFCCC6E1), Color(0xFFD4CCE2)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -1199,6 +1212,19 @@ class _ProfileTabState extends State<ProfileTab> {
                 activeThumbColor: accentBeige,
                 onChanged: (val) {
                   setState(() => _dailyReminderEnabled = val);
+                },
+              ),
+              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              SwitchListTile(
+                secondary: const Icon(Icons.pie_chart_outline_rounded, color: accentBeige),
+                title: Text(AppTranslations.tr(lang, 'budget_alerts_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                subtitle: Text(AppTranslations.tr(lang, 'budget_alerts_subtitle'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                value: _budgetAlertsEnabled,
+                activeThumbColor: accentBeige,
+                onChanged: (val) async {
+                  setState(() => _budgetAlertsEnabled = val);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('budget_alerts_enabled', val);
                 },
               ),
             ],

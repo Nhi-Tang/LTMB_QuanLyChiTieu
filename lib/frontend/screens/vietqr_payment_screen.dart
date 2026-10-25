@@ -346,7 +346,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
                     : const Text(
-                        'Đã chuyển khoản, kiểm tra thanh toán',
+                        'Hoàn tất chuyển khoản',
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                       ),
               ),
