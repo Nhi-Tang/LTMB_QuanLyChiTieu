@@ -37,4 +37,5 @@ PAYMENT_CODE_PREFIX = os.getenv("PAYMENT_CODE_PREFIX", "MSY")
 
 # ---- Webhook cổng thanh toán (SePay / Casso / ...) ----
 # Cổng gửi header "Authorization: Apikey <secret>" hoặc "X-Webhook-Secret: <secret>".
-PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "")
+# strip(): khi dán vào Render dễ dính dấu cách/xuống dòng thừa, làm webhook luôn bị 401
+PAYMENT_WEBHOOK_SECRET = os.getenv("PAYMENT_WEBHOOK_SECRET", "").strip()
