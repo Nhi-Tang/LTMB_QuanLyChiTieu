@@ -26,6 +26,34 @@ flutter build apk --dart-define=API_BASE_URL=https://api.your-domain.vn
 
 Test: `python -m unittest discover -s tests -t .`
 
+## Deploy lên Render
+
+Repo đã có `render.yaml` ở thư mục gốc. Render đọc file này để tạo service `mousey-api`
+(gói free, region Singapore, Python 3.12, tự deploy lại mỗi khi push lên nhánh đã chọn).
+
+1. Đăng ký https://render.com bằng tài khoản GitHub, cho phép Render truy cập repo `LTMB_QuanLyChiTieu`.
+2. **New → Blueprint** → chọn repo → chọn nhánh `main` → Render tìm thấy `render.yaml`.
+3. Điền các biến bí mật Render hỏi:
+   - `FIREBASE_SERVICE_ACCOUNT_JSON`: toàn bộ nội dung file `serviceAccountKey.json`.
+     Trên Windows, copy nhanh: `Get-Content serviceAccountKey.json -Raw | Set-Clipboard` rồi dán.
+     (Cũng nhận chuỗi base64 của file.)
+   - `PAYMENT_ACCOUNT_NO`, `PAYMENT_ACCOUNT_NAME`: số và tên tài khoản nhận tiền thật.
+   - `PAYMENT_WEBHOOK_SECRET`: để trống nếu chưa nối cổng thanh toán (webhook sẽ tắt).
+4. **Apply**. Chờ build xong (~3 phút), mở `https://mousey-api.onrender.com/` (tên có thể khác
+   nếu bị trùng, xem trên Dashboard) → thấy `{"message":"Mousey API is running successfully!"}`.
+5. Build app trỏ vào server:
+   ```bash
+   flutter run --dart-define=API_BASE_URL=https://mousey-api.onrender.com
+   flutter build apk --release --dart-define=API_BASE_URL=https://mousey-api.onrender.com
+   ```
+
+Lưu ý gói free:
+- Server **ngủ sau 15 phút** không có request; lần gọi đầu mất ~30-60s (app đã chờ tối đa 60s).
+  Muốn luôn thức: nâng gói Starter, hoặc dùng dịch vụ ping (vd. UptimeRobot) gọi `/` mỗi 10 phút.
+- `ENABLE_MOCK_PAY=false` trên server: chỉ dùng thử 7 ngày và thanh toán thật (webhook) cấp được PRO.
+- Không bao giờ commit `serviceAccountKey.json`/`.env`. Nếu khóa bị lộ: Firebase Console →
+  Project settings → Service accounts → tạo khóa mới, xóa khóa cũ, cập nhật biến trên Render.
+
 ## Endpoint
 
 | Method | Path | Mô tả |

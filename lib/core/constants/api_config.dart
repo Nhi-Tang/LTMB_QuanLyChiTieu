@@ -10,5 +10,6 @@ class ApiConfig {
     defaultValue: 'http://10.0.2.2:8000',
   );
 
-  static const Duration timeout = Duration(seconds: 15);
+  // Gói free của Render ngủ sau 15 phút không có request; lần gọi đầu mất ~30-60s để khởi động
+  static const Duration timeout = Duration(seconds: 60);
 }
