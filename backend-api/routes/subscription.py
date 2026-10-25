@@ -1,4 +1,5 @@
 import hmac
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -7,6 +8,7 @@ from middleware.auth import verify_firebase_token
 from services import subscription_service
 
 router = APIRouter(prefix="/subscription", tags=["Subscription"])
+logger = logging.getLogger("uvicorn.error")
 
 class CreateOrderRequest(BaseModel):
     planType: str
@@ -57,6 +59,9 @@ def _verify_webhook_secret(request: Request):
     elif auth_header.lower().startswith("bearer "):
         provided = auth_header[7:].strip()
     if not provided or not hmac.compare_digest(provided, secret):
+        # Không in secret, chỉ in kiểu header để biết cổng thanh toán gửi gì
+        scheme = auth_header.split(" ")[0] if auth_header else ("X-Webhook-Secret" if provided else "none")
+        logger.warning(f"Webhook rejected: wrong secret (auth scheme={scheme})")
         raise HTTPException(status_code=401, detail="Sai webhook secret")
 
 @router.post("/webhook/bank")

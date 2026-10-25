@@ -302,9 +302,13 @@ def _normalize_bank_events(payload: dict) -> list:
 
 def handle_bank_webhook(payload: dict) -> dict:
     results = []
-    for ev in _normalize_bank_events(payload):
+    events = _normalize_bank_events(payload)
+    if not events:
+        logger.info(f"Webhook: no incoming transfer in payload (keys={sorted(payload.keys())})")
+    for ev in events:
         match = _CODE_RE.search(ev["content"].upper().replace(" ", ""))
         if not match:
+            logger.info(f"Webhook {ev['ref']}: {ev['amount']}đ, no payment code in content={ev['content']!r}")
             results.append({"ref": ev["ref"], "status": "ignored", "reason": "no_payment_code"})
             continue
         code = match.group(0)
@@ -332,6 +336,7 @@ def handle_bank_webhook(payload: dict) -> dict:
         try:
             res = mark_order_paid(info["uid"], info["orderId"], source="bank_transfer",
                                   paid_amount=ev["amount"], payment_ref=ev["ref"])
+            logger.info(f"Webhook {ev['ref']}: {code} {ev['amount']}đ -> {res.get('status')}")
             results.append({"ref": ev["ref"], "code": code, **{k: res[k] for k in ("status",) if k in res}})
         except Exception as e:
             # Xóa dấu đã xử lý để lần gửi lại của cổng thanh toán được thử lại

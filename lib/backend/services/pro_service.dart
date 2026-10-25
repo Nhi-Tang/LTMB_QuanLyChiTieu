@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,7 @@ class ProService extends ChangeNotifier {
   bool _trialUsed = false;
   int _remainingDays = 0;
   bool _isLoading = false;
+  StreamSubscription? _userDocSub;
 
   bool get isPro => _isPro;
   String? get proExpiredAt => _proExpiredAt;
@@ -26,6 +28,8 @@ class ProService extends ChangeNotifier {
 
   /// Reset toàn bộ trạng thái trong bộ nhớ về mặc định (dùng khi đăng xuất / chuyển user)
   void resetState() {
+    _userDocSub?.cancel();
+    _userDocSub = null;
     _isPro = false;
     _proExpiredAt = null;
     _trialUsed = false;
@@ -40,17 +44,18 @@ class ProService extends ChangeNotifier {
       final user = _authService.currentFirebaseUser;
       final prefs = await SharedPreferences.getInstance();
 
+      // Chỉ đọc cache theo UID: không dùng khóa chung để PRO của tài khoản trước không lọt sang tài khoản sau
       if (user != null) {
         final uid = user.uid;
-        _isPro = prefs.getBool('mousey_is_pro_$uid') ?? prefs.getBool('mousey_is_pro') ?? false;
-        _proExpiredAt = prefs.getString('mousey_pro_expired_at_$uid') ?? prefs.getString('mousey_pro_expired_at');
-        _trialUsed = prefs.getBool('mousey_trial_used_$uid') ?? prefs.getBool('mousey_trial_used') ?? false;
-        _remainingDays = prefs.getInt('mousey_remaining_days_$uid') ?? prefs.getInt('mousey_remaining_days') ?? 0;
+        _isPro = prefs.getBool('mousey_is_pro_$uid') ?? false;
+        _proExpiredAt = prefs.getString('mousey_pro_expired_at_$uid');
+        _trialUsed = prefs.getBool('mousey_trial_used_$uid') ?? false;
+        _remainingDays = prefs.getInt('mousey_remaining_days_$uid') ?? 0;
       } else {
-        _isPro = prefs.getBool('mousey_is_pro') ?? false;
-        _proExpiredAt = prefs.getString('mousey_pro_expired_at');
-        _trialUsed = prefs.getBool('mousey_trial_used') ?? false;
-        _remainingDays = prefs.getInt('mousey_remaining_days') ?? 0;
+        _isPro = false;
+        _proExpiredAt = null;
+        _trialUsed = false;
+        _remainingDays = 0;
       }
       
       debugPrint('💎 [ProService] Init loaded from cache: isPro=$_isPro, expiry=$_proExpiredAt, trialUsed=$_trialUsed');
@@ -67,10 +72,14 @@ class ProService extends ChangeNotifier {
   /// Lắng nghe thay đổi realtime từ Firestore users/{uid}
   void _listenToFirestoreChanges() {
     final user = _authService.currentFirebaseUser;
+    _userDocSub?.cancel();
+    _userDocSub = null;
     if (user == null) return;
 
     try {
-      _firestore.collection('users').doc(user.uid).snapshots().listen((doc) {
+      _userDocSub = _firestore.collection('users').doc(user.uid).snapshots().listen((doc) {
+        // Bỏ qua snapshot đến muộn của tài khoản đã đăng xuất
+        if (_authService.currentFirebaseUser?.uid != user.uid) return;
         if (doc.exists) {
           final data = doc.data()!;
           final plan = data['plan'] as String? ?? 'free';
@@ -121,6 +130,8 @@ class ProService extends ChangeNotifier {
       // Nguồn chính: backend (cũng tự hạ cấp gói hết hạn trên server)
       try {
         final status = await ApiClient.instance.get('/subscription/status');
+        // Người dùng đã đổi tài khoản trong lúc chờ: bỏ kết quả của tài khoản cũ
+        if (_authService.currentFirebaseUser?.uid != user.uid) return false;
         await _applyServerStatus(status);
         _notifyExpiry(user.uid);
         return _isPro;
@@ -129,6 +140,7 @@ class ProService extends ChangeNotifier {
       }
 
       final doc = await _firestore.collection('users').doc(user.uid).get();
+      if (_authService.currentFirebaseUser?.uid != user.uid) return false;
 
       if (doc.exists) {
         final data = doc.data()!;
@@ -195,14 +207,10 @@ class ProService extends ChangeNotifier {
 
   Future<void> _saveToCache() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('mousey_is_pro', _isPro);
-    if (_proExpiredAt != null) {
-      await prefs.setString('mousey_pro_expired_at', _proExpiredAt!);
-    } else {
-      await prefs.remove('mousey_pro_expired_at');
+    // Dọn khóa chung của bản cũ (gây lẫn PRO giữa các tài khoản)
+    for (final key in ['mousey_is_pro', 'mousey_pro_expired_at', 'mousey_trial_used', 'mousey_remaining_days']) {
+      await prefs.remove(key);
     }
-    await prefs.setBool('mousey_trial_used', _trialUsed);
-    await prefs.setInt('mousey_remaining_days', _remainingDays);
 
     final user = _authService.currentFirebaseUser;
     if (user != null) {

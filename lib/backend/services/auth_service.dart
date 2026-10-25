@@ -7,6 +7,7 @@ import '../database/db_helper.dart';
 import '../models/user_model.dart';
 import '../models/user_change_model.dart';
 import 'api_client.dart';
+import 'bank_notification_listener_manager.dart';
 import 'pro_service.dart';
 import 'sync_service.dart';
 
@@ -230,6 +231,9 @@ class AuthService {
   Future<void> signOut() async {
     final uid = _firebaseAuth.currentUser?.uid;
     
+    // Ngừng đọc thông báo ngân hàng để không ghi giao dịch vào tài khoản đăng nhập sau
+    BankNotificationListenerManager.instance.stopListening();
+
     // Reset ProService in-memory state so it doesn't leak Pro to the next logged in user
     ProService.instance.resetState();
 
