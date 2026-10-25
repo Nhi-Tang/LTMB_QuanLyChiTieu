@@ -16,12 +16,13 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 Chạy app trỏ vào backend:
 
 ```bash
-# Android emulator (mặc định): http://10.0.2.2:8000
+# Mặc định (không cần tham số): server thật https://mousey-api.onrender.com
 flutter run
-# Điện thoại thật cùng mạng Wi-Fi với máy tính:
+flutter build apk --release
+# Backend chạy trên máy tính, Android emulator:
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+# Backend chạy trên máy tính, điện thoại thật cùng mạng Wi-Fi:
 flutter run --dart-define=API_BASE_URL=http://<IP-máy-tính>:8000
-# Bản release (bắt buộc https):
-flutter build apk --dart-define=API_BASE_URL=https://api.your-domain.vn
 ```
 
 Test: `python -m unittest discover -s tests -t .`
@@ -41,11 +42,8 @@ Repo đã có `render.yaml` ở thư mục gốc. Render đọc file này để 
    - `PAYMENT_WEBHOOK_SECRET`: để trống nếu chưa nối cổng thanh toán (webhook sẽ tắt).
 4. **Apply**. Chờ build xong (~3 phút), mở `https://mousey-api.onrender.com/` (tên có thể khác
    nếu bị trùng, xem trên Dashboard) → thấy `{"message":"Mousey API is running successfully!"}`.
-5. Build app trỏ vào server:
-   ```bash
-   flutter run --dart-define=API_BASE_URL=https://mousey-api.onrender.com
-   flutter build apk --release --dart-define=API_BASE_URL=https://mousey-api.onrender.com
-   ```
+5. App mặc định đã trỏ vào `https://mousey-api.onrender.com` (`lib/core/constants/api_config.dart`).
+   Nếu tên service khác, sửa `defaultValue` ở đó hoặc build với `--dart-define=API_BASE_URL=<url>`.
 
 Lưu ý gói free:
 - Server **ngủ sau 15 phút** không có request; lần gọi đầu mất ~30-60s (app đã chờ tối đa 60s).
