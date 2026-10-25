@@ -102,10 +102,10 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
         });
         showAppAlertDialog(
           context: context,
-          title: status == 'expired' ? 'Đơn hàng đã hết hạn' : 'Chuyển khoản chưa đủ',
+          title: status == 'expired' ? 'Đơn hàng đã hết hạn' : 'Thanh toán không thành công',
           message: status == 'expired'
               ? 'Đơn hàng đã quá thời gian thanh toán. Vui lòng tạo đơn mới. Nếu bạn đã chuyển tiền, gói PRO vẫn được kích hoạt khi hệ thống nhận được giao dịch.'
-              : 'Số tiền nhận được thấp hơn giá gói. Vui lòng liên hệ hỗ trợ kèm mã đơn hàng.',
+              : 'Số dư tài khoản không đủ để thực hiện thanh toán.',
           isSuccess: false,
         );
       } else {

@@ -1,5 +1,6 @@
 import hmac
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import config
 from middleware.auth import verify_firebase_token
@@ -65,4 +66,8 @@ async def bank_webhook(request: Request):
     payload = await request.json()
     if not isinstance(payload, dict):
         raise HTTPException(status_code=400, detail="Payload không hợp lệ")
-    return subscription_service.handle_bank_webhook(payload)
+    result = subscription_service.handle_bank_webhook(payload)
+    # SePay/Casso chỉ gửi lại webhook khi nhận mã lỗi HTTP
+    if any(r.get("retryable") for r in result["results"]):
+        return JSONResponse(status_code=500, content={**result, "success": False})
+    return result

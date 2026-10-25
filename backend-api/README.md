@@ -39,7 +39,7 @@ Repo đã có `render.yaml` ở thư mục gốc. Render đọc file này để 
      Trên Windows, copy nhanh: `Get-Content serviceAccountKey.json -Raw | Set-Clipboard` rồi dán.
      (Cũng nhận chuỗi base64 của file.)
    - `PAYMENT_ACCOUNT_NO`, `PAYMENT_ACCOUNT_NAME`: số và tên tài khoản nhận tiền thật.
-   - `PAYMENT_WEBHOOK_SECRET`: để trống nếu chưa nối cổng thanh toán (webhook sẽ tắt).
+   - `PAYMENT_WEBHOOK_SECRET`: để trống nếu chưa nối cổng thanh toán (webhook sẽ tắt), xem mục "Nối SePay".
 4. **Apply**. Chờ build xong (~3 phút), mở `https://mousey-api.onrender.com/` (tên có thể khác
    nếu bị trùng, xem trên Dashboard) → thấy `{"message":"Mousey API is running successfully!"}`.
 5. App mặc định đã trỏ vào `https://mousey-api.onrender.com` (`lib/core/constants/api_config.dart`).
@@ -75,17 +75,34 @@ cổng thanh toán (SePay, Casso, PayOS webhook...) theo dõi tài khoản ngân
 `POST /subscription/webhook/bank` → backend tìm đơn qua mã trong nội dung, kiểm tra số tiền,
 đánh dấu `paid` và cấp PRO → app (đang poll mỗi 5 giây + nghe Firestore realtime) mở khóa PRO.
 
-Các bước:
-1. Đặt tài khoản nhận tiền thật trong `.env`: `PAYMENT_BANK_ID`, `PAYMENT_ACCOUNT_NO`, `PAYMENT_ACCOUNT_NAME`.
-2. Deploy backend lên server có **https**.
-3. Đăng ký cổng thanh toán, khai báo webhook URL `https://<domain>/subscription/webhook/bank`,
-   chọn xác thực API Key và đặt cùng giá trị vào `PAYMENT_WEBHOOK_SECRET`.
-   (Backend nhận `Authorization: Apikey <secret>`, `Bearer <secret>` hoặc `X-Webhook-Secret`.)
-4. Đặt `ENABLE_MOCK_PAY=false`, `ALLOW_UNVERIFIED_TOKEN=false`.
-5. Deploy `firestore.rules`: `firebase deploy --only firestore:rules`.
+### Nối SePay (đang dùng cho server Render)
+
+1. **Tạo secret** (chuỗi ngẫu nhiên, giữ bí mật). PowerShell:
+   ```powershell
+   -join ((48..57)+(65..90)+(97..122) | Get-Random -Count 40 | % {[char]$_}) | Set-Clipboard
+   ```
+2. **Render** → service `mousey-api` → Environment → `PAYMENT_WEBHOOK_SECRET` = chuỗi vừa tạo → Save
+   (Render tự deploy lại, ~2 phút).
+3. **SePay** (https://my.sepay.vn): đăng ký, liên kết tài khoản ngân hàng nhận tiền
+   (đúng số `PAYMENT_ACCOUNT_NO` trên Render).
+4. SePay → **Tích hợp WebHooks → Thêm webhooks**:
+   - Sự kiện: **Có tiền vào**; chọn đúng tài khoản ngân hàng.
+   - URL: `https://mousey-api.onrender.com/subscription/webhook/bank`
+   - Bỏ qua nếu không có code thanh toán: **Không** (backend tự tìm mã `MSY...` trong nội dung).
+   - Kiểu chứng thực: **API Key** → dán cùng chuỗi secret ở bước 1.
+   - Request content type: `application/json`.
+5. Kiểm tra: SePay có nút gửi thử, hoặc mở app → Nâng cấp → Gói Tháng → chuyển 20.000đ
+   **từ một tài khoản khác** với đúng nội dung `MSY...` → app tự lên PRO trong vài giây.
+   Xem lịch sử gọi ở SePay → Nhật ký WebHooks (phản hồi `{"success": true, ...}` là đúng).
+
+Hành vi webhook:
+- Chống xử lý trùng theo mã giao dịch (`payment_events/{id}`).
+- Không nhận thanh toán thiếu: mỗi giao dịch phải đủ giá gói (không cộng dồn). Chuyển thiếu → đơn `underpaid`,
+  không cấp PRO, app báo "Số dư tài khoản không đủ để thực hiện thanh toán."; các lần chuyển thiếu lưu ở `underpaidTransfers` để hoàn tiền thủ công.
+- Tiền về sau khi đơn hết hạn 15 phút vẫn được cấp PRO.
+- Lỗi hạ tầng (Firestore...) → trả HTTP 500 để SePay tự gửi lại; lỗi nghiệp vụ (không thấy đơn) → 200.
+- Webhook sai secret → 401; chưa đặt `PAYMENT_WEBHOOK_SECRET` → 503 (webhook tắt).
 
 Payload đang hỗ trợ: SePay (`transferType`, `transferAmount`, `content`, `id`), Casso
 (`data: [{tid, amount, description}]`), hoặc tự định nghĩa `{id, amount, content}`.
 Cổng khác chỉ cần chỉnh `_normalize_bank_events` trong `services/subscription_service.py`.
-Webhook chống xử lý trùng theo mã giao dịch (`payment_events/{id}`) và chuyển khoản thiếu tiền
-được đánh dấu `underpaid` (không cấp PRO).
