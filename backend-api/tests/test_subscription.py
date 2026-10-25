@@ -107,8 +107,50 @@ class WebhookTest(unittest.TestCase):
     def test_failed_grant_can_be_retried(self):
         self.mark_paid.side_effect = RuntimeError("firestore down")
         payload = {"id": 7, "transferType": "in", "transferAmount": 20000, "content": "MSYAB12CD34"}
-        self.assertEqual(self._post(payload).json()["results"][0]["status"], "error")
+        res = self._post(payload)
+        self.assertEqual(res.status_code, 500)  # để cổng thanh toán gửi lại
+        self.assertEqual(res.json()["results"][0]["status"], "error")
         self.assertNotIn("payment_events/7", self.fake_db.store)
+
+    def test_business_error_not_retried(self):
+        self.mark_paid.side_effect = svc.HTTPException(status_code=404, detail="Không tìm thấy đơn hàng")
+        payload = {"id": 8, "transferType": "in", "transferAmount": 20000, "content": "MSYAB12CD34"}
+        self.assertEqual(self._post(payload).status_code, 200)
+
+
+class _FakeTxn:
+    def __init__(self, store):
+        self.store = store
+
+    def update(self, ref, data):
+        self.store[ref.path] = {**self.store.get(ref.path, {}), **data}
+
+
+class UnderpaidTest(unittest.TestCase):
+    def setUp(self):
+        self.store = {"users/u1/orders/o1": {"orderId": "o1", "amount": 20000, "planType": "monthly",
+                                             "status": "pending"}}
+        self.order_ref = _FakeDoc(self.store, "users/u1/orders/o1")
+        self.user_ref = _FakeDoc(self.store, "users/u1")
+        self.txn = _FakeTxn(self.store)
+        mock.patch.object(svc, "_apply_grant", return_value={"plan": "pro"}).start()
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def _pay(self, amount, ref):
+        return svc._mark_paid_txn.to_wrap(self.txn, self.order_ref, self.user_ref,
+                                              "bank_transfer", amount, ref)
+
+    def test_partial_transfers_not_accumulated(self):
+        self.assertEqual(self._pay(15000, "r1")["status"], "underpaid")
+        self.assertEqual(self._pay(5000, "r2")["status"], "underpaid")
+        svc._apply_grant.assert_not_called()
+
+    def test_full_transfer_after_underpaid_is_accepted(self):
+        self._pay(15000, "r1")
+        self.assertEqual(self._pay(20000, "r2")["status"], "paid")
+        self.assertEqual(self.store["users/u1/orders/o1"]["paidAmount"], 20000)
 
 
 class AuthAndMockPayTest(unittest.TestCase):

@@ -161,7 +161,7 @@ def _vietqr_url(amount: int, content: str) -> str:
 def _public_order(order: dict) -> dict:
     keys = (
         "orderId", "status", "planType", "amount", "bank", "bankId", "accountNo",
-        "accountName", "content", "qrUrl", "createdAt", "expiresAt", "paidAt",
+        "accountName", "content", "qrUrl", "createdAt", "expiresAt", "paidAt", "paidAmount",
     )
     return {k: order.get(k) for k in keys}
 
@@ -229,11 +229,14 @@ def _mark_paid_txn(transaction, order_ref, user_ref, source: str, paid_amount, p
         return {"status": "paid", "alreadyPaid": True, "orderId": order.get("orderId")}
 
     expected = int(order.get("amount", 0))
+    # Không nhận thanh toán thiếu: mỗi giao dịch phải đủ giá gói, không cộng dồn nhiều lần chuyển.
+    # Các lần chuyển thiếu được lưu lại để hoàn tiền thủ công.
     if paid_amount is not None and int(paid_amount) < expected:
         transaction.update(order_ref, {
             "status": "underpaid",
             "paidAmount": int(paid_amount),
             "paymentRef": payment_ref,
+            "underpaidTransfers": firestore.ArrayUnion([{"ref": payment_ref, "amount": int(paid_amount)}]),
             "updatedAt": _now().isoformat(),
         })
         return {"status": "underpaid", "orderId": order.get("orderId"),
@@ -336,6 +339,8 @@ def handle_bank_webhook(payload: dict) -> dict:
                 db.collection("payment_events").document(ev["ref"]).delete()
             logger.error(f"Webhook: failed to mark order {code} paid: {e}")
             reason = e.detail if isinstance(e, HTTPException) else str(e)
-            results.append({"ref": ev["ref"], "code": code, "status": "error", "reason": reason})
+            # Lỗi nghiệp vụ (vd. không thấy đơn) gửi lại cũng vô ích; lỗi hạ tầng thì nên gửi lại
+            results.append({"ref": ev["ref"], "code": code, "status": "error", "reason": reason,
+                            "retryable": not isinstance(e, HTTPException)})
 
     return {"success": True, "results": results}
