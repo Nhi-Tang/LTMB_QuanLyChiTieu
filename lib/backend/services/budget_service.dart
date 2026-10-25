@@ -147,7 +147,16 @@ class BudgetService extends ChangeNotifier {
   /// Kiểm tra các ngưỡng ngân sách (80% warning, 100% reached, 120% exceeded) và kích hoạt cảnh báo.
   /// Mỗi ngưỡng chỉ báo tối đa 1 lần/tháng/ngân sách; nhảy thẳng lên ngưỡng cao thì các ngưỡng thấp hơn
   /// được đánh dấu đã báo để không phát cảnh báo "lùi" khi chi tiêu giảm nhẹ.
-  Future<List<String>> checkAndTriggerAlerts(String ledgerId, String month, {String? uid}) async {
+  Future<List<String>> checkAndTriggerAlerts(String ledgerId, String month, {String? uid}) {
+    // Nhiều màn hình cùng gọi loadBudgets; chạy lần lượt để không ghi/báo trùng một mức
+    final run = _alertQueue.then((_) => _checkAndTriggerAlerts(ledgerId, month, uid: uid));
+    _alertQueue = run.then((_) {}, onError: (_) {});
+    return run;
+  }
+
+  Future<void> _alertQueue = Future.value();
+
+  Future<List<String>> _checkAndTriggerAlerts(String ledgerId, String month, {String? uid}) async {
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool('budget_alerts_enabled') ?? true;
     if (!enabled) return [];

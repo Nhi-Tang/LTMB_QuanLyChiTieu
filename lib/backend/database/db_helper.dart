@@ -53,7 +53,7 @@ class DatabaseHelper {
 
     final db = await openDatabase(
       path,
-      version: 21,
+      version: 22,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -169,15 +169,6 @@ class DatabaseHelper {
       )
     ''');
     try { await db.execute("CREATE INDEX IF NOT EXISTS idx_tx_uid ON transactions(uid);"); } catch (_) {}
-
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS budget_alerts (
-        budgetId TEXT NOT NULL,
-        month TEXT NOT NULL,
-        level TEXT NOT NULL,
-        PRIMARY KEY (budgetId, month, level)
-      )
-    ''');
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS categories (
@@ -658,17 +649,29 @@ class DatabaseHelper {
         }
       } catch (_) {}
     }
-    if (oldVersion < 21) {
-      try {
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS budget_alerts (
-            budgetId TEXT NOT NULL,
-            month TEXT NOT NULL,
-            level TEXT NOT NULL,
-            PRIMARY KEY (budgetId, month, level)
-          )
-        ''');
-      } catch (_) {}
+    if (oldVersion < 22) {
+      // Migration v22: bản v21 có thể đã tạo budget_alerts thiếu cột createdAt/uid
+      await _ensureBudgetAlertsColumns(db);
+    }
+  }
+
+  static Future<void> _ensureBudgetAlertsColumns(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS budget_alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        budgetId TEXT NOT NULL,
+        month TEXT NOT NULL,
+        level TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        uid TEXT
+      )
+    ''');
+    final cols = (await db.rawQuery('PRAGMA table_info(budget_alerts)')).map((c) => c['name']).toSet();
+    if (!cols.contains('createdAt')) {
+      await db.execute("ALTER TABLE budget_alerts ADD COLUMN createdAt TEXT NOT NULL DEFAULT ''");
+    }
+    if (!cols.contains('uid')) {
+      await db.execute('ALTER TABLE budget_alerts ADD COLUMN uid TEXT');
     }
   }
 

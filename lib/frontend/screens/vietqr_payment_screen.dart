@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../backend/services/pro_service.dart';
+import '../../core/utils/money_input_formatter.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_alert_dialog.dart';
 
@@ -270,7 +271,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${amount.toString()}đ',
+                    '${formatMoney(amount as num)}đ',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -358,7 +359,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                   _buildDetailRow('Ngân hàng', bank, copyable: false),
                   _buildDetailRow('Số tài khoản', accountNo, copyable: true, labelName: 'số tài khoản'),
                   _buildDetailRow('Chủ tài khoản', accountName, copyable: false),
-                  _buildDetailRow('Số tiền', '$amountđ', copyable: true, rawText: amount.toString(), labelName: 'số tiền'),
+                  _buildDetailRow('Số tiền', '${formatMoney(amount)}đ', copyable: true, rawText: amount.toString(), labelName: 'số tiền'),
                   _buildDetailRow('Nội dung chuyển khoản', content, copyable: true, rawText: content, labelName: 'nội dung chuyển khoản', isHighlight: true),
                 ],
               ),
