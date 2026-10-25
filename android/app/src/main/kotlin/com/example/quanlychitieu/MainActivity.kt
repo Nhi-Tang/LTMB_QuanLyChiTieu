@@ -56,21 +56,6 @@ class MainActivity : FlutterActivity() {
                         }
                         result.success(true)
                     }
-                    "sendTestNotification" -> {
-                        val packageName = call.argument<String>("packageName") ?: "com.VCB"
-                        val title = call.argument<String>("title") ?: "Vietcombank"
-                        val text = call.argument<String>("text") ?: "SD TK 102... +500,000 VND luc 15:30. Ref: Chuyen tien"
-                        val timestamp = call.argument<Long>("timestamp") ?: System.currentTimeMillis()
-
-                        val data = mapOf(
-                            "packageName" to packageName,
-                            "title" to title,
-                            "text" to text,
-                            "timestamp" to timestamp
-                        )
-                        BankNotificationService.sendEvent(data)
-                        result.success(true)
-                    }
                     else -> {
                         result.notImplemented()
                     }

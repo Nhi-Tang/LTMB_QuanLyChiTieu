@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../backend/services/bank_parser/bank_notification_parser.dart';
-import '../../../backend/services/category_suggestion_service.dart';
 import '../../../backend/services/daily_reminder_service.dart';
 import '../../theme/app_colors.dart';
-
-import 'pending_inbox.dart';
 import 'permission_guide_screen.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
@@ -25,51 +21,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   int _reminderMinute = 30;
   bool _isLoading = true;
 
-  final TextEditingController _customTitleController = TextEditingController(text: 'Vietcombank');
-  final TextEditingController _customTextController = TextEditingController(
-    text: 'SD TK 0011001234567 -150,000 VND luc 12:30. So du 5,000,000 VND. Ref: Mua do an tai Highlands Coffee',
-  );
-  String _selectedSampleBank = 'Vietcombank';
-
-  final Map<String, Map<String, String>> _sampleNotifications = {
-    'Vietcombank': {
-      'pkg': 'com.VCB',
-      'title': 'Vietcombank',
-      'text': 'SD TK 0011001234567 -150,000 VND luc 12:30. So du 5,000,000 VND. Ref: Mua do an tai Highlands Coffee',
-    },
-    'MB Bank': {
-      'pkg': 'com.mbmobile',
-      'title': 'MB Bank',
-      'text': 'TK 123456789 GD: +2,000,000VND 12/05/23 15:30. So du 12,500,000VND. ND: Nhan luong thang 5',
-    },
-    'Techcombank': {
-      'pkg': 'vn.com.techcombank.bb.app',
-      'title': 'Techcombank',
-      'text': 'TCB: TK 19031234567890 GD: -50,000VND. So du 1,200,000VND. Noi dung: Thanh toan tien gui xe',
-    },
-    'MoMo': {
-      'pkg': 'com.mservice.momopay',
-      'title': 'MoMo',
-      'text': 'Thanh toán thành công 85.000đ cho Circle K. Mã GD 12345678',
-    },
-    'BIDV': {
-      'pkg': 'com.vnpay.bidv',
-      'title': 'BIDV',
-      'text': 'BIDV: TK 123456789 -300,000VND. So du: 3,500,000VND. ND: Thanh toan tien dien Thang 5',
-    },
-  };
-
   @override
   void initState() {
     super.initState();
     _loadSettings();
-  }
-
-  @override
-  void dispose() {
-    _customTitleController.dispose();
-    _customTextController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadSettings() async {
@@ -130,146 +85,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         DailyReminderService.instance.scheduleDailyEveningReminder();
       }
     }
-  }
-
-  void _selectSample(String bankName) {
-    final sample = _sampleNotifications[bankName];
-    if (sample != null) {
-      setState(() {
-        _selectedSampleBank = bankName;
-        _customTitleController.text = sample['title']!;
-        _customTextController.text = sample['text']!;
-      });
-    }
-  }
-
-  Future<void> _testSampleNotification() async {
-    final sample = _sampleNotifications[_selectedSampleBank] ?? {
-      'pkg': 'com.VCB',
-      'title': _customTitleController.text,
-      'text': _customTextController.text,
-    };
-
-    final title = _customTitleController.text.trim();
-    final text = _customTextController.text.trim();
-    final pkg = sample['pkg'] ?? 'com.VCB';
-
-    final parsed = BankNotificationParser.parseNotification(
-      packageName: pkg,
-      title: title,
-      text: text,
-      timestamp: DateTime.now(),
-    );
-
-    if (parsed == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không thể phân tích giao dịch! Thông báo bị bỏ qua hoặc không chứa số tiền.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    // Xử lý lưu nháp & gợi ý danh mục (chế độ thử nghiệm test mode)
-    final pendingItem = await CategorySuggestionService.instance.processIncomingNotification(
-      parsed,
-      isTestMode: true,
-    );
-
-    if (!mounted) return;
-
-    if (pendingItem == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Giao dịch mẫu bị trùng lặp fingerprint (đã tồn tại trong 10 phút gần đây).'),
-          backgroundColor: Colors.blueGrey,
-        ),
-      );
-      return;
-    }
-
-    // Hiển thị kết quả thử nghiệm
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            const Icon(Icons.check_circle_rounded, color: AppColors.primary),
-            const SizedBox(width: 8),
-            const Expanded(
-              child: Text(
-                'Thử nghiệm thành công!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildResultRow('Ngân hàng', parsed.bankName),
-              _buildResultRow('Loại giao dịch', parsed.type == 'expense' ? 'Chi tiêu (-)' : 'Thu nhập (+)'),
-              _buildResultRow('Số tiền', '${parsed.amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ'),
-              _buildResultRow('Số tài khoản', 'TK ***${parsed.accountLast4}'),
-              _buildResultRow('Mô tả trích xuất', parsed.description),
-              _buildResultRow('Danh mục gợi ý', pendingItem.suggestedCategoryId ?? 'Chưa phân loại'),
-              _buildResultRow('Độ tin cậy', pendingItem.suggestionConfidence.toUpperCase()),
-              _buildResultRow('Trạng thái', pendingItem.status == 'confirmed' ? 'Đã tự động xác nhận' : 'Đã tạo bản nháp (Chờ xác nhận)'),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Đóng'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              PendingInboxSheet.show(
-      context,
-      selectedLanguage: widget.selectedLanguage,
-    );
-            },
-            child: const Text('Xem Hộp thư Chờ xác nhận'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkBeige),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -379,93 +194,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           MaterialPageRoute(builder: (context) => const PermissionGuideScreen()),
                         );
                       },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Test Tool Section: "Thử với thông báo mẫu"
-                  const Text(
-                    'Thử với thông báo mẫu',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkBeige),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Chọn ngân hàng hoặc nhập nội dung thông báo bất kỳ để kiểm tra bộ lọc tự động:',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Preset Bank Chips
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: _sampleNotifications.keys.map((bank) {
-                        final isSelected = bank == _selectedSampleBank;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(bank),
-                            selected: isSelected,
-                            selectedColor: AppColors.primary,
-                            labelStyle: TextStyle(
-                              color: isSelected ? Colors.white : AppColors.darkBeige,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              fontSize: 12,
-                            ),
-                            onSelected: (_) => _selectSample(bank),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Sample Input Fields
-                  Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _customTitleController,
-                            decoration: const InputDecoration(
-                              labelText: 'Tiêu đề thông báo',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _customTextController,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Nội dung thông báo',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.all(12),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              onPressed: _testSampleNotification,
-                              icon: const Icon(Icons.play_arrow_rounded),
-                              label: const Text(
-                                'Thử nghiệm ngay',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
