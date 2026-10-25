@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "252576636037",
+    "project_id": "quan-ly-chi-65a86",
+    "storage_bucket": "quan-ly-chi-65a86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252576636037:android:a006dc7296fd084a099dec",
+        "android_client_info": {
+          "package_name": "com.example.quanlychitieu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252576636037-qun9qbqph6p7ep3n91ao8mrbehhsd94b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.quanlychitieu",
+            "certificate_hash": "e3dd29895eb0814d668a2a935ce4f783228fcc07"
+          }
+        },
+        {
+          "client_id": "252576636037-b0ron8cb2g4u6fo6rqja33om5cop4tl9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7bH2kGhjdcgHLmENUrjL8dEQaVk2OwWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252576636037-b0ron8cb2g4u6fo6rqja33om5cop4tl9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

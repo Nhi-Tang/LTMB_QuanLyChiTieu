@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // role do backend ghi vào users/{uid} (xem backend-api/routes/auth.py)
+    function isAdmin() {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'user') == 'admin';
+    }
+
+    // Các trường chỉ backend (Admin SDK) được ghi
+    function serverFields() {
+      return ['role', 'plan', 'planType', 'planSource', 'proExpiredAt', 'trialUsed'];
+    }
+
+    // Dữ liệu đồng bộ từ SQLite luôn có updatedAt dạng epoch millis
+    function hasValidUpdatedAt() {
+      return request.resource.data.updatedAt is number;
+    }
+
+    match /users/{userId} {
+      // Admin cần đọc toàn bộ để hiển thị màn quản lý người dùng
+      allow read: if isOwner(userId) || isAdmin();
+
+      allow create: if isOwner(userId)
+                    && !request.resource.data.keys().hasAny(serverFields());
+
+      allow update: if isOwner(userId)
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(serverFields());
+
+      allow delete: if false;
+
+      // Đơn hàng và lịch sử gói: chỉ đọc, backend ghi
+      match /orders/{orderId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      match /subscriptions/{subId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      match /ledgers/{ledgerId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && hasValidUpdatedAt();
+      }
+
+      match /categories/{categoryId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /transactions/{txId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && hasValidUpdatedAt()
+          && request.resource.data.amount is number
+          && request.resource.data.amount >= 0
+          && (!('note' in request.resource.data)
+              || request.resource.data.note == null
+              || (request.resource.data.note is string && request.resource.data.note.size() <= 500));
+      }
+
+      match /savings_goals/{goalId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && hasValidUpdatedAt()
+          && request.resource.data.target_amount is number
+          && request.resource.data.target_amount >= 0;
+      }
+
+      match /budgets/{budgetId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && hasValidUpdatedAt()
+          && request.resource.data.amountLimit is number
+          && request.resource.data.amountLimit >= 0;
+      }
+    }
+
+    // Chỉ backend (Admin SDK) đọc/ghi: chỉ mục mã thanh toán và log webhook
+    match /payment_codes/{code} {
+      allow read, write: if false;
+    }
+    match /payment_events/{eventId} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+# Bí mật: không bao giờ commit
+serviceAccountKey.json
+.env
+__pycache__/
+*.pyc
+.venv/
