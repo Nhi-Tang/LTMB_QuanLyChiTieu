@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../database/db_helper.dart';
 import '../models/user_model.dart';
 import '../models/user_change_model.dart';
+import 'api_client.dart';
 import 'pro_service.dart';
 import 'sync_service.dart';
 
@@ -169,6 +170,19 @@ class AuthService {
       createdAt: now,
     );
 
+    // Đăng ký/cập nhật phiên với backend: server tạo doc users/{uid} với các trường
+    // do server quản lý (role, plan, proExpiredAt) mà client không được phép ghi.
+    if (idToken != null) {
+      try {
+        final session = await ApiClient.instance.post('/auth/session');
+        if (session['plan'] == 'pro') {
+          userModel = userModel.copyWith(plan: 'pro', proExpiredAt: session['proExpiredAt'] as String?);
+        }
+      } on ApiException catch (e) {
+        developer.log('Backend session sync failed (offline fallback): ${e.message}');
+      }
+    }
+
     // Fetch from Cloud Firestore to preserve real plan status
     try {
       final doc = await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
@@ -198,13 +212,11 @@ class AuthService {
       await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
         'name': userModel.name,
         'email': userModel.email,
-        'role': userModel.role,
+        // role / plan / proExpiredAt / trialUsed do backend quản lý (firestore.rules chặn client ghi)
         'isActive': userModel.isActive,
         'createdAt': userModel.createdAt,
         'photoUrl': userModel.photoUrl,
         'provider': userModel.provider,
-        'plan': userModel.plan,
-        'proExpiredAt': userModel.proExpiredAt,
         'lastLoginAt': userModel.lastLoginAt,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));

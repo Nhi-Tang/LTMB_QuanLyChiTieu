@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'api_client.dart';
 import 'auth_service.dart';
 import 'in_app_notification_service.dart';
 
@@ -117,7 +118,16 @@ class ProService extends ChangeNotifier {
         return false;
       }
 
-      debugPrint('💎 [ProService] Reading plan for user ${user.uid} from Firestore...');
+      // Nguồn chính: backend (cũng tự hạ cấp gói hết hạn trên server)
+      try {
+        final status = await ApiClient.instance.get('/subscription/status');
+        await _applyServerStatus(status);
+        _notifyExpiry(user.uid);
+        return _isPro;
+      } on ApiException catch (e) {
+        debugPrint('💎 [ProService] Backend status unavailable (${e.message}), reading Firestore');
+      }
+
       final doc = await _firestore.collection('users').doc(user.uid).get();
 
       if (doc.exists) {
@@ -132,9 +142,6 @@ class ProService extends ChangeNotifier {
           if (expiryDate != null && DateTime.now().isAfter(expiryDate)) {
             activePro = false;
             debugPrint('⚠️ [ProService] Downgrading user ${user.uid} to Free (Expired at $_proExpiredAt)');
-            try {
-              await _firestore.collection('users').doc(user.uid).update({'plan': 'free'});
-            } catch (_) {}
           }
         }
 
@@ -147,23 +154,7 @@ class ProService extends ChangeNotifier {
           }
         }
 
-        if (_isPro && _remainingDays <= 3) {
-          InAppNotificationService.instance.add(
-            type: 'pro',
-            title: 'Thông báo gói Mousey PRO',
-            body: 'Gói Mousey PRO của bạn còn lại $_remainingDays ngày sử dụng. Hãy gia hạn để không bị gián đoạn!',
-            dedupeKey: 'notif_pro_expiry_${user.uid}_${_remainingDays}d',
-            uid: user.uid,
-          );
-        } else if (!_isPro && _proExpiredAt != null) {
-          InAppNotificationService.instance.add(
-            type: 'pro',
-            title: 'Gói Mousey PRO đã hết hạn',
-            body: 'Gói Mousey PRO của bạn đã hết hạn. Hãy nâng cấp ngay để tiếp tục sử dụng các tính năng cao cấp!',
-            dedupeKey: 'notif_pro_expired_${user.uid}',
-            uid: user.uid,
-          );
-        }
+        _notifyExpiry(user.uid);
 
         await _saveToCache();
         notifyListeners();
@@ -180,6 +171,26 @@ class ProService extends ChangeNotifier {
       debugPrint('Check Pro Status error (offline cache used): $e');
     }
     return _isPro;
+  }
+
+  void _notifyExpiry(String uid) {
+    if (_isPro && _remainingDays <= 3) {
+      InAppNotificationService.instance.add(
+        type: 'pro',
+        title: 'Thông báo gói Mousey PRO',
+        body: 'Gói Mousey PRO của bạn còn lại $_remainingDays ngày sử dụng. Hãy gia hạn để không bị gián đoạn!',
+        dedupeKey: 'notif_pro_expiry_${uid}_${_remainingDays}d',
+        uid: uid,
+      );
+    } else if (!_isPro && _proExpiredAt != null) {
+      InAppNotificationService.instance.add(
+        type: 'pro',
+        title: 'Gói Mousey PRO đã hết hạn',
+        body: 'Gói Mousey PRO của bạn đã hết hạn. Hãy nâng cấp ngay để tiếp tục sử dụng các tính năng cao cấp!',
+        dedupeKey: 'notif_pro_expired_$uid',
+        uid: uid,
+      );
+    }
   }
 
   Future<void> _saveToCache() async {
@@ -214,198 +225,80 @@ class ProService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Kích hoạt dùng thử 7 ngày miễn phí
+  /// Áp dụng kết quả trạng thái gói từ backend (/subscription/status hoặc kết quả cấp PRO)
+  Future<void> _applyServerStatus(Map<String, dynamic> data) async {
+    final expiry = data['proExpiredAt'] as String?;
+    final exp = expiry != null ? DateTime.tryParse(expiry) : null;
+    _proExpiredAt = expiry;
+    if (data.containsKey('trialUsed')) {
+      _trialUsed = data['trialUsed'] as bool? ?? _trialUsed;
+    }
+    _isPro = data['plan'] == 'pro' && exp != null && exp.isAfter(DateTime.now());
+    _remainingDays = exp != null ? exp.difference(DateTime.now()).inDays.clamp(0, 100000) : 0;
+    await _saveToCache();
+    notifyListeners();
+  }
+
+  /// Kích hoạt dùng thử 7 ngày miễn phí (backend kiểm tra và cấp quyền)
   Future<bool> startTrial() async {
     _isLoading = true;
     notifyListeners();
     try {
-      final user = _authService.currentFirebaseUser;
-      if (user == null) throw Exception('Chưa đăng nhập tài khoản.');
-
-      final docRef = _firestore.collection('users').doc(user.uid);
-      
-      try {
-        await _firestore.runTransaction((transaction) async {
-          final snapshot = await transaction.get(docRef);
-          bool used = false;
-          if (snapshot.exists) {
-            used = snapshot.data()?['trialUsed'] as bool? ?? false;
-          }
-          if (used) {
-            throw Exception('Bạn đã sử dụng gói dùng thử trước đó.');
-          }
-
-          final now = DateTime.now();
-          final expiry = now.add(const Duration(days: 7)).toIso8601String();
-
-          transaction.set(docRef, {
-            'plan': 'pro',
-            'planType': 'trial',
-            'planSource': 'trial',
-            'trialUsed': true,
-            'proExpiredAt': expiry,
-            'proStartedAt': now.toIso8601String(),
-          }, SetOptions(merge: true));
-
-          debugPrint('💎 [ProService] Writing trial plan to Firestore for user ${user.uid}: expiry=$expiry');
-        });
-      } catch (fsErr) {
-        debugPrint('Firestore trial error (fallback used): $fsErr');
-        if (_trialUsed) {
-          _isLoading = false;
-          notifyListeners();
-          throw Exception('Bạn đã sử dụng gói dùng thử trước đó.');
-        }
-      }
-
-      // Local fallback activation
-      _isPro = true;
+      final result = await ApiClient.instance.post('/subscription/start-trial');
       _trialUsed = true;
-      final expiry = DateTime.now().add(const Duration(days: 7)).toIso8601String();
-      _proExpiredAt = expiry;
-      _remainingDays = 7;
-      await _saveToCache();
-
-      _isLoading = false;
-      notifyListeners();
+      await _applyServerStatus({...result, 'trialUsed': true});
       return true;
-    } catch (e) {
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    } finally {
       _isLoading = false;
       notifyListeners();
-      rethrow;
     }
   }
 
-  /// Tạo đơn hàng thanh toán gói PRO
+  /// Tạo đơn hàng thanh toán gói PRO trên backend. Số tiền do server quyết định theo [planType].
   Future<Map<String, dynamic>?> createOrder(String planType, int amount) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final user = _authService.currentFirebaseUser;
-      if (user == null) throw Exception('Chưa đăng nhập tài khoản.');
-
-      final orderId = 'MOUSEY_ORDER_${planType.toUpperCase()}_${amount}_${DateTime.now().millisecondsSinceEpoch}';
-      final orderData = {
-        'orderId': orderId,
-        'userId': user.uid,
+      return await ApiClient.instance.post('/subscription/create-order', {
         'planType': planType,
         'amount': amount,
-        'status': 'pending',
-        'createdAt': FieldValue.serverTimestamp(),
-      };
-
-      try {
-        await _firestore.collection('users').doc(user.uid).collection('orders').doc(orderId).set(orderData);
-      } catch (fsErr) {
-        debugPrint('Firestore write order error (permission fallback used): $fsErr');
-      }
-
+      });
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    } finally {
       _isLoading = false;
       notifyListeners();
-
-      return {
-        'orderId': orderId,
-        'amount': amount,
-        'planType': planType,
-        'status': 'pending',
-        'bank': 'MB Bank',
-        'accountNo': '0912345678',
-        'accountName': 'MOUSEY APP',
-        'content': orderId,
-      };
-    } catch (e) {
-      _isLoading = false;
-      notifyListeners();
-      rethrow;
     }
   }
 
-  /// Kiểm tra trạng thái đơn hàng thanh toán từ Firestore
+  /// Kiểm tra trạng thái đơn hàng: 'pending' | 'paid' | 'expired' | 'underpaid'
   Future<Map<String, dynamic>> checkOrderStatus(String orderId) async {
     try {
-      final user = _authService.currentFirebaseUser;
-      if (user == null) throw Exception('Chưa đăng nhập tài khoản.');
-
-      try {
-        final doc = await _firestore.collection('users').doc(user.uid).collection('orders').doc(orderId).get();
-        if (doc.exists) {
-          final data = doc.data()!;
-          final status = data['status'] as String? ?? 'pending';
-          if (status == 'paid') {
-            await checkProStatus();
-            return data;
-          }
-        }
-      } catch (fsErr) {
-        debugPrint('Firestore check order error (fallback used): $fsErr');
+      final order = await ApiClient.instance.get('/subscription/check-order/${Uri.encodeComponent(orderId)}');
+      if (order['status'] == 'paid') {
+        await checkProStatus();
       }
-
-      await mockPay(orderId);
-      return {'status': 'paid'};
-    } catch (e) {
-      debugPrint('Check order status error: $e');
-      rethrow;
+      return order;
+    } on ApiException catch (e) {
+      throw Exception(e.message);
     }
   }
 
-  /// Giả lập thanh toán đơn hàng thành công (Mock Pay / Grant Pro)
+  /// Thanh toán giả lập — chỉ hoạt động khi backend bật ENABLE_MOCK_PAY (môi trường dev)
   Future<bool> mockPay(String orderId) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final user = _authService.currentFirebaseUser;
-      if (user == null) throw Exception('Chưa đăng nhập tài khoản.');
-
-      final userDocRef = _firestore.collection('users').doc(user.uid);
-      final orderDocRef = userDocRef.collection('orders').doc(orderId);
-
-      await _firestore.runTransaction((transaction) async {
-        final userSnapshot = await transaction.get(userDocRef);
-        String? currentExpiryStr;
-        if (userSnapshot.exists) {
-          final userData = userSnapshot.data();
-          if (userData != null && userData.containsKey('proExpiredAt')) {
-            currentExpiryStr = userData['proExpiredAt'] as String?;
-          }
-        }
-
-        DateTime baseDate = DateTime.now();
-        if (currentExpiryStr != null && currentExpiryStr.isNotEmpty) {
-          final DateTime? currentExpiry = DateTime.tryParse(currentExpiryStr);
-          if (currentExpiry != null && currentExpiry.isAfter(baseDate)) {
-            baseDate = currentExpiry;
-          }
-        }
-
-        // Nhận diện chính xác gói năm (yearly / 200000) hay gói tháng (monthly / 20000)
-        final bool isYear = orderId.toUpperCase().contains('YEARLY') || 
-                            orderId.toUpperCase().contains('YEAR') || 
-                            orderId.contains('200000');
-
-        final int days = isYear ? 365 : 30;
-        final newExpiry = baseDate.add(Duration(days: days)).toIso8601String();
-
-        transaction.set(userDocRef, {
-          'plan': 'pro',
-          'planType': isYear ? 'yearly' : 'monthly',
-          'planSource': 'paid',
-          'proExpiredAt': newExpiry,
-          'proStartedAt': DateTime.now().toIso8601String(),
-        }, SetOptions(merge: true));
-
-        transaction.update(orderDocRef, {'status': 'paid'});
-
-        debugPrint('💎 [ProService] Writing paid plan to Firestore for user ${user.uid}: planType=${isYear ? 'yearly' : 'monthly'}, days=$days, expiry=$newExpiry');
-      });
-
+      final result = await ApiClient.instance.post('/subscription/mock-pay', {'orderId': orderId});
       await checkProStatus();
+      return result['status'] == 'paid';
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      notifyListeners();
-      rethrow;
     }
   }
 }

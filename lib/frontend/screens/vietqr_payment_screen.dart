@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../backend/services/pro_service.dart';
@@ -27,6 +28,11 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
   @override
   void initState() {
     super.initState();
+    // Thời hạn đơn do server quy định (expiresAt), mặc định 15 phút
+    final expiresAt = DateTime.tryParse(widget.orderData['expiresAt'] as String? ?? '');
+    if (expiresAt != null) {
+      _remainingSeconds = expiresAt.difference(DateTime.now()).inSeconds.clamp(0, 24 * 3600);
+    }
     _startCountdown();
     _startPolling();
   }
@@ -85,6 +91,22 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
         setState(() => _isChecking = false);
 
         _showSuccessDialog();
+      } else if (status == 'expired' || status == 'underpaid') {
+        _pollingTimer.cancel();
+        _countdownTimer.cancel();
+        if (!mounted) return;
+        setState(() {
+          _isChecking = false;
+          _remainingSeconds = 0;
+        });
+        showAppAlertDialog(
+          context: context,
+          title: status == 'expired' ? 'Đơn hàng đã hết hạn' : 'Chuyển khoản chưa đủ',
+          message: status == 'expired'
+              ? 'Đơn hàng đã quá thời gian thanh toán. Vui lòng tạo đơn mới. Nếu bạn đã chuyển tiền, gói PRO vẫn được kích hoạt khi hệ thống nhận được giao dịch.'
+              : 'Số tiền nhận được thấp hơn giá gói. Vui lòng liên hệ hỗ trợ kèm mã đơn hàng.',
+          isSuccess: false,
+        );
       } else {
         if (!silent && mounted) {
           setState(() => _isChecking = false);
@@ -112,6 +134,22 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
       if (!silent && mounted) {
         setState(() => _isChecking = false);
       }
+    }
+  }
+
+  /// Chỉ dùng khi dev: backend phải bật ENABLE_MOCK_PAY
+  Future<void> _mockPay() async {
+    setState(() => _isChecking = true);
+    try {
+      await ProService.instance.mockPay(widget.orderData['orderId'] as String);
+      if (mounted) setState(() => _isChecking = false);
+      await _checkPaymentStatus(silent: true);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isChecking = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -146,12 +184,14 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
     final orderId = widget.orderData['orderId'] ?? '';
     final amount = widget.orderData['amount'] ?? 0;
     final planType = widget.orderData['planType'] ?? 'monthly';
-    final bank = widget.orderData['bank'] ?? 'MB Bank';
-    final accountNo = widget.orderData['accountNo'] ?? '0912345678';
-    final accountName = widget.orderData['accountName'] ?? 'MOUSEY APP';
-
-    // Dynamic VietQR image URL using QuickLink / VietQR API
-    final qrUrl = 'https://img.vietqr.io/image/MB-$accountNo-compact2.png?amount=$amount&addInfo=$orderId&accountName=MOUSEY';
+    final bank = widget.orderData['bank'] ?? '';
+    final accountNo = widget.orderData['accountNo'] ?? '';
+    final accountName = widget.orderData['accountName'] ?? '';
+    // Nội dung chuyển khoản là mã đơn ngắn do server sinh, webhook dùng mã này để đối soát
+    final content = (widget.orderData['content'] ?? orderId).toString();
+    final bankId = widget.orderData['bankId'] ?? 'MB';
+    final qrUrl = widget.orderData['qrUrl'] as String? ??
+        'https://img.vietqr.io/image/$bankId-$accountNo-compact2.png?amount=$amount&addInfo=${Uri.encodeComponent(content)}&accountName=${Uri.encodeComponent(accountName.toString())}';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -319,7 +359,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                   _buildDetailRow('Số tài khoản', accountNo, copyable: true, labelName: 'số tài khoản'),
                   _buildDetailRow('Chủ tài khoản', accountName, copyable: false),
                   _buildDetailRow('Số tiền', '$amountđ', copyable: true, rawText: amount.toString(), labelName: 'số tiền'),
-                  _buildDetailRow('Nội dung chuyển khoản', orderId, copyable: true, rawText: orderId, labelName: 'nội dung chuyển khoản', isHighlight: true),
+                  _buildDetailRow('Nội dung chuyển khoản', content, copyable: true, rawText: content, labelName: 'nội dung chuyển khoản', isHighlight: true),
                 ],
               ),
             ),
@@ -351,6 +391,14 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                       ),
               ),
             ),
+            if (kDebugMode) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: _isChecking ? null : _mockPay,
+                icon: const Icon(Icons.bug_report_outlined, size: 18),
+                label: const Text('Giả lập thanh toán (chỉ bản debug)'),
+              ),
+            ],
             const SizedBox(height: 12),
             const Text(
               'Hệ thống tự động kiểm tra giao dịch mỗi 5 giây.',
