@@ -183,19 +183,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   totalBalance: _totalBalance,
                   transactions: _transactions,
                   onLogout: () => _logout(context),
-                  onSelectMonth: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedMonth,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2030),
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        _selectedMonth = DateTime(picked.year, picked.month, 1);
-                      });
-                    }
-                  },
                   onAddIncome: () => _showAddTransactionModal(defaultExpense: false),
                   onAddExpense: () => _showAddTransactionModal(defaultExpense: true),
                 ),

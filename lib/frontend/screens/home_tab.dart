@@ -26,7 +26,6 @@ class HomeTab extends StatefulWidget {
   final double totalBalance;
   final List<TransactionItem> transactions;
   final VoidCallback onLogout;
-  final VoidCallback onSelectMonth;
   final VoidCallback onAddIncome;
   final VoidCallback onAddExpense;
 
@@ -45,7 +44,6 @@ class HomeTab extends StatefulWidget {
     required this.totalBalance,
     required this.transactions,
     required this.onLogout,
-    required this.onSelectMonth,
     required this.onAddIncome,
     required this.onAddExpense,
   });
@@ -109,10 +107,6 @@ class _HomeTabState extends State<HomeTab> {
         });
       }
     } catch (_) {}
-  }
-
-  String _formatMonthYear(DateTime date) {
-    return AppTranslations.formatMonthYear(widget.selectedLanguage, date);
   }
 
   String _formatDateTime(DateTime date) {
@@ -412,42 +406,6 @@ class _HomeTabState extends State<HomeTab> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Month Picker
-                    Flexible(
-                      child: GestureDetector(
-                        onTap: widget.onSelectMonth,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFECE7DB)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.calendar_today_rounded, size: 14, color: HomeTab.darkBeige),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  _formatMonthYear(widget.selectedMonth),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: HomeTab.darkBeige,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.keyboard_arrow_down, size: 18, color: HomeTab.darkBeige),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 8),
                     // Bell icon with dynamic badge
                     GestureDetector(
                       onTap: _openNotificationCenter,
