@@ -61,6 +61,11 @@ class TransactionItem {
     } else {
       defaultKind = 'income';
     }
+    // kind lưu sẵn mà ngược với is_expense (dữ liệu cũ/đồng bộ lệch) thì suy lại từ is_expense
+    var kind = map['kind'] as String? ?? defaultKind;
+    if (isExp ? (kind == 'income' || kind == 'received') : (kind == 'expense' || kind == 'transfer_out')) {
+      kind = defaultKind;
+    }
 
     return TransactionItem(
       id: map['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -74,7 +79,7 @@ class TransactionItem {
       isSynced: (map['isSynced'] as int? ?? 0) == 1,
       uid: map['uid'] as String?,
       ledgerId: map['ledgerId'] as String? ?? 'Sổ cá nhân 1',
-      kind: map['kind'] as String? ?? defaultKind,
+      kind: kind,
       transferGroupId: map['transferGroupId'] as String?,
     );
   }
