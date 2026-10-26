@@ -8,6 +8,7 @@ import 'category_link_tile.dart';
 import 'delete_category_dialog.dart';
 import 'linked_categories_header.dart';
 import 'type_tabs.dart';
+import '../../utils/app_language.dart';
 
 class LinkedCategoriesScreen extends StatefulWidget {
   final String ledgerId;
@@ -87,8 +88,8 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
           if (mounted) {
             showAppAlertDialog(
               context: context,
-              title: 'Thành công',
-              message: 'Đã thêm danh mục "$name" thành công!',
+              title: context.t('Thành công'),
+              message: context.t('Đã thêm danh mục "{name}" thành công!', {'name': name}),
               isSuccess: true,
             );
           }
@@ -119,8 +120,8 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
           if (mounted) {
             showAppAlertDialog(
               context: context,
-              title: 'Thành công',
-              message: 'Đã cập nhật danh mục thành công!',
+              title: context.t('Thành công'),
+              message: context.t('Đã cập nhật danh mục thành công!'),
               isSuccess: true,
             );
           }
@@ -150,8 +151,8 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
               if (mounted) {
                 showAppAlertDialog(
                   context: context,
-                  title: 'Thành công',
-                  message: archiveInstead ? 'Đã lưu trữ danh mục thành công!' : 'Đã xóa danh mục thành công!',
+                  title: context.t('Thành công'),
+                  message: archiveInstead ? context.t('Đã lưu trữ danh mục thành công!') : context.t('Đã xóa danh mục thành công!'),
                   isSuccess: true,
                 );
               }
@@ -160,7 +161,7 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
             if (mounted) {
               showAppAlertDialog(
                 context: context,
-                title: 'Không thể xóa',
+                title: context.t('Không thể xóa'),
                 message: e.toString().replaceAll('Exception: ', ''),
                 isSuccess: false,
               );
@@ -189,7 +190,7 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundCream,
       appBar: LinkedCategoriesHeader(
-        title: 'Quản lý & Liên kết danh mục',
+        title: context.t('Quản lý & Liên kết danh mục'),
         onAddPressed: _showAddCategorySheet,
       ),
       body: Column(
@@ -206,8 +207,8 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Danh sách danh mục',
+                Text(
+                  context.t('Danh sách danh mục'),
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textSub),
                 ),
                 ElevatedButton.icon(
@@ -221,7 +222,7 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
                   ),
                   onPressed: _showAddCategorySheet,
                   icon: const Icon(Icons.add, size: 16),
-                  label: const Text('Mới', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  label: Text(context.t('Mới'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -230,9 +231,9 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))
                 : _categories.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          'Chưa có danh mục nào.',
+                          context.t('Chưa có danh mục nào.'),
                           style: TextStyle(color: AppColors.textSub, fontSize: 14),
                         ),
                       )

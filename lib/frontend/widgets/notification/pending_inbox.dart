@@ -5,6 +5,7 @@ import '../../../backend/services/transaction_service.dart';
 import '../../../backend/services/category_repository.dart';
 import '../../../backend/models/category_model.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class PendingInboxSheet extends StatefulWidget {
   final String selectedLanguage;
@@ -111,7 +112,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã xác nhận: ${item.description}'),
+          content: Text(context.t('Đã xác nhận: {description}', {'description': item.description})),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 2),
         ),
@@ -136,7 +137,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã xác nhận $count giao dịch!'),
+          content: Text(context.t('Đã xác nhận {count} giao dịch!', {'count': count})),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -189,15 +190,15 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Chọn danh mục (${item.type == 'expense' ? 'Chi tiêu' : 'Thu nhập'})',
+                context.t('Chọn danh mục ({type})', {'type': context.t(item.type == 'expense' ? 'Chi tiêu' : 'Thu nhập')}),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.darkBeige),
               ),
               const SizedBox(height: 12),
               Expanded(
                 child: displayCats.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Text(
-                          'Chưa có danh mục nào.\nVui lòng thêm ở màn hình Cài đặt.',
+                          context.t('Chưa có danh mục nào.\nVui lòng thêm ở màn hình Cài đặt.'),
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.grey),
                         ),
@@ -217,7 +218,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                               child: Icon(CategoryModel.getIconData(cat.iconKey), color: AppColors.primary, size: 22),
                             ),
                             title: Text(
-                              cat.name,
+                              context.tCategory(cat.name),
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                             ),
                             onTap: () {
@@ -269,7 +270,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Chờ xác nhận (${_pendingItems.length})',
+                          context.t('Chờ xác nhận ({count})', {'count': _pendingItems.length}),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -290,8 +291,8 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     ),
                     onPressed: _confirmAll,
                     icon: const Icon(Icons.done_all_rounded, size: 16, color: AppColors.primary),
-                    label: const Text(
-                      'Xác nhận tất cả',
+                    label: Text(
+                      context.t('Xác nhận tất cả'),
                       style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ),
@@ -336,8 +337,8 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Không có giao dịch nào chờ xác nhận!',
+          Text(
+            context.t('Không có giao dịch nào chờ xác nhận!'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -345,8 +346,8 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Khi ngân hàng có thông báo mới, Mousey sẽ tự động ghi nhận bản nháp ở đây.',
+          Text(
+            context.t('Khi ngân hàng có thông báo mới, Mousey sẽ tự động ghi nhận bản nháp ở đây.'),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: Colors.grey),
           ),
@@ -370,16 +371,16 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     switch (item.suggestionConfidence) {
       case 'high':
         confidenceColor = Colors.green;
-        confidenceLabel = 'Tin cậy cao';
+        confidenceLabel = context.t('Tin cậy cao');
         break;
       case 'medium':
         confidenceColor = Colors.orange;
-        confidenceLabel = 'Gợi ý';
+        confidenceLabel = context.t('Gợi ý');
         break;
       case 'none':
       default:
         confidenceColor = Colors.grey;
-        confidenceLabel = 'Chưa phân loại';
+        confidenceLabel = context.t('Chưa phân loại');
         break;
     }
 
@@ -423,7 +424,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            isExpense ? 'TK trừ: ***${item.accountLast4}' : 'TK nhận: ***${item.accountLast4}',
+                            isExpense ? context.t('TK trừ: ***{accountLast4}', {'accountLast4': item.accountLast4}) : context.t('TK nhận: ***{accountLast4}', {'accountLast4': item.accountLast4}),
                             style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -488,7 +489,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                             children: [
                               ListTile(
                                 leading: const Icon(Icons.arrow_upward, color: Colors.red),
-                                title: const Text('Khoản Chi tiêu'),
+                                title: Text(context.t('Khoản Chi tiêu')),
                                 onTap: () {
                                   Navigator.pop(ctx);
                                   setState(() {
@@ -501,7 +502,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                               ),
                               ListTile(
                                 leading: const Icon(Icons.arrow_downward, color: Colors.green),
-                                title: const Text('Khoản Thu nhập'),
+                                title: Text(context.t('Khoản Thu nhập')),
                                 onTap: () {
                                   Navigator.pop(ctx);
                                   setState(() {
@@ -512,7 +513,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                               ),
                               ListTile(
                                 leading: const Icon(Icons.swap_horiz, color: Colors.blue),
-                                title: const Text('Chuyển khoản (Không tính vào tổng)'),
+                                title: Text(context.t('Chuyển khoản (Không tính vào tổng)')),
                                 onTap: () {
                                   Navigator.pop(ctx);
                                   setState(() {
@@ -540,7 +541,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                           Icon(isUnknown ? Icons.help_outline : (isExpense ? Icons.arrow_upward : Icons.arrow_downward), size: 14, color: Colors.blue),
                           const SizedBox(width: 4),
                           Text(
-                            isUnknown ? 'Xác định loại' : 'Đổi loại',
+                            isUnknown ? context.t('Xác định loại') : context.t('Đổi loại'),
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
                           ),
                           const Icon(Icons.arrow_drop_down, size: 16, color: Colors.blue),
@@ -569,7 +570,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            currentCat,
+                            context.tCategory(currentCat),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -613,7 +614,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => _dismissItem(item),
-                  child: const Text('Bỏ qua', style: TextStyle(color: Colors.grey)),
+                  child: Text(context.t('Bỏ qua'), style: TextStyle(color: Colors.grey)),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
@@ -623,8 +624,8 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => _confirmItem(item, currentCat, isExpenseOverride: isExpense),
-                  child: const Text(
-                    'Xác nhận',
+                  child: Text(
+                    context.t('Xác nhận'),
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),

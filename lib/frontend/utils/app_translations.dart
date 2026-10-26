@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../../core/utils/money_input_formatter.dart';
+import 'app_texts.dart';
 
 class AppTranslations {
   static const Map<String, Map<String, String>> _keys = {
@@ -299,6 +300,16 @@ class AppTranslations {
       'delete_all_data_sub': 'Delete transactions, accounts & custom categories',
       'add_ledger_btn': 'Add New Ledger',
       'last_sync_label': 'Last sync',
+      'synced_status': 'Synced',
+      'not_synced_status': 'Not synced',
+      'sync_state_synced': 'Synced',
+      'sync_state_syncing': 'Syncing...',
+      'sync_state_error': 'Sync error',
+      'never': 'Never',
+      'welcome_back': 'Welcome back',
+      'sync_status_label': 'Status',
+      'budget_alerts_toggle': 'Budget alerts',
+      'budget_alerts_subtitle': 'Friendly reminders when spending goes over the limit',
       'upgrade_pro_title': 'Upgrade to Mousey PRO 👑',
       'upgrade_pro_desc': 'Unlock unlimited ledgers, export Excel...',
       'upgrade': 'Upgrade',
@@ -489,6 +500,13 @@ class AppTranslations {
       'subscribe_now': '今すぐ登録',
       'add_ledger_btn': '新しい帳簿を追加',
       'last_sync_label': '最終同期',
+      'synced_status': '同期済み',
+      'not_synced_status': '未同期',
+      'never': 'なし',
+      'welcome_back': 'おかえりなさい',
+      'sync_status_label': '状態',
+      'budget_alerts_toggle': '予算アラート',
+      'budget_alerts_subtitle': '支出が上限を超えたときにお知らせします',
       'sync_state_synced': '同期済み',
       'sync_state_syncing': '同期中...',
       'sync_state_error': '同期エラー',
@@ -651,6 +669,13 @@ class AppTranslations {
       'subscribe_now': '立即订阅',
       'add_ledger_btn': '添加新账本',
       'last_sync_label': '最后同步',
+      'synced_status': '已同步',
+      'not_synced_status': '未同步',
+      'never': '从未',
+      'welcome_back': '欢迎回来',
+      'sync_status_label': '状态',
+      'budget_alerts_toggle': '预算提醒',
+      'budget_alerts_subtitle': '支出超出限额时友好提醒',
       'sync_state_synced': '已同步',
       'sync_state_syncing': '正在同步...',
       'sync_state_error': '同步错误',
@@ -813,6 +838,13 @@ class AppTranslations {
       'subscribe_now': '지금 구독',
       'add_ledger_btn': '새 장부 추가',
       'last_sync_label': '마지막 동기화',
+      'synced_status': '동기화됨',
+      'not_synced_status': '동기화 안 됨',
+      'never': '없음',
+      'welcome_back': '다시 오신 것을 환영합니다',
+      'sync_status_label': '상태',
+      'budget_alerts_toggle': '예산 알림',
+      'budget_alerts_subtitle': '지출이 한도를 넘으면 알려드려요',
       'sync_state_synced': '동기화됨',
       'sync_state_syncing': '동기화 중...',
       'sync_state_error': '동기화 오류',
@@ -820,43 +852,151 @@ class AppTranslations {
   };
 
   static const Map<String, Map<String, String>> _categories = {
-    'vi': {
-      'Ăn uống': 'Ăn uống',
-      'Hóa đơn': 'Hóa đơn',
-      'Di chuyển': 'Di chuyển',
-      'Mua sắm': 'Mua sắm',
-      'Giải trí': 'Giải trí',
-      'Sức khoẻ': 'Sức khoẻ',
-      'Làm đẹp': 'Làm đẹp',
-      'Quần áo': 'Quần áo',
-      'Học tập': 'Học tập',
-      'Thú cưng': 'Thú cưng',
-      'Con cái': 'Con cái',
-      'Hỗ trợ gia đình': 'Hỗ trợ gia đình',
-      'Bảo hiểm': 'Bảo hiểm',
-      'Thuế': 'Thuế',
-      'Công việc': 'Công việc',
-      'Nhà ở': 'Nhà ở',
-      'Tiền nợ': 'Tiền nợ',
-      'Khác': 'Khác',
-      'Lương': 'Lương',
-      'Thưởng': 'Thưởng',
-      'Bán hàng': 'Bán hàng',
-      'Đầu tư': 'Đầu tư',
+    'en': {
+      'Ăn uống': 'Food & Drinks',
+      'Hóa đơn': 'Bills',
+      'Di chuyển': 'Transport',
+      'Mua sắm': 'Shopping',
+      'Giải trí': 'Entertainment',
+      'Sức khoẻ': 'Health',
+      'Làm đẹp': 'Beauty',
+      'Quần áo': 'Clothing',
+      'Học tập': 'Education',
+      'Thú cưng': 'Pets',
+      'Con cái': 'Children',
+      'Hỗ trợ gia đình': 'Family support',
+      'Bảo hiểm': 'Insurance',
+      'Thuế': 'Taxes',
+      'Công việc': 'Work',
+      'Nhà ở': 'Housing',
+      'Tiền nợ': 'Debt',
+      'Khác': 'Other',
+      'Lương': 'Salary',
+      'Thưởng': 'Bonus',
+      'Bán hàng': 'Sales',
+      'Đầu tư': 'Investment',
+      'Chuyển tiền': 'Transfer',
+      'Tiết kiệm': 'Savings',
+      'Tất cả': 'All',
+    },
+    'ja': {
+      'Ăn uống': '飲食',
+      'Hóa đơn': '請求書',
+      'Di chuyển': '交通',
+      'Mua sắm': 'ショッピング',
+      'Giải trí': '娯楽',
+      'Sức khoẻ': '健康',
+      'Làm đẹp': '美容',
+      'Quần áo': '衣服',
+      'Học tập': '学習',
+      'Thú cưng': 'ペット',
+      'Con cái': '子ども',
+      'Hỗ trợ gia đình': '家族支援',
+      'Bảo hiểm': '保険',
+      'Thuế': '税金',
+      'Công việc': '仕事',
+      'Nhà ở': '住居',
+      'Tiền nợ': '借金',
+      'Khác': 'その他',
+      'Lương': '給料',
+      'Thưởng': 'ボーナス',
+      'Bán hàng': '販売',
+      'Đầu tư': '投資',
+      'Chuyển tiền': '送金',
+      'Tiết kiệm': '貯金',
+      'Tất cả': 'すべて',
+    },
+    'zh': {
+      'Ăn uống': '餐饮',
+      'Hóa đơn': '账单',
+      'Di chuyển': '交通',
+      'Mua sắm': '购物',
+      'Giải trí': '娱乐',
+      'Sức khoẻ': '健康',
+      'Làm đẹp': '美容',
+      'Quần áo': '服装',
+      'Học tập': '学习',
+      'Thú cưng': '宠物',
+      'Con cái': '子女',
+      'Hỗ trợ gia đình': '家庭支持',
+      'Bảo hiểm': '保险',
+      'Thuế': '税费',
+      'Công việc': '工作',
+      'Nhà ở': '住房',
+      'Tiền nợ': '债务',
+      'Khác': '其他',
+      'Lương': '工资',
+      'Thưởng': '奖金',
+      'Bán hàng': '销售',
+      'Đầu tư': '投资',
+      'Chuyển tiền': '转账',
+      'Tiết kiệm': '储蓄',
+      'Tất cả': '全部',
+    },
+    'ko': {
+      'Ăn uống': '식비',
+      'Hóa đơn': '공과금',
+      'Di chuyển': '교통',
+      'Mua sắm': '쇼핑',
+      'Giải trí': '여가',
+      'Sức khoẻ': '건강',
+      'Làm đẹp': '미용',
+      'Quần áo': '의류',
+      'Học tập': '교육',
+      'Thú cưng': '반려동물',
+      'Con cái': '자녀',
+      'Hỗ trợ gia đình': '가족 지원',
+      'Bảo hiểm': '보험',
+      'Thuế': '세금',
+      'Công việc': '업무',
+      'Nhà ở': '주거',
+      'Tiền nợ': '부채',
+      'Khác': '기타',
+      'Lương': '급여',
+      'Thưởng': '보너스',
+      'Bán hàng': '판매',
+      'Đầu tư': '투자',
+      'Chuyển tiền': '이체',
+      'Tiết kiệm': '저축',
+      'Tất cả': '전체',
     },
   };
 
   static String tr(String langCode, String key) {
     final code = _mapLanguageToCode(langCode);
-    final map = _keys[code] ?? _keys['vi']!;
-    return map[key] ?? key;
+    return _keys[code]?[key] ?? _keys['vi']![key] ?? text(langCode, key);
   }
 
+  /// Danh mục được lưu bằng tên tiếng Việt; danh mục người dùng tự tạo giữ nguyên tên.
   static String trCategory(String langCode, String category) {
     final code = _mapLanguageToCode(langCode);
-    final catMap = _categories[code] ?? _categories['vi']!;
-    return catMap[category] ?? category;
+    return _categories[code]?[category] ??
+        _categories[code]?[_categoryAliases[category]] ??
+        category;
   }
+
+  static const Map<String, String> _categoryAliases = {
+    'Tiền Nợ': 'Tiền nợ',
+    'Sức khỏe': 'Sức khoẻ',
+  };
+
+  /// Dịch câu tiếng Việt [viText] (bảng ở app_texts.dart). Không có bản dịch thì giữ tiếng Việt.
+  /// Tham số dạng `{name}` được thay bằng giá trị trong [params].
+  static String text(String langCode, String viText, [Map<String, Object?>? params]) {
+    final code = _mapLanguageToCode(langCode);
+    var result = viText;
+    if (code != 'vi') {
+      final row = appTexts[viText];
+      final index = const ['en', 'ja', 'zh', 'ko'].indexOf(code);
+      if (row != null && index >= 0 && index < row.length) result = row[index];
+    }
+    params?.forEach((key, value) {
+      result = result.replaceAll('{$key}', '$value');
+    });
+    return result;
+  }
+
+  static String languageCode(String lang) => _mapLanguageToCode(lang);
 
   static String formatDate(String langCode, DateTime date) {
     final code = _mapLanguageToCode(langCode);
@@ -866,6 +1006,8 @@ class AppTranslations {
       return '${date.year}年${date.month}月${date.day}日';
     } else if (code == 'zh') {
       return '${date.year}年${date.month}月${date.day}日';
+    } else if (code == 'ko') {
+      return '${date.year}년 ${date.month}월 ${date.day}일';
     } else if (date.year == DateTime.now().year) {
       return 'Ngày ${date.day} tháng ${date.month}';
     }
@@ -894,7 +1036,11 @@ class AppTranslations {
     return months[month - 1];
   }
 
+  /// Sổ mặc định được lưu với tên 'Sổ cá nhân 1'; sổ người dùng tự đặt tên giữ nguyên.
   static String trLedger(String langCode, String ledger) {
+    if (ledger == 'Sổ cá nhân 1' || ledger == 'default_ledger') {
+      return text(langCode, 'Sổ cá nhân 1');
+    }
     return ledger;
   }
 

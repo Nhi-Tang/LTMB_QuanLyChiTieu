@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../backend/models/transaction_model.dart';
 import '../utils/app_translations.dart';
 import 'app_alert_dialog.dart';
+import '../utils/app_language.dart';
 
 class AddTransactionModal extends StatefulWidget {
   final bool defaultExpense;
@@ -44,7 +45,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -182,7 +183,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                   showAppAlertDialog(
                     context: context,
                     title: AppTranslations.tr(lang, 'language'),
-                    message: 'Vui lòng nhập số tiền hợp lệ!',
+                    message: context.t('Vui lòng nhập số tiền hợp lệ!'),
                     isSuccess: false,
                   );
                   return;
@@ -204,8 +205,8 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                   context: context,
                   title: AppTranslations.tr(lang, 'save_transaction'),
                   message: isExpense
-                      ? 'Đã ghi nhận khoản chi tiêu mới! 💸'
-                      : 'Đã ghi nhận khoản thu nhập mới! 💰',
+                      ? context.t('Đã ghi nhận khoản chi tiêu mới! 💸')
+                      : context.t('Đã ghi nhận khoản thu nhập mới! 💰'),
                   isSuccess: true,
                 );
               },

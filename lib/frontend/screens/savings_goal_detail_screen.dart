@@ -7,6 +7,7 @@ import '../../core/widgets/money_text.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/mousey_avatar.dart';
+import '../utils/app_language.dart';
 
 class SavingsGoalDetailScreen extends StatefulWidget {
   final SavingsGoalModel goal;
@@ -98,7 +99,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        isDeposit ? 'Nạp thêm tiền vào mục tiêu' : 'Rút bớt tiền khỏi mục tiêu',
+                        isDeposit ? context.t('Nạp thêm tiền vào mục tiêu') : context.t('Rút bớt tiền khỏi mục tiêu'),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -119,7 +120,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [MoneyInputFormatter()],
                   decoration: InputDecoration(
-                    labelText: 'Số tiền (đ)',
+                    labelText: context.t('Số tiền (đ)'),
                     prefixIcon: Icon(Icons.attach_money, color: isDeposit ? accentPurple : Colors.red),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                   ),
@@ -128,7 +129,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                 TextField(
                   controller: noteController,
                   decoration: InputDecoration(
-                    labelText: 'Ghi chú (Tùy chọn)',
+                    labelText: context.t('Ghi chú (Tùy chọn)'),
                     prefixIcon: const Icon(Icons.note, color: Colors.grey),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                   ),
@@ -148,8 +149,8 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       if (amount <= 0) {
                         showAppAlertDialog(
                           context: context,
-                          title: 'Thông báo',
-                          message: 'Vui lòng nhập số tiền hợp lệ lớn hơn 0!',
+                          title: context.t('Thông báo'),
+                          message: context.t('Vui lòng nhập số tiền hợp lệ lớn hơn 0!'),
                           isSuccess: false,
                         );
                         return;
@@ -158,8 +159,8 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       if (!isDeposit && amount > _goal.currentAmount) {
                         showAppAlertDialog(
                           context: context,
-                          title: 'Không thể rút',
-                          message: 'Số tiền rút không được vượt quá số tiền hiện có (${_formatCurrency(_goal.currentAmount)})!',
+                          title: context.t('Không thể rút'),
+                          message: context.t('Số tiền rút không được vượt quá số tiền hiện có ({value})!', {'value': _formatCurrency(_goal.currentAmount)}),
                           isSuccess: false,
                         );
                         return;
@@ -169,7 +170,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         goalId: _goal.id ?? '',
                         amount: amount,
                         isDeposit: isDeposit,
-                        note: noteController.text.trim().isNotEmpty ? noteController.text.trim() : (isDeposit ? 'Nạp thêm' : 'Rút bớt'),
+                        note: noteController.text.trim().isNotEmpty ? noteController.text.trim() : (isDeposit ? context.t('Nạp thêm') : context.t('Rút bớt')),
                         date: DateTime.now().toIso8601String(),
                       );
 
@@ -192,13 +193,13 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                       if (!mounted) return;
                       showAppAlertDialog(
                         context: context,
-                        title: 'Thành công',
-                        message: isDeposit ? 'Đã nạp thêm tiền thành công! 🐖' : 'Đã rút bớt tiền thành công!',
+                        title: context.t('Thành công'),
+                        message: isDeposit ? context.t('Đã nạp thêm tiền thành công! 🐖') : context.t('Đã rút bớt tiền thành công!'),
                         isSuccess: true,
                       );
                     },
                     child: Text(
-                      isDeposit ? 'XÁC NHẬN NẠP THÊM' : 'XÁC NHẬN RÚT BỚT',
+                      isDeposit ? context.t('XÁC NHẬN NẠP THÊM') : context.t('XÁC NHẬN RÚT BỚT'),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
@@ -231,13 +232,13 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           children: [
             const Text('🎉', style: TextStyle(fontSize: 60)),
             const SizedBox(height: 12),
-            const Text(
-              'Chúc mừng bạn!',
+            Text(
+              context.t('Chúc mừng bạn!'),
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: accentPurple),
             ),
             const SizedBox(height: 8),
             Text(
-              'Bạn đã hoàn thành mục tiêu "${_goal.name}" xuất sắc!',
+              context.t('Bạn đã hoàn thành mục tiêu "{name}" xuất sắc!', {'name': _goal.name}),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
@@ -249,7 +250,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('TUYỆT VỜI', style: TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
+              child: Text(context.t('TUYỆT VỜI'), style: TextStyle(color: Color(0xFF5D4222), fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -258,11 +259,11 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
   }
 
   String _getForecastText() {
-    if (_goal.isCompleted) return 'Mục tiêu này đã hoàn thành';
-    if (_transactions.isEmpty || _goal.currentAmount <= 0) return 'Chưa đủ dữ liệu lịch sử để dự báo.';
+    if (_goal.isCompleted) return context.t('Mục tiêu này đã hoàn thành');
+    if (_transactions.isEmpty || _goal.currentAmount <= 0) return context.t('Chưa đủ dữ liệu lịch sử để dự báo.');
 
     final deposits = _transactions.where((t) => t.isDeposit).toList();
-    if (deposits.isEmpty) return 'Chưa có giao dịch nạp tiền.';
+    if (deposits.isEmpty) return context.t('Chưa có giao dịch nạp tiền.');
 
     final totalDeposited = deposits.fold(0.0, (sum, t) => sum + t.amount);
     final firstTxDate = DateTime.tryParse(_transactions.last.date) ?? DateTime.now();
@@ -270,27 +271,27 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
     final monthsPassed = daysPassed > 0 ? daysPassed / 30.0 : 1.0;
     final avgMonthlyDeposit = totalDeposited / monthsPassed;
 
-    if (avgMonthlyDeposit <= 0) return 'Tốc độ tiết kiệm hiện tại bằng 0.';
+    if (avgMonthlyDeposit <= 0) return context.t('Tốc độ tiết kiệm hiện tại bằng 0.');
 
     final remainingAmount = _goal.targetAmount - _goal.currentAmount;
     final monthsNeeded = remainingAmount / avgMonthlyDeposit;
 
     final targetCompletionDate = DateTime.now().add(Duration(days: (monthsNeeded * 30).toInt()));
-    String deadlineStr = 'tháng ${targetCompletionDate.month}/${targetCompletionDate.year}';
+    String deadlineStr = context.t('tháng {month}/{year}', {'month': targetCompletionDate.month, 'year': targetCompletionDate.year});
 
     if (_goal.deadline != null && _goal.deadline!.isNotEmpty) {
       final deadline = DateTime.tryParse(_goal.deadline!);
       if (deadline != null) {
         if (targetCompletionDate.isBefore(deadline) || targetCompletionDate.isAtSameMomentAs(deadline)) {
-          return 'Với tốc độ hiện tại, bạn sẽ đạt mục tiêu vào $deadlineStr, sớm hơn dự kiến!';
+          return context.t('Với tốc độ hiện tại, bạn sẽ đạt mục tiêu vào {deadlineStr}, sớm hơn dự kiến!', {'deadlineStr': deadlineStr});
         } else {
           final diffMonths = (targetCompletionDate.difference(deadline).inDays / 30).ceil();
-          return 'Với tốc độ hiện tại, bạn sẽ đạt mục tiêu vào $deadlineStr, trễ hơn dự kiến khoảng $diffMonths tháng.';
+          return context.t('Với tốc độ hiện tại, bạn sẽ đạt mục tiêu vào {deadlineStr}, trễ hơn dự kiến khoảng {diffMonths} tháng.', {'deadlineStr': deadlineStr, 'diffMonths': diffMonths});
         }
       }
     }
 
-    return 'Với tốc độ hiện tại, bạn sẽ hoàn thành mục tiêu vào $deadlineStr.';
+    return context.t('Với tốc độ hiện tại, bạn sẽ hoàn thành mục tiêu vào {deadlineStr}.', {'deadlineStr': deadlineStr});
   }
 
   @override
@@ -310,7 +311,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
           if (!_goal.isCompleted)
             IconButton(
               icon: const Icon(Icons.edit_outlined),
-              tooltip: 'Sửa mục tiêu',
+              tooltip: context.t('Sửa mục tiêu'),
               onPressed: () {
                 showDialog(
                   context: context,
@@ -328,16 +329,16 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
             ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
-            tooltip: 'Xóa mục tiêu',
+            tooltip: context.t('Xóa mục tiêu'),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  title: const Text('Xóa mục tiêu'),
-                  content: Text('Bạn có chắc chắn muốn xóa mục tiêu "${_goal.name}"?'),
+                  title: Text(context.t('Xóa mục tiêu')),
+                  content: Text(context.t('Bạn có chắc chắn muốn xóa mục tiêu "{name}"?', {'name': _goal.name})),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+                    TextButton(onPressed: () => Navigator.pop(ctx), child: Text(context.t('Hủy'))),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                       onPressed: () async {
@@ -347,7 +348,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         Navigator.pop(context);
                         widget.onGoalUpdated();
                       },
-                      child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+                      child: Text(context.t('Xóa'), style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -397,7 +398,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _goal.isCompleted ? 'Đã hoàn thành 🌟' : 'Đang tích lũy...',
+                              _goal.isCompleted ? context.t('Đã hoàn thành 🌟') : context.t('Đang tích lũy...'),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -460,13 +461,13 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFFE5D3AF)),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.check_circle_rounded, color: accentPurple, size: 20),
                           SizedBox(width: 8),
                           Text(
-                            'Đã hoàn thành mục tiêu',
+                            context.t('Đã hoàn thành mục tiêu'),
                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
                           ),
                         ],
@@ -484,7 +485,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             ),
                             icon: const Icon(Icons.add, color: Color(0xFF5D4222)),
-                            label: const Text('Nạp thêm', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4222))),
+                            label: Text(context.t('Nạp thêm'), style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4222))),
                             onPressed: () => _showDepositWithdrawModal(isDeposit: true),
                           ),
                         ),
@@ -497,7 +498,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                             ),
                             icon: Icon(Icons.remove, color: Colors.red[700]),
-                            label: Text('Rút bớt', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red[700])),
+                            label: Text(context.t('Rút bớt'), style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red[700])),
                             onPressed: () => _showDepositWithdrawModal(isDeposit: false),
                           ),
                         ),
@@ -513,7 +514,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                        label: const Text('Đánh dấu Hoàn thành', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14)),
+                        label: Text(context.t('Đánh dấu Hoàn thành'), style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14)),
                         onPressed: _markAsCompleted,
                       ),
                     ),
@@ -553,8 +554,8 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
             const SizedBox(height: 24),
 
             // History Header
-            const Text(
-              'LỊCH SỬ NẠP / RÚT',
+            Text(
+              context.t('LỊCH SỬ NẠP / RÚT'),
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.0, color: Color(0xFF706C66)),
             ),
 
@@ -571,8 +572,8 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: const Color(0xFFD4CCE2)),
                         ),
-                        child: const Center(
-                          child: Text('Chưa có lịch sử giao dịch tiết kiệm nào.', style: TextStyle(color: Colors.grey)),
+                        child: Center(
+                          child: Text(context.t('Chưa có lịch sử giao dịch tiết kiệm nào.'), style: TextStyle(color: Colors.grey)),
                         ),
                       )
                     : ListView.separated(
@@ -613,7 +614,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        tx.note ?? (tx.isDeposit ? 'Nạp thêm' : 'Rút bớt'),
+                                        tx.note ?? (tx.isDeposit ? context.t('Nạp thêm') : context.t('Rút bớt')),
                                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
                                         overflow: TextOverflow.ellipsis,
                                       ),

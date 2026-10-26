@@ -4,6 +4,7 @@ import '../../backend/services/transaction_service.dart';
 import '../../core/widgets/money_text.dart';
 import '../../core/widgets/category_icon.dart';
 import '../utils/app_translations.dart';
+import '../utils/app_language.dart';
 
 class AllTransactionsScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -96,7 +97,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        item.category,
+                        context.tCategory(item.category),
                         style: const TextStyle(fontSize: 13, color: Colors.grey),
                       ),
                     ],
@@ -119,7 +120,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Số tiền:', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(context.t('Số tiền:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
                       MoneyText(
                         amount: item.amount,
                         prefix: isExpense ? '-' : '+',
@@ -135,7 +136,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Ngày giờ:', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(context.t('Ngày giờ:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
                       Text(
                         formattedDateTime,
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
@@ -146,9 +147,9 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Loại giao dịch:', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(context.t('Loại giao dịch:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
                       Text(
-                        isExpense ? 'Chi tiêu (-)' : 'Thu nhập (+)',
+                        isExpense ? context.t('Chi tiêu (-)') : context.t('Thu nhập (+)'),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -177,11 +178,11 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   await TransactionService.instance.removeTransaction(item.id, uid: item.uid, date: item.date);
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã xóa giao dịch thành công!'), backgroundColor: Colors.red),
+                    SnackBar(content: Text(context.t('Đã xóa giao dịch thành công!')), backgroundColor: Colors.red),
                   );
                 },
                 icon: const Icon(Icons.delete_outline_rounded),
-                label: const Text('Xóa giao dịch', style: TextStyle(fontWeight: FontWeight.bold)),
+                label: Text(context.t('Xóa giao dịch'), style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -194,7 +195,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   Widget build(BuildContext context) {
     const accentBeige = Color(0xFFE5D3AF);
     const darkBeige = Color(0xFF5D4222);
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final transactionsList = _filteredTransactions;
 
     return Scaffold(
@@ -219,7 +220,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                 TextField(
                   onChanged: (val) => setState(() => _searchQuery = val.trim()),
                   decoration: InputDecoration(
-                    hintText: 'Tìm kiếm giao dịch...',
+                    hintText: context.t('Tìm kiếm giao dịch...'),
                     prefixIcon: const Icon(Icons.search, color: darkBeige),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -245,7 +246,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   children: [
                     Expanded(
                       child: ChoiceChip(
-                        label: const Center(child: Text('Tất cả')),
+                        label: Center(child: Text(context.t('Tất cả'))),
                         selected: _filterType == 'all',
                         selectedColor: accentBeige,
                         labelStyle: TextStyle(
@@ -258,7 +259,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: ChoiceChip(
-                        label: const Center(child: Text('Chi tiêu')),
+                        label: Center(child: Text(context.t('Chi tiêu'))),
                         selected: _filterType == 'expense',
                         selectedColor: const Color(0xFFE57373),
                         labelStyle: TextStyle(
@@ -271,7 +272,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: ChoiceChip(
-                        label: const Center(child: Text('Thu nhập')),
+                        label: Center(child: Text(context.t('Thu nhập'))),
                         selected: _filterType == 'income',
                         selectedColor: accentBeige,
                         labelStyle: TextStyle(

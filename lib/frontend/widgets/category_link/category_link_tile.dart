@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../backend/models/category_model.dart';
 import '../../../core/widgets/category_icon.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class CategoryLinkTile extends StatelessWidget {
   final CategoryModel category;
@@ -58,7 +59,7 @@ class CategoryLinkTile extends StatelessWidget {
             ],
           ),
           title: Text(
-            category.name,
+            context.tCategory(category.name),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,

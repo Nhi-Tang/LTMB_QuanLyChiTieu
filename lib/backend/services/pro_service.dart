@@ -6,6 +6,7 @@ import 'api_client.dart';
 import 'auth_service.dart';
 import 'in_app_notification_service.dart';
 
+import '../../frontend/utils/app_language.dart';
 class ProService extends ChangeNotifier {
   static final ProService instance = ProService._init();
   ProService._init();
@@ -189,16 +190,16 @@ class ProService extends ChangeNotifier {
     if (_isPro && _remainingDays <= 3) {
       InAppNotificationService.instance.add(
         type: 'pro',
-        title: 'Thông báo gói Mousey PRO',
-        body: 'Gói Mousey PRO của bạn còn lại $_remainingDays ngày sử dụng. Hãy gia hạn để không bị gián đoạn!',
+        title: AppLanguage.instance.t('Thông báo gói Mousey PRO'),
+        body: AppLanguage.instance.t('Gói Mousey PRO của bạn còn lại {remainingDays} ngày sử dụng. Hãy gia hạn để không bị gián đoạn!', {'remainingDays': _remainingDays}),
         dedupeKey: 'notif_pro_expiry_${uid}_${_remainingDays}d',
         uid: uid,
       );
     } else if (!_isPro && _proExpiredAt != null) {
       InAppNotificationService.instance.add(
         type: 'pro',
-        title: 'Gói Mousey PRO đã hết hạn',
-        body: 'Gói Mousey PRO của bạn đã hết hạn. Hãy nâng cấp ngay để tiếp tục sử dụng các tính năng cao cấp!',
+        title: AppLanguage.instance.t('Gói Mousey PRO đã hết hạn'),
+        body: AppLanguage.instance.t('Gói Mousey PRO của bạn đã hết hạn. Hãy nâng cấp ngay để tiếp tục sử dụng các tính năng cao cấp!'),
         dedupeKey: 'notif_pro_expired_$uid',
         uid: uid,
       );

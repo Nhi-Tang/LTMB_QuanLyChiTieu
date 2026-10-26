@@ -11,6 +11,7 @@ import 'bank_notification_listener_manager.dart';
 import 'pro_service.dart';
 import 'sync_service.dart';
 
+import '../../frontend/utils/app_language.dart';
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
@@ -45,13 +46,13 @@ class AuthService {
         userCredential = await _firebaseAuth.signInWithCredential(credential);
       } on FirebaseAuthException catch (e) {
         if (e.code == 'account-exists-with-different-credential') {
-          throw Exception('Email này đã được liên kết với phương thức đăng nhập khác.');
+          throw Exception(AppLanguage.instance.t('Email này đã được liên kết với phương thức đăng nhập khác.'));
         }
         rethrow;
       }
 
       final User? firebaseUser = userCredential.user;
-      if (firebaseUser == null) throw Exception('Đăng nhập Firebase thất bại.');
+      if (firebaseUser == null) throw Exception(AppLanguage.instance.t('Đăng nhập Firebase thất bại.'));
 
       final idToken = await getIdToken(forceRefresh: true);
       UserModel localUser = await _syncWithBackendOrLocal(firebaseUser, idToken, 'google.com');
@@ -95,7 +96,7 @@ class AuthService {
       }
 
       final user = credential.user;
-      if (user == null) throw Exception('Đăng nhập thất bại.');
+      if (user == null) throw Exception(AppLanguage.instance.t('Đăng nhập thất bại.'));
 
       final idToken = await getIdToken(forceRefresh: true);
       return await _syncWithBackendOrLocal(user, idToken, 'password');
@@ -119,14 +120,14 @@ class AuthService {
         );
       } on FirebaseAuthException catch (e) {
         if (e.code == 'email-already-in-use') {
-          throw Exception('Số điện thoại hoặc email này đã được đăng ký. Vui lòng đăng nhập.');
+          throw Exception(AppLanguage.instance.t('Số điện thoại hoặc email này đã được đăng ký. Vui lòng đăng nhập.'));
         } else {
           rethrow;
         }
       }
 
       final user = credential.user;
-      if (user == null) throw Exception('Đăng ký thất bại.');
+      if (user == null) throw Exception(AppLanguage.instance.t('Đăng ký thất bại.'));
 
       await user.updateDisplayName(name);
 
@@ -159,7 +160,7 @@ class AuthService {
 
     UserModel userModel = existingLocal ?? UserModel(
       uid: firebaseUser.uid,
-      name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? 'Người dùng',
+      name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? AppLanguage.instance.t('Người dùng'),
       email: firebaseUser.email ?? '',
       password: '',
       photoUrl: firebaseUser.photoURL,
@@ -261,17 +262,17 @@ class AuthService {
 
   String _mapFirebaseErrorToVietnamese(String error) {
     if (error.contains('network-request-failed')) {
-      return 'Không có kết nối Internet. Vui lòng kiểm tra lại mạng.';
+      return AppLanguage.instance.t('Không có kết nối Internet. Vui lòng kiểm tra lại mạng.');
     } else if (error.contains('popup-closed-by-user') || error.contains('canceled')) {
-      return 'Bạn đã hủy quá trình đăng nhập.';
+      return AppLanguage.instance.t('Bạn đã hủy quá trình đăng nhập.');
     } else if (error.contains('user-disabled')) {
-      return 'Tài khoản này đã bị vô hiệu hóa.';
+      return AppLanguage.instance.t('Tài khoản này đã bị vô hiệu hóa.');
     } else if (error.contains('invalid-credential') || error.contains('wrong-password') || error.contains('user-not-found') || error.contains('invalid-email')) {
-      return 'Email/SĐT hoặc mật khẩu không chính xác.';
+      return AppLanguage.instance.t('Email/SĐT hoặc mật khẩu không chính xác.');
     } else if (error.contains('email-already-in-use')) {
-      return 'Số điện thoại hoặc email này đã được đăng ký. Vui lòng đăng nhập.';
+      return AppLanguage.instance.t('Số điện thoại hoặc email này đã được đăng ký. Vui lòng đăng nhập.');
     } else if (error.contains('weak-password')) {
-      return 'Mật khẩu quá yếu (cần ít nhất 6 ký tự).';
+      return AppLanguage.instance.t('Mật khẩu quá yếu (cần ít nhất 6 ký tự).');
     }
     return error.replaceAll('Exception: ', '');
   }

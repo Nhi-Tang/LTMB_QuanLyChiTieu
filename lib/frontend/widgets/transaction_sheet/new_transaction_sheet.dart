@@ -10,6 +10,7 @@ import 'category_grid.dart';
 import 'mousey_colors.dart';
 import 'show_note_sheet.dart';
 import 'transaction_type_switcher.dart';
+import '../../utils/app_language.dart';
 
 class NewTransactionSheet extends StatefulWidget {
   final TransactionItem? editingTransaction;
@@ -101,8 +102,8 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
     if (amount <= 0) {
       showAppAlertDialog(
         context: context,
-        title: 'Thông báo',
-        message: 'Vui lòng nhập số tiền hợp lệ lớn hơn 0!',
+        title: context.t('Thông báo'),
+        message: context.t('Vui lòng nhập số tiền hợp lệ lớn hơn 0!'),
         isSuccess: false,
       );
       return;
@@ -125,10 +126,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
 
     showAppAlertDialog(
       context: context,
-      title: 'Thành công',
+      title: context.t('Thành công'),
       message: widget.editingTransaction != null
-          ? 'Đã cập nhật giao dịch thành công!'
-          : 'Đã lưu giao dịch mới thành công! 💸',
+          ? context.t('Đã cập nhật giao dịch thành công!')
+          : context.t('Đã lưu giao dịch mới thành công! 💸'),
       isSuccess: true,
     );
   }
@@ -175,7 +176,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                   onPressed: () => Navigator.pop(context),
                 ),
                 Text(
-                  widget.editingTransaction != null ? 'Sửa giao dịch' : 'Giao dịch mới',
+                  widget.editingTransaction != null ? context.t('Sửa giao dịch') : context.t('Giao dịch mới'),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MouseyColors.textMain),
                 ),
                 const SizedBox(width: 48),

@@ -17,6 +17,7 @@ import '../widgets/notification/notification_settings_screen.dart';
 import '../widgets/notification/pending_inbox.dart';
 import '../widgets/export_options_bottom_sheet.dart';
 import 'pro_upgrade_screen.dart';
+import '../utils/app_language.dart';
 
 class ProfileTab extends StatefulWidget {
   final UserModel currentUser;
@@ -135,7 +136,7 @@ class _ProfileTabState extends State<ProfileTab> {
     if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ProUpgradeScreen(selectedLanguage: widget.selectedLanguage)),
+        MaterialPageRoute(builder: (context) => ProUpgradeScreen(selectedLanguage: context.lang)),
       );
       return;
     }
@@ -161,8 +162,8 @@ class _ProfileTabState extends State<ProfileTab> {
         });
         showAppAlertDialog(
           context: context,
-          title: 'Đồng bộ thành công',
-          message: 'Đã đồng bộ giao dịch và tiết kiệm với Cloud Firestore thành công!',
+          title: context.t('Đồng bộ thành công'),
+          message: context.t('Đã đồng bộ giao dịch và tiết kiệm với Cloud Firestore thành công!'),
           isSuccess: true,
         );
       }
@@ -174,7 +175,7 @@ class _ProfileTabState extends State<ProfileTab> {
         });
         showAppAlertDialog(
           context: context,
-          title: 'Lỗi đồng bộ',
+          title: context.t('Lỗi đồng bộ'),
           message: e.toString(),
           isSuccess: false,
         );
@@ -183,15 +184,15 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showAvatarPickerSheet(StateSetter setDialogState) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final avatars = [
       {'key': 'cat', 'name': 'Mochi Cat'},
-      {'key': 'dog', 'name': 'Cún con'},
-      {'key': 'fox', 'name': 'Cáo nhỏ'},
-      {'key': 'rabbit', 'name': 'Thỏ con'},
-      {'key': 'panda', 'name': 'Gấu trúc'},
-      {'key': 'lion', 'name': 'Sư tử'},
-      {'key': 'bear', 'name': 'Gấu bông'},
+      {'key': 'dog', 'name': context.t('Cún con')},
+      {'key': 'fox', 'name': context.t('Cáo nhỏ')},
+      {'key': 'rabbit', 'name': context.t('Thỏ con')},
+      {'key': 'panda', 'name': context.t('Gấu trúc')},
+      {'key': 'lion', 'name': context.t('Sư tử')},
+      {'key': 'bear', 'name': context.t('Gấu bông')},
       {'key': 'initials', 'name': 'Mousey'},
     ];
 
@@ -310,7 +311,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   Future<void> _showDeviceImagePicker(StateSetter setDialogState) async {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -322,7 +323,7 @@ class _ProfileTabState extends State<ProfileTab> {
         showAppAlertDialog(
           context: context,
           title: AppTranslations.tr(lang, 'choose_avatar'),
-          message: 'Đã cập nhật ảnh đại diện từ thiết bị thành công!',
+          message: context.t('Đã cập nhật ảnh đại diện từ thiết bị thành công!'),
           isSuccess: true,
         );
       }
@@ -330,8 +331,8 @@ class _ProfileTabState extends State<ProfileTab> {
       if (mounted) {
         showAppAlertDialog(
           context: context,
-          title: 'Lỗi chọn ảnh',
-          message: 'Không thể mở thư viện ảnh: $e',
+          title: context.t('Lỗi chọn ảnh'),
+          message: context.t('Không thể mở thư viện ảnh: {e}', {'e': e}),
           isSuccess: false,
         );
       }
@@ -339,7 +340,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showEditProfileDialog() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final nameController = TextEditingController(text: widget.currentUser.name);
     final emailController = TextEditingController(text: widget.currentUser.email);
     final formKey = GlobalKey<FormState>();
@@ -395,7 +396,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         prefixIcon: const Icon(Icons.person, color: accentBeige),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ và tên' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ và tên') : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -406,7 +407,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         prefixIcon: const Icon(Icons.email, color: accentBeige),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email / SĐT' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email / SĐT') : null,
                     ),
                   ],
                 ),
@@ -468,8 +469,8 @@ class _ProfileTabState extends State<ProfileTab> {
                     if (!mounted) return;
                     showAppAlertDialog(
                       context: context,
-                      title: 'Thành công',
-                      message: 'Đã cập nhật thông tin cá nhân thành công!',
+                      title: context.t('Thành công'),
+                      message: context.t('Đã cập nhật thông tin cá nhân thành công!'),
                       isSuccess: true,
                     );
                   }
@@ -497,18 +498,18 @@ class _ProfileTabState extends State<ProfileTab> {
         builder: (ctx, setDialogState) {
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Row(
+            title: Row(
               children: [
                 Icon(Icons.menu_book_rounded, color: darkBeige),
                 SizedBox(width: 8),
-                Text('Thêm sổ sách mới', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(context.t('Thêm sổ sách mới'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Nhập tên sổ sách mới để quản lý chi tiêu riêng biệt:', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                Text(context.t('Nhập tên sổ sách mới để quản lý chi tiêu riêng biệt:'), style: TextStyle(fontSize: 13, color: Colors.grey)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: nameController,
@@ -516,7 +517,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   enabled: !isCreating,
                   maxLength: 40,
                   decoration: InputDecoration(
-                    hintText: 'VD: Sổ du lịch, Sổ kinh doanh...',
+                    hintText: context.t('VD: Sổ du lịch, Sổ kinh doanh...'),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -527,7 +528,7 @@ class _ProfileTabState extends State<ProfileTab> {
             actions: [
               TextButton(
                 onPressed: isCreating ? null : () => Navigator.pop(ctx),
-                child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -541,7 +542,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         final name = nameController.text.trim();
                         if (name.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Vui lòng nhập tên sổ sách!'), backgroundColor: Colors.orange),
+                            SnackBar(content: Text(context.t('Vui lòng nhập tên sổ sách!')), backgroundColor: Colors.orange),
                           );
                           return;
                         }
@@ -559,15 +560,15 @@ class _ProfileTabState extends State<ProfileTab> {
                           if (!mounted) return;
                           showAppAlertDialog(
                             context: context,
-                            title: 'Thành công',
-                            message: 'Đã tạo sổ sách "$name" thành công!',
+                            title: context.t('Thành công'),
+                            message: context.t('Đã tạo sổ sách "{name}" thành công!', {'name': name}),
                             isSuccess: true,
                           );
                         } catch (e) {
                           debugPrint('Error creating ledger: $e');
                           setDialogState(() => isCreating = false);
                           
-                          if (e.toString().contains('Giới hạn gói Free')) {
+                          if (e is FreePlanLimitException) {
                             if (!ctx.mounted) return;
                             Navigator.pop(ctx); // Đóng dialog nhập tên sổ
                             Navigator.push(
@@ -583,7 +584,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       },
                 child: isCreating
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: darkBeige))
-                    : const Text('Tạo sổ mới', style: TextStyle(fontWeight: FontWeight.bold)),
+                    : Text(context.t('Tạo sổ mới'), style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
           );
@@ -593,7 +594,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showLedgerPickerSheet() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final uid = widget.currentUser.uid ?? 'default';
 
     showModalBottomSheet(
@@ -708,7 +709,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showExportFileDialog() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
       Navigator.push(
@@ -730,21 +731,21 @@ class _ProfileTabState extends State<ProfileTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             SizedBox(width: 8),
-            Text('Cảnh báo xóa dữ liệu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(context.t('Cảnh báo xóa dữ liệu'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
-        content: const Text(
-          'Bạn có chắc chắn muốn xóa toàn bộ giao dịch, tài khoản và danh mục tùy chỉnh? Hành động này không thể hoàn tác!',
+        content: Text(
+          context.t('Bạn có chắc chắn muốn xóa toàn bộ giao dịch, tài khoản và danh mục tùy chỉnh? Hành động này không thể hoàn tác!'),
           style: TextStyle(fontSize: 14, color: Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -759,12 +760,12 @@ class _ProfileTabState extends State<ProfileTab> {
               if (!mounted) return;
               showAppAlertDialog(
                 context: context,
-                title: 'Đã xóa dữ liệu',
-                message: 'Toàn bộ dữ liệu tài chính cá nhân đã được làm sạch thành công.',
+                title: context.t('Đã xóa dữ liệu'),
+                message: context.t('Toàn bộ dữ liệu tài chính cá nhân đã được làm sạch thành công.'),
                 isSuccess: true,
               );
             },
-            child: const Text('Xác nhận Xóa', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(context.t('Xác nhận Xóa'), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -772,7 +773,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showLanguagePickerSheet() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final languages = ['Tiếng Việt', 'English (US)', '日本語 (Japanese)', '中文 (Chinese)', '한국어 (Korean)'];
 
     showModalBottomSheet(
@@ -802,7 +803,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
                 const SizedBox(height: 16),
                 ...languages.map((l) {
-                  final isSel = widget.selectedLanguage == l;
+                  final isSel = context.lang == l;
                   return ListTile(
                     title: Text(l, style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal)),
                     trailing: isSel ? const Icon(Icons.check_circle, color: accentBeige) : null,
@@ -821,7 +822,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showRatingDialog() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     showAppAlertDialog(
       context: context,
       title: AppTranslations.tr(lang, 'rate_app'),
@@ -831,7 +832,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showSupportDialog() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     showAppAlertDialog(
       context: context,
       title: AppTranslations.tr(lang, 'contact_support'),
@@ -842,7 +843,7 @@ class _ProfileTabState extends State<ProfileTab> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -952,16 +953,16 @@ class _ProfileTabState extends State<ProfileTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Tài khoản Mousey PRO 👑',
+                            Text(
+                              context.t('Tài khoản Mousey PRO 👑'),
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               ProService.instance.remainingDays > 0
-                                  ? 'Còn lại ${ProService.instance.remainingDays} ngày sử dụng PRO'
-                                  : 'Đã mở khóa toàn bộ tính năng cao cấp',
+                                  ? context.t('Còn lại {remainingDays} ngày sử dụng PRO', {'remainingDays': ProService.instance.remainingDays})
+                                  : context.t('Đã mở khóa toàn bộ tính năng cao cấp'),
                               style: const TextStyle(fontSize: 12, color: Color(0xFF795548)),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1086,7 +1087,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 onTap: () {
                   PendingInboxSheet.show(
                     context,
-                    selectedLanguage: widget.selectedLanguage,
+                    selectedLanguage: context.lang,
                     onTransactionsUpdated: _loadPendingCount,
                   );
                 },
@@ -1128,7 +1129,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => NotificationSettingsScreen(
-                        selectedLanguage: widget.selectedLanguage,
+                        selectedLanguage: context.lang,
                       ),
                     ),
                   );
@@ -1199,7 +1200,7 @@ class _ProfileTabState extends State<ProfileTab> {
               SettingsTile(
                 leading: const Icon(Icons.language_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'language'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
-                subtitle: Text(widget.selectedLanguage, style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
+                subtitle: Text(context.lang, style: const TextStyle(fontSize: 12, color: Colors.grey), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showLanguagePickerSheet,
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class PermissionGuideScreen extends StatefulWidget {
   const PermissionGuideScreen({super.key});
@@ -75,7 +76,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7EB),
       appBar: AppBar(
-        title: const Text('Hướng dẫn cấp quyền & Tối ưu pin'),
+        title: Text(context.t('Hướng dẫn cấp quyền & Tối ưu pin')),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -120,8 +121,8 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                             children: [
                               Text(
                                 _isNotificationPermissionGranted
-                                    ? 'Đã cấp quyền đọc thông báo'
-                                    : 'Chưa cấp quyền truy cập thông báo',
+                                    ? context.t('Đã cấp quyền đọc thông báo')
+                                    : context.t('Chưa cấp quyền truy cập thông báo'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
@@ -133,8 +134,8 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                               const SizedBox(height: 4),
                               Text(
                                 _isNotificationPermissionGranted
-                                    ? 'Mousey đã sẵn sàng tự động ghi nhận giao dịch ngân hàng.'
-                                    : 'Vui lòng hoàn thành Hướng dẫn bên dưới để bật tính năng.',
+                                    ? context.t('Mousey đã sẵn sàng tự động ghi nhận giao dịch ngân hàng.')
+                                    : context.t('Vui lòng hoàn thành Hướng dẫn bên dưới để bật tính năng.'),
                                 style: const TextStyle(fontSize: 12, color: Colors.black87),
                               ),
                             ],
@@ -148,10 +149,10 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                   // Step 1 Section
                   _buildStepSection(
                     stepNumber: '1',
-                    title: 'Quyền đọc thông báo (Notification Access)',
+                    title: context.t('Quyền đọc thông báo (Notification Access)'),
                     description:
-                        'Cho phép Mousey lắng nghe thông báo biến động số dư từ ứng dụng ngân hàng (Vietcombank, MB Bank, Techcombank, MoMo,...).',
-                    buttonText: 'Mở Cài Đặt Quyền Thông Báo',
+                        context.t('Cho phép Mousey lắng nghe thông báo biến động số dư từ ứng dụng ngân hàng (Vietcombank, MB Bank, Techcombank, MoMo,...).'),
+                    buttonText: context.t('Mở Cài Đặt Quyền Thông Báo'),
                     buttonIcon: Icons.notifications_active_rounded,
                     onPressed: _requestNotificationPermission,
                     isDone: _isNotificationPermissionGranted,
@@ -176,7 +177,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Android 13+ "Cài đặt bị hạn chế"?',
+                                context.t('Android 13+ "Cài đặt bị hạn chế"?'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -188,11 +189,11 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Nếu công tắc gạt bị ẩn/xám do tính năng bảo vệ Android 13+:\n'
-                          '1. Vào Cài đặt máy -> Ứng dụng -> Chọn Mousey.\n'
-                          '2. Nhấn biểu tượng 3 chấm ở góc trên bên phải màn hình.\n'
-                          '3. Chọn "Cho phép cài đặt bị hạn chế" (Allow restricted settings).\n'
-                          '4. Quay lại đây và bấm nút mở quyền ở Bước 1.',
+                          context.t('Nếu công tắc gạt bị ẩn/xám do tính năng bảo vệ Android 13+:\n'
+                              '1. Vào Cài đặt máy -> Ứng dụng -> Chọn Mousey.\n'
+                              '2. Nhấn biểu tượng 3 chấm ở góc trên bên phải màn hình.\n'
+                              '3. Chọn "Cho phép cài đặt bị hạn chế" (Allow restricted settings).\n'
+                              '4. Quay lại đây và bấm nút mở quyền ở Bước 1.'),
                           style: TextStyle(fontSize: 12, color: Colors.orange.shade900, height: 1.45),
                         ),
                       ],
@@ -204,10 +205,10 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                   // Step 2 Section: Battery Optimization
                   _buildStepSection(
                     stepNumber: '2',
-                    title: 'Tắt tối ưu hóa pin (Battery Optimization)',
+                    title: context.t('Tắt tối ưu hóa pin (Battery Optimization)'),
                     description:
-                        'Hệ điều hành Android có thể tự động ngắt các dịch vụ ngầm. Tắt tối ưu hóa pin để Mousey không bị bỏ lỡ thông báo khi khóa màn hình.',
-                    buttonText: 'Mở Cài Đặt Tối Ưu Pin',
+                        context.t('Hệ điều hành Android có thể tự động ngắt các dịch vụ ngầm. Tắt tối ưu hóa pin để Mousey không bị bỏ lỡ thông báo khi khóa màn hình.'),
+                    buttonText: context.t('Mở Cài Đặt Tối Ưu Pin'),
                     buttonIcon: Icons.battery_saver_rounded,
                     onPressed: _openBatteryOptimizationSettings,
                     isDone: false,
@@ -233,13 +234,13 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             Icon(Icons.phone_android_rounded, color: AppColors.primary, size: 22),
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Hướng dẫn theo từng hãng điện thoại',
+                                context.t('Hướng dẫn theo từng hãng điện thoại'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -251,10 +252,10 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                           ],
                         ),
                         const SizedBox(height: 10),
-                        _buildOemGuideItem('Xiaomi / Poco (MIUI / HyperOS)', 'Vào Bảo mật -> Quản lý ứng dụng -> Mousey -> Bật "Tự khởi chạy" (Autostart) & Chọn Tắt hạn chế pin.'),
-                        _buildOemGuideItem('Oppo / Realme / OnePlus', 'Vào Quản lý ứng dụng -> Mousey -> Bật "Cho phép hoạt động chạy ngầm" & Bật Tự khởi chạy.'),
-                        _buildOemGuideItem('Vivo / iQOO', 'Vào Cài đặt -> Pin -> Quản lý mức tiêu thụ điện năng ngầm -> Chọn Mousey -> Cho phép chạy ngầm.'),
-                        _buildOemGuideItem('Samsung Galaxy', 'Vào Cài đặt -> Ứng dụng -> Mousey -> Pin -> Chọn "Không hạn chế" (Unrestricted).'),
+                        _buildOemGuideItem('Xiaomi / Poco (MIUI / HyperOS)', context.t('Vào Bảo mật -> Quản lý ứng dụng -> Mousey -> Bật "Tự khởi chạy" (Autostart) & Chọn Tắt hạn chế pin.')),
+                        _buildOemGuideItem('Oppo / Realme / OnePlus', context.t('Vào Quản lý ứng dụng -> Mousey -> Bật "Cho phép hoạt động chạy ngầm" & Bật Tự khởi chạy.')),
+                        _buildOemGuideItem('Vivo / iQOO', context.t('Vào Cài đặt -> Pin -> Quản lý mức tiêu thụ điện năng ngầm -> Chọn Mousey -> Cho phép chạy ngầm.')),
+                        _buildOemGuideItem('Samsung Galaxy', context.t('Vào Cài đặt -> Ứng dụng -> Mousey -> Pin -> Chọn "Không hạn chế" (Unrestricted).')),
                       ],
                     ),
                   ),
@@ -284,8 +285,8 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Bảo mật & Quyền riêng tư',
+                              Text(
+                                context.t('Bảo mật & Quyền riêng tư'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -294,7 +295,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                'Mousey chỉ đọc thông báo từ danh sách các ứng dụng ngân hàng được hỗ trợ. Dữ liệu số dư và giao dịch được xử lý hoàn toàn trên thiết bị và lưu trữ trong cơ sở dữ liệu SQLite của bạn.',
+                                context.t('Mousey chỉ đọc thông báo từ danh sách các ứng dụng ngân hàng được hỗ trợ. Dữ liệu số dư và giao dịch được xử lý hoàn toàn trên thiết bị và lưu trữ trong cơ sở dữ liệu SQLite của bạn.'),
                                 style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.4),
                               ),
                             ],
@@ -395,7 +396,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
               onPressed: onPressed,
               icon: Icon(buttonIcon, size: 18),
               label: Text(
-                isDone ? 'Đã cấp quyền - Cài đặt lại' : buttonText,
+                isDone ? context.t('Đã cấp quyền - Cài đặt lại') : buttonText,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

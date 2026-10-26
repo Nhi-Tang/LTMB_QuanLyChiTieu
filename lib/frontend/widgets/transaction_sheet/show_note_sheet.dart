@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../backend/database/db_helper.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_translations.dart';
+import '../../utils/app_language.dart';
 
 /// Bottom Sheet nhập ghi chú giao dịch chuẩn AppColors, hỗ trợ gợi ý từ lịch sử và i18n
 Future<String?> showNoteSheet({
@@ -97,7 +98,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     return Padding(
       padding: EdgeInsets.only(

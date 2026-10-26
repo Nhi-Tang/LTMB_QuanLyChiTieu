@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'amount_expression.dart';
 import 'mousey_colors.dart';
+import '../../utils/app_language.dart';
 
 class AmountCard extends StatelessWidget {
   final String expression;
@@ -42,8 +43,8 @@ class AmountCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'SỐ TIỀN',
+          Text(
+            context.t('SỐ TIỀN'),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,

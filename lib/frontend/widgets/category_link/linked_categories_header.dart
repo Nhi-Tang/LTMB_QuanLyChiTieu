@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class LinkedCategoriesHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -36,7 +37,7 @@ class LinkedCategoriesHeader extends StatelessWidget implements PreferredSizeWid
         IconButton(
           icon: const Icon(Icons.add_circle_rounded, color: AppColors.primaryGreen, size: 28),
           onPressed: onAddPressed,
-          tooltip: 'Thêm danh mục mới',
+          tooltip: context.t('Thêm danh mục mới'),
         ),
         const SizedBox(width: 8),
       ],

@@ -5,6 +5,7 @@ import '../../backend/models/category_model.dart';
 import '../../backend/services/category_repository.dart';
 import '../../core/utils/money_input_formatter.dart';
 import '../../core/widgets/category_icon.dart';
+import '../utils/app_language.dart';
 
 class BudgetFormSheet extends StatefulWidget {
   final String ledgerId;
@@ -158,7 +159,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
     final amount = parseMoney(_amountController.text).toDouble();
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập hạn mức ngân sách hợp lệ (> 0)')),
+        SnackBar(content: Text(context.t('Vui lòng nhập hạn mức ngân sách hợp lệ (> 0)'))),
       );
       return;
     }
@@ -219,7 +220,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEditing ? 'Sửa Ngân Sách' : 'Thêm Ngân Sách Mới',
+                    isEditing ? context.t('Sửa Ngân Sách') : context.t('Thêm Ngân Sách Mới'),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -240,12 +241,12 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Chọn danh mục ngân sách',
+                  Text(
+                    context.t('Chọn danh mục ngân sách'),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
                   ),
                   Text(
-                    _selectedCategory ?? 'Tổng ngân sách',
+                    _selectedCategory != null ? context.tCategory(_selectedCategory!) : context.t('Tổng ngân sách'),
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFD9B97A)),
                   ),
                 ],
@@ -276,9 +277,9 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                                 children: [
                                   const Icon(Icons.pie_chart_outline_rounded, color: Color(0xFF5D4222), size: 22),
                                   const SizedBox(width: 8),
-                                  const Expanded(
+                                  Expanded(
                                     child: Text(
-                                      'Tổng ngân sách tháng (Toàn bộ chi tiêu)',
+                                      context.t('Tổng ngân sách tháng (Toàn bộ chi tiêu)'),
                                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -332,7 +333,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          name,
+                                          context.tCategory(name),
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -353,8 +354,8 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
               const SizedBox(height: 20),
 
               // Amount Input
-              const Text(
-                'Hạn mức (VNĐ)',
+              Text(
+                context.t('Hạn mức (VNĐ)'),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
               ),
               const SizedBox(height: 8),
@@ -374,10 +375,10 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập hạn mức ngân sách';
+                    return context.t('Vui lòng nhập hạn mức ngân sách');
                   }
                   if (parseMoney(value) <= 0) {
-                    return 'Hạn mức phải lớn hơn 0';
+                    return context.t('Hạn mức phải lớn hơn 0');
                   }
                   return null;
                 },
@@ -386,12 +387,12 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
 
               // Recurring Switch
               SwitchListTile(
-                title: const Text(
-                  'Ngân sách định kỳ',
+                title: Text(
+                  context.t('Ngân sách định kỳ'),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
                 ),
-                subtitle: const Text(
-                  'Áp dụng tự động cho mọi tháng',
+                subtitle: Text(
+                  context.t('Áp dụng tự động cho mọi tháng'),
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 value: _isRecurring,
@@ -420,7 +421,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                   ),
                   onPressed: _submit,
                   child: Text(
-                    isEditing ? 'Cập Nhật Ngân Sách' : 'Thêm Ngân Sách',
+                    isEditing ? context.t('Cập Nhật Ngân Sách') : context.t('Thêm Ngân Sách'),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

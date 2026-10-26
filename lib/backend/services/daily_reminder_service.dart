@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/db_helper.dart';
 
+import '../../frontend/utils/app_language.dart';
 class DailyReminderService {
   static final DailyReminderService instance = DailyReminderService._();
   DailyReminderService._();
@@ -55,8 +56,8 @@ class DailyReminderService {
 
     final androidDetails = AndroidNotificationDetails(
       'mousey_bank_reminder',
-      'Nhắc nhở thu chi ngân hàng',
-      channelDescription: 'Nhắc nhở tổng hợp giao dịch chờ xác nhận lúc $formattedTime',
+      AppLanguage.instance.t('Nhắc nhở thu chi ngân hàng'),
+      channelDescription: AppLanguage.instance.t('Nhắc nhở tổng hợp giao dịch chờ xác nhận lúc {formattedTime}', {'formattedTime': formattedTime}),
       importance: Importance.high,
       priority: Priority.high,
     );
@@ -64,13 +65,13 @@ class DailyReminderService {
     final notificationDetails = NotificationDetails(android: androidDetails);
 
     final message = pendingCount > 0
-        ? 'Bạn có $pendingCount giao dịch ngân hàng chờ xác nhận trong ngày. Hãy kiểm tra ngay!'
-        : 'Hãy mở Mousey để kiểm tra và cập nhật thu chi trong ngày hôm nay nhé!';
+        ? AppLanguage.instance.t('Bạn có {pendingCount} giao dịch ngân hàng chờ xác nhận trong ngày. Hãy kiểm tra ngay!', {'pendingCount': pendingCount})
+        : AppLanguage.instance.t('Hãy mở Mousey để kiểm tra và cập nhật thu chi trong ngày hôm nay nhé!');
 
     try {
       await _notificationsPlugin.zonedSchedule(
         888,
-        'Mousey - Nhắc nhở thu chi',
+        AppLanguage.instance.t('Mousey - Nhắc nhở thu chi'),
         message,
         tzScheduledDate,
         notificationDetails,
@@ -82,7 +83,7 @@ class DailyReminderService {
       // Fallback nếu exact alarm chưa được cấp quyền
       await _notificationsPlugin.zonedSchedule(
         888,
-        'Mousey - Nhắc nhở thu chi',
+        AppLanguage.instance.t('Mousey - Nhắc nhở thu chi'),
         message,
         tzScheduledDate,
         notificationDetails,
@@ -104,16 +105,16 @@ class DailyReminderService {
   }) async {
     await init();
 
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'mousey_bank_transactions',
-      'Biến động số dư ngân hàng',
-      channelDescription: 'Thông báo khi có biến động số dư từ các ứng dụng ngân hàng',
+      AppLanguage.instance.t('Biến động số dư ngân hàng'),
+      channelDescription: AppLanguage.instance.t('Thông báo khi có biến động số dư từ các ứng dụng ngân hàng'),
       importance: Importance.max,
       priority: Priority.high,
-      ticker: 'Biến động số dư',
+      ticker: AppLanguage.instance.t('Biến động số dư'),
     );
 
-    const notificationDetails = NotificationDetails(android: androidDetails);
+    final notificationDetails = NotificationDetails(android: androidDetails);
 
     try {
       await _notificationsPlugin.show(

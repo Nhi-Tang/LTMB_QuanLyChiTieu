@@ -10,6 +10,7 @@ import 'backend/services/sync_service.dart';
 import 'frontend/screens/auth_screen.dart';
 import 'frontend/screens/home_screen.dart';
 import 'frontend/screens/admin_management_screen.dart';
+import 'frontend/utils/app_language.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,14 +22,44 @@ Future<void> main() async {
     debugPrint('Firebase initialization error: $e');
   }
   await ProService.instance.init();
+  await AppLanguage.instance.load(uid: FirebaseAuth.instance.currentUser?.uid);
   runApp(const MouseyApp());
 }
 
-class MouseyApp extends StatelessWidget {
+class MouseyApp extends StatefulWidget {
   const MouseyApp({super.key});
 
   // Tỉ lệ thu nhỏ toàn bộ giao diện (1.0 = kích thước gốc)
   static const double uiScale = 0.9;
+
+  @override
+  State<MouseyApp> createState() => _MouseyAppState();
+}
+
+class _MouseyAppState extends State<MouseyApp> {
+  static const double uiScale = MouseyApp.uiScale;
+
+  @override
+  void initState() {
+    super.initState();
+    AppLanguage.instance.addListener(_onLanguageChanged);
+  }
+
+  @override
+  void dispose() {
+    AppLanguage.instance.removeListener(_onLanguageChanged);
+    super.dispose();
+  }
+
+  // Đổi ngôn ngữ thì dựng lại toàn bộ cây widget, kể cả các màn hình,
+  // dialog và bottom sheet đang mở, để mọi chữ cùng đổi theo.
+  void _onLanguageChanged() {
+    void rebuild(Element el) {
+      el.markNeedsBuild();
+      el.visitChildren(rebuild);
+    }
+    (context as Element).visitChildren(rebuild);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +129,7 @@ class AuthGate extends StatelessWidget {
 
               final localUser = userSnapshot.data ?? UserModel(
                 uid: firebaseUser.uid,
-                name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? 'Người dùng',
+                name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? context.t('Người dùng'),
                 email: firebaseUser.email ?? '',
                 password: '',
                 photoUrl: firebaseUser.photoURL,

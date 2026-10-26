@@ -18,6 +18,7 @@ import '../services/sync_service.dart';
 import '../services/transaction_service.dart';
 import '../services/in_app_notification_service.dart';
 import '../../core/utils/account_masker.dart';
+import '../../frontend/utils/app_language.dart';
 import '../../core/utils/money_input_formatter.dart';
 
 class DatabaseHelper {
@@ -1047,7 +1048,7 @@ class DatabaseHelper {
       return await db.insert('users', userToInsert.toMap());
     } catch (e) {
       if (e.toString().contains('UNIQUE constraint failed')) {
-        throw Exception('Email hoặc số điện thoại này đã được đăng ký!');
+        throw Exception(AppLanguage.instance.t('Email hoặc số điện thoại này đã được đăng ký!'));
       }
       rethrow;
     }
@@ -1366,8 +1367,8 @@ class DatabaseHelper {
         final formattedGoalAmount = formatMoney(newAmount);
         await InAppNotificationService.instance.add(
           type: 'savings',
-          title: 'Chúc mừng! Đạt mục tiêu tiết kiệm',
-          body: 'Mục tiêu "${goal.name}" đã hoàn thành 100%! Bạn đã tích lũy $formattedGoalAmount đ.',
+          title: AppLanguage.instance.t('Chúc mừng! Đạt mục tiêu tiết kiệm'),
+          body: AppLanguage.instance.t('Mục tiêu "{name}" đã hoàn thành 100%! Bạn đã tích lũy {amount} đ.', {'name': goal.name, 'amount': formattedGoalAmount}),
           dedupeKey: 'notif_savings_${goal.id}',
           uid: goal.uid,
         );

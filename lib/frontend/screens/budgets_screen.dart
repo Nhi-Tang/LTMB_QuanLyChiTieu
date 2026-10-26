@@ -5,6 +5,7 @@ import '../../backend/services/transaction_service.dart';
 import '../utils/app_translations.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/budget_form_sheet.dart';
+import '../utils/app_language.dart';
 
 class BudgetsScreen extends StatefulWidget {
   final String ledgerId;
@@ -68,14 +69,14 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           }
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã lưu ngân sách thành công!'), backgroundColor: Colors.green),
+              SnackBar(content: Text(context.t('Đã lưu ngân sách thành công!')), backgroundColor: Colors.green),
             );
           }
         } catch (e) {
           debugPrint('Error saving budget: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lỗi lưu ngân sách: $e'), backgroundColor: Colors.red),
+              SnackBar(content: Text(context.t('Lỗi lưu ngân sách: {e}', {'e': e})), backgroundColor: Colors.red),
             );
           }
         }
@@ -88,12 +89,12 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Xác nhận xóa'),
-        content: const Text('Bạn có chắc chắn muốn xóa ngân sách này?'),
+        title: Text(context.t('Xác nhận xóa')),
+        content: Text(context.t('Bạn có chắc chắn muốn xóa ngân sách này?')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -102,7 +103,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xóa', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(context.t('Xóa'), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -114,7 +115,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   }
 
   String _formatMonthYear(DateTime date) {
-    return AppTranslations.formatMonthYear(widget.selectedLanguage, date);
+    return AppTranslations.formatMonthYear(context.lang, date);
   }
 
   @override
@@ -125,8 +126,8 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
         backgroundColor: const Color(0xFFFCF1D0),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Quản Lý Ngân Sách',
+        title: Text(
+          context.t('Quản Lý Ngân Sách'),
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -153,7 +154,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Tháng chi tiêu',
+                    context.t('Tháng chi tiêu'),
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.brown[700]),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -232,8 +233,8 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                       children: [
                         const Icon(Icons.pie_chart_outline_rounded, size: 64, color: Colors.brown),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Chưa có ngân sách nào trong tháng này',
+                        Text(
+                          context.t('Chưa có ngân sách nào trong tháng này'),
                           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF5D4222)),
                         ),
                         const SizedBox(height: 16),
@@ -246,7 +247,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                           ),
                           onPressed: () => _showAddEditBudget(),
                           icon: const Icon(Icons.add_rounded),
-                          label: const Text('Thêm Ngân Sách Ngay', style: TextStyle(fontWeight: FontWeight.bold)),
+                          label: Text(context.t('Thêm Ngân Sách Ngay'), style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -260,7 +261,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     final status = budgetStatuses[index];
                     return BudgetCard(
                       status: status,
-                      selectedLanguage: widget.selectedLanguage,
+                      selectedLanguage: context.lang,
                       onEdit: () => _showAddEditBudget(editingBudget: status.budget),
                       onDelete: () => status.budget.id != null ? _deleteBudget(status.budget.id!) : null,
                     );

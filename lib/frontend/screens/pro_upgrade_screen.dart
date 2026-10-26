@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/services/pro_service.dart';
 import '../../core/constants/pricing.dart';
 import '../theme/app_colors.dart';
@@ -8,6 +7,7 @@ import '../widgets/app_alert_dialog.dart';
 import '../widgets/mousey_avatar.dart';
 import '../widgets/pro/plan_card.dart';
 import 'vietqr_payment_screen.dart';
+import '../utils/app_language.dart';
 
 class ProUpgradeScreen extends StatefulWidget {
   final String selectedLanguage;
@@ -21,24 +21,7 @@ class ProUpgradeScreen extends StatefulWidget {
 class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
   String _selectedPlan = 'yearly';
   bool _isLoading = false;
-  late String _lang;
-
-  @override
-  void initState() {
-    super.initState();
-    _lang = widget.selectedLanguage;
-    _loadLang();
-  }
-
-  Future<void> _loadLang() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('mousey_language') ?? widget.selectedLanguage;
-    if (mounted) {
-      setState(() {
-        _lang = saved;
-      });
-    }
-  }
+  String get _lang => AppLanguage.instance.value;
 
   Future<void> _handleStartTrial() async {
     setState(() => _isLoading = true);
@@ -47,8 +30,8 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
       if (!mounted) return;
       showAppAlertDialog(
         context: context,
-        title: 'Kích hoạt thành công!',
-        message: 'Bạn đã bắt đầu 7 ngày dùng thử Mousey PRO miễn phí.',
+        title: context.t('Kích hoạt thành công!'),
+        message: context.t('Bạn đã bắt đầu 7 ngày dùng thử Mousey PRO miễn phí.'),
         isSuccess: true,
       );
       Navigator.pop(context);
@@ -56,7 +39,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
       if (!mounted) return;
       showAppAlertDialog(
         context: context,
-        title: 'Không thể dùng thử',
+        title: context.t('Không thể dùng thử'),
         message: e.toString().replaceAll('Exception: ', ''),
         isSuccess: false,
       );
@@ -71,7 +54,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
       final amount = _selectedPlan == 'yearly' ? PricingConstants.yearlyPrice : PricingConstants.monthlyPrice;
       final order = await ProService.instance.createOrder(_selectedPlan, amount);
       if (order == null || !order.containsKey('orderId')) {
-        throw Exception('Không tạo được đơn hàng.');
+        throw Exception(AppLanguage.instance.t('Không tạo được đơn hàng.'));
       }
 
       if (!mounted) return;
@@ -85,7 +68,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
       if (!mounted) return;
       showAppAlertDialog(
         context: context,
-        title: 'Lỗi tạo đơn hàng',
+        title: context.t('Lỗi tạo đơn hàng'),
         message: e.toString().replaceAll('Exception: ', ''),
         isSuccess: false,
       );
@@ -203,7 +186,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 PlanCard(
                   title: AppTranslations.tr(lang, 'yearly_plan'),
                   price: '200.000đ',
-                  period: lang == 'English' ? 'year' : (lang == '한국어' ? '년' : 'năm'),
+                  period: context.t('năm'),
                   savings: AppTranslations.tr(lang, 'yearly_saving'),
                   isBestValue: true,
                   bestValueLabel: AppTranslations.tr(lang, 'best_value'),
@@ -214,7 +197,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 PlanCard(
                   title: AppTranslations.tr(lang, 'monthly_plan'),
                   price: '20.000đ',
-                  period: lang == 'English' ? 'month' : (lang == '한국어' ? '월' : 'tháng'),
+                  period: context.t('tháng'),
                   isSelected: _selectedPlan == 'monthly',
                   onTap: () => setState(() => _selectedPlan = 'monthly'),
                 ),
@@ -264,7 +247,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                             ),
                             onPressed: _isLoading ? null : _handleUpgrade,
                             child: Text(
-                              '${AppTranslations.tr(lang, 'subscribe_now')} (${_selectedPlan == 'yearly' ? '200.000đ/${lang == 'English' ? 'year' : 'năm'}' : '20.000đ/${lang == 'English' ? 'month' : 'tháng'}'})',
+                              '${AppTranslations.tr(lang, 'subscribe_now')} (${_selectedPlan == 'yearly' ? '200.000đ/${context.t('năm')}' : '20.000đ/${context.t('tháng')}'})',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

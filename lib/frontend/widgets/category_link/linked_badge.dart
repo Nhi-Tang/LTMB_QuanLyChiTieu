@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class LinkedBadge extends StatelessWidget {
   final bool isLinked;
@@ -31,7 +32,7 @@ class LinkedBadge extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            isLinked ? 'Đã liên kết' : 'Chưa liên kết',
+            isLinked ? context.t('Đã liên kết') : context.t('Chưa liên kết'),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,

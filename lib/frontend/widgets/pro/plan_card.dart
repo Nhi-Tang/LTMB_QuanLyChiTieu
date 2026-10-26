@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class PlanCard extends StatelessWidget {
   final String title;
@@ -91,7 +92,7 @@ class PlanCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            bestValueLabel ?? 'TIẾT KIỆM NHẤT',
+                            bestValueLabel ?? context.t('TIẾT KIỆM NHẤT'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 8,

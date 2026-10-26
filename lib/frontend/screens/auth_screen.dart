@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../backend/services/auth_service.dart';
 import '../widgets/app_alert_dialog.dart';
+import '../utils/app_language.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -75,7 +76,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 const Icon(Icons.lock_reset_rounded, color: primaryBeige, size: 28),
                 const SizedBox(width: 8),
                 Text(
-                  step == 1 ? 'Khôi phục mật khẩu' : 'Đặt lại mật khẩu mới',
+                  step == 1 ? context.t('Khôi phục mật khẩu') : context.t('Đặt lại mật khẩu mới'),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -87,8 +88,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (step == 1) ...[
-                    const Text(
-                      'Nhập email hoặc số điện thoại đã đăng ký tài khoản của bạn:',
+                    Text(
+                      context.t('Nhập email hoặc số điện thoại đã đăng ký tài khoản của bạn:'),
                       style: TextStyle(fontSize: 13, color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
@@ -96,15 +97,15 @@ class _AuthScreenState extends State<AuthScreen> {
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
-                        labelText: 'Email / Số điện thoại',
+                        labelText: context.t('Email / Số điện thoại'),
                         prefixIcon: const Icon(Icons.email_outlined),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email hoặc SĐT' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email hoặc SĐT') : null,
                     ),
                   ] else ...[
                     Text(
-                      'Tài khoản: $verifiedEmail',
+                      context.t('Tài khoản: {verifiedEmail}', {'verifiedEmail': verifiedEmail}),
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                     const SizedBox(height: 16),
@@ -112,13 +113,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       controller: newPasswordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: 'Mật khẩu mới',
+                        labelText: context.t('Mật khẩu mới'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Vui lòng nhập mật khẩu mới';
-                        if (v.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
+                        if (v == null || v.isEmpty) return context.t('Vui lòng nhập mật khẩu mới');
+                        if (v.length < 6) return context.t('Mật khẩu phải có ít nhất 6 ký tự');
                         return null;
                       },
                     ),
@@ -127,13 +128,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       controller: confirmPasswordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        labelText: 'Xác nhận mật khẩu mới',
+                        labelText: context.t('Xác nhận mật khẩu mới'),
                         prefixIcon: const Icon(Icons.lock_reset_outlined),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Vui lòng xác nhận mật khẩu';
-                        if (v != newPasswordController.text) return 'Mật khẩu xác nhận không khớp';
+                        if (v == null || v.isEmpty) return context.t('Vui lòng xác nhận mật khẩu');
+                        if (v != newPasswordController.text) return context.t('Mật khẩu xác nhận không khớp');
                         return null;
                       },
                     ),
@@ -144,7 +145,7 @@ class _AuthScreenState extends State<AuthScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogCtx),
-                child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -166,8 +167,8 @@ class _AuthScreenState extends State<AuthScreen> {
                                 if (!dialogCtx.mounted) return;
                                 showAppAlertDialog(
                                   context: dialogCtx,
-                                  title: 'Không tìm thấy',
-                                  message: 'Email hoặc số điện thoại này chưa được đăng ký trong hệ thống!',
+                                  title: AppLanguage.instance.t('Không tìm thấy'),
+                                  message: AppLanguage.instance.t('Email hoặc số điện thoại này chưa được đăng ký trong hệ thống!'),
                                   isSuccess: false,
                                 );
                                 return;
@@ -185,8 +186,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               Navigator.pop(dialogCtx);
                               showAppAlertDialog(
                                 context: dialogCtx,
-                                title: 'Thành công',
-                                message: 'Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.',
+                                title: AppLanguage.instance.t('Thành công'),
+                                message: AppLanguage.instance.t('Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.'),
                                 isSuccess: true,
                               );
                             }
@@ -195,7 +196,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             if (!dialogCtx.mounted) return;
                             showAppAlertDialog(
                               context: dialogCtx,
-                              title: 'Lỗi',
+                              title: AppLanguage.instance.t('Lỗi'),
                               message: e.toString(),
                               isSuccess: false,
                             );
@@ -209,7 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF5D4222)),
                       )
                     : Text(
-                        step == 1 ? 'TIẾP TỤC' : 'CẬP NHẬT MẬT KHẨU',
+                        step == 1 ? context.t('TIẾP TỤC') : context.t('CẬP NHẬT MẬT KHẨU'),
                         style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
                       ),
               ),
@@ -237,14 +238,14 @@ class _AuthScreenState extends State<AuthScreen> {
 
         if (user == null) {
           _showAlertDialog(
-            title: 'Đăng nhập thất bại',
-            message: 'Email/SĐT hoặc mật khẩu không chính xác!',
+            title: context.t('Đăng nhập thất bại'),
+            message: context.t('Email/SĐT hoặc mật khẩu không chính xác!'),
             isSuccess: false,
           );
         } else if (!user.isActive) {
           _showAlertDialog(
-            title: 'Tài khoản bị khóa',
-            message: 'Tài khoản của bạn đã bị khóa bởi Quản trị viên.',
+            title: context.t('Tài khoản bị khóa'),
+            message: context.t('Tài khoản của bạn đã bị khóa bởi Quản trị viên.'),
             isSuccess: false,
           );
         } else {
@@ -259,8 +260,8 @@ class _AuthScreenState extends State<AuthScreen> {
         if (!mounted) return;
 
         await _showAlertDialog(
-          title: 'Thông báo',
-          message: 'Đăng ký tài khoản thành công, vui lòng đăng nhập.',
+          title: context.t('Thông báo'),
+          message: context.t('Đăng ký tài khoản thành công, vui lòng đăng nhập.'),
           isSuccess: true,
         );
 
@@ -273,7 +274,7 @@ class _AuthScreenState extends State<AuthScreen> {
     } catch (e) {
       if (mounted) {
         _showAlertDialog(
-          title: 'Thông báo',
+          title: context.t('Thông báo'),
           message: e.toString().replaceAll('Exception: ', ''),
           isSuccess: false,
         );
@@ -293,7 +294,7 @@ class _AuthScreenState extends State<AuthScreen> {
     } catch (e) {
       if (mounted) {
         _showAlertDialog(
-          title: 'Đăng nhập Google thất bại',
+          title: context.t('Đăng nhập Google thất bại'),
           message: e.toString().replaceAll('Exception: ', ''),
           isSuccess: false,
         );
@@ -350,8 +351,8 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
       child: Row(
         children: [
-          tab('Đăng nhập', _isLogin, () => setState(() => _isLogin = true)),
-          tab('Đăng ký', !_isLogin, () => setState(() => _isLogin = false)),
+          tab(context.t('Đăng nhập'), _isLogin, () => setState(() => _isLogin = true)),
+          tab(context.t('Đăng ký'), !_isLogin, () => setState(() => _isLogin = false)),
         ],
       ),
     );
@@ -404,7 +405,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Quản lý chi tiêu thông minh & hiệu quả',
+                  context.t('Quản lý chi tiêu thông minh & hiệu quả'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],
@@ -443,12 +444,12 @@ class _AuthScreenState extends State<AuthScreen> {
                             keyboardType: TextInputType.name,
                             textCapitalization: TextCapitalization.words,
                             decoration: _inputDecoration(
-                              label: 'Họ và tên',
+                              label: context.t('Họ và tên'),
                               icon: Icons.person_outline,
                             ),
                             validator: (value) {
                               if (!_isLogin && (value == null || value.trim().isEmpty)) {
-                                return 'Vui lòng nhập họ và tên';
+                                return context.t('Vui lòng nhập họ và tên');
                               }
                               return null;
                             },
@@ -464,16 +465,16 @@ class _AuthScreenState extends State<AuthScreen> {
                           enableSuggestions: false,
                           textCapitalization: TextCapitalization.none,
                           decoration: _inputDecoration(
-                            label: 'Email hoặc Số điện thoại',
+                            label: context.t('Email hoặc Số điện thoại'),
                             icon: Icons.email_outlined,
                           ),
                           validator: (value) {
                             final v = value?.trim() ?? '';
                             if (v.isEmpty) {
-                              return 'Vui lòng nhập Email hoặc Số điện thoại';
+                              return context.t('Vui lòng nhập Email hoặc Số điện thoại');
                             }
                             if (!_emailRegex.hasMatch(v) && !_phoneRegex.hasMatch(v)) {
-                              return 'Email hoặc SĐT không hợp lệ (không dùng chữ có dấu)';
+                              return context.t('Email hoặc SĐT không hợp lệ (không dùng chữ có dấu)');
                             }
                             return null;
                           },
@@ -488,7 +489,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           enableSuggestions: false,
                           textCapitalization: TextCapitalization.none,
                           decoration: _inputDecoration(
-                            label: 'Mật khẩu',
+                            label: context.t('Mật khẩu'),
                             icon: Icons.lock_outline,
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -503,13 +504,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Vui lòng nhập mật khẩu';
+                              return context.t('Vui lòng nhập mật khẩu');
                             }
                             if (value.length < 6) {
-                              return 'Mật khẩu phải chứa ít nhất 6 ký tự';
+                              return context.t('Mật khẩu phải chứa ít nhất 6 ký tự');
                             }
                             if (!_asciiRegex.hasMatch(value)) {
-                              return 'Mật khẩu không được chứa chữ có dấu';
+                              return context.t('Mật khẩu không được chứa chữ có dấu');
                             }
                             return null;
                           },
@@ -524,7 +525,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             enableSuggestions: false,
                             textCapitalization: TextCapitalization.none,
                             decoration: _inputDecoration(
-                              label: 'Xác nhận mật khẩu',
+                              label: context.t('Xác nhận mật khẩu'),
                               icon: Icons.lock_reset_outlined,
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -542,10 +543,10 @@ class _AuthScreenState extends State<AuthScreen> {
                             validator: (value) {
                               if (!_isLogin) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Vui lòng xác nhận mật khẩu';
+                                  return context.t('Vui lòng xác nhận mật khẩu');
                                 }
                                 if (value != _passwordController.text) {
-                                  return 'Mật khẩu xác nhận không khớp';
+                                  return context.t('Mật khẩu xác nhận không khớp');
                                 }
                               }
                               return null;
@@ -558,8 +559,8 @@ class _AuthScreenState extends State<AuthScreen> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: _showForgotPasswordDialog,
-                              child: const Text(
-                                'Quên mật khẩu?',
+                              child: Text(
+                                context.t('Quên mật khẩu?'),
                                 style: TextStyle(
                                   color: primaryBeige,
                                   fontWeight: FontWeight.w600,
@@ -594,7 +595,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           )
                               : Text(
-                            _isLogin ? 'Đăng nhập' : 'Đăng ký tài khoản',
+                            _isLogin ? context.t('Đăng nhập') : context.t('Đăng ký tài khoản'),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -614,7 +615,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12.0),
                               child: Text(
-                                'Hoặc tiếp tục với',
+                                context.t('Hoặc tiếp tục với'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey[600],
@@ -659,7 +660,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                _isLogin ? 'Đăng nhập bằng Google' : 'Đăng ký bằng Google',
+                                _isLogin ? context.t('Đăng nhập bằng Google') : context.t('Đăng ký bằng Google'),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -677,7 +678,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Bằng việc tiếp tục, bạn đồng ý với Điều khoản & Chính sách của Mousey.',
+                  context.t('Bằng việc tiếp tục, bạn đồng ý với Điều khoản & Chính sách của Mousey.'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,

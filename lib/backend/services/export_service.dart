@@ -11,6 +11,7 @@ import '../models/budget_model.dart';
 import '../models/savings_goal_model.dart';
 import 'totals_calculator.dart';
 import '../../core/utils/account_masker.dart';
+import '../../frontend/utils/app_translations.dart';
 
 class ExportOptions {
   final DateTime startDate;
@@ -59,15 +60,15 @@ class ExportService {
   static String _translateKind(String kind, String lang) {
     switch (kind) {
       case 'income':
-        return lang == 'English' ? 'Income' : (lang == '한국어' ? '수입' : 'Thu nhập');
+        return AppTranslations.text(lang, 'Thu nhập');
       case 'received':
-        return lang == 'English' ? 'Received' : (lang == '한국어' ? '입금' : 'Tiền nhận');
+        return AppTranslations.text(lang, 'Tiền nhận');
       case 'expense':
-        return lang == 'English' ? 'Expense' : (lang == '한국어' ? '지출' : 'Chi tiêu');
+        return AppTranslations.text(lang, 'Chi tiêu');
       case 'transfer_out':
-        return lang == 'English' ? 'Transfer Out' : (lang == '한국어' ? '송금' : 'Chuyển cho người khác');
+        return AppTranslations.text(lang, 'Chuyển cho người khác');
       case 'transfer_internal':
-        return lang == 'English' ? 'Internal Transfer' : (lang == '한국어' ? '내부이체' : 'Chuyển nội bộ');
+        return AppTranslations.text(lang, 'Chuyển nội bộ');
       default:
         return kind;
     }
@@ -203,14 +204,14 @@ class ExportService {
 
     final excel = Excel.createExcel();
     final defaultSheetName = excel.getDefaultSheet() ?? 'Sheet1';
-    final txSheetName = lang == 'English' ? 'Transactions' : 'Giao dịch';
+    final txSheetName = AppTranslations.text(lang, 'Giao dịch');
     excel.rename(defaultSheetName, txSheetName);
     final sheet = excel[txSheetName];
 
     // Headers Giao dịch
-    final headers = lang == 'English'
-        ? ['Date', 'Time', 'Type', 'Category', 'Amount', 'Ledger', 'Note']
-        : ['Ngày', 'Giờ', 'Loại', 'Danh mục', 'Số tiền', 'Sổ', 'Ghi chú'];
+    final headers = ['Ngày', 'Giờ', 'Loại', 'Danh mục', 'Số tiền', 'Sổ', 'Ghi chú']
+        .map((h) => AppTranslations.text(lang, h))
+        .toList();
     
     sheet.appendRow(headers.map((h) => TextCellValue(h)).toList());
 
@@ -219,13 +220,13 @@ class ExportService {
       final timeStr = '${t.date.hour.toString().padLeft(2, '0')}:${t.date.minute.toString().padLeft(2, '0')}';
       final typeStr = _translateKind(t.kind, lang);
       final cleanNote = maskAccountNumbers(t.title);
-      final ledgerName = ledgerNames[t.ledgerId] ?? t.ledgerId ?? '';
+      final ledgerName = AppTranslations.trLedger(lang, ledgerNames[t.ledgerId] ?? t.ledgerId ?? '');
 
       sheet.appendRow([
         TextCellValue(dateStr),
         TextCellValue(timeStr),
         TextCellValue(typeStr),
-        TextCellValue(t.category),
+        TextCellValue(AppTranslations.trCategory(lang, t.category)),
         IntCellValue(t.amount.toInt()),
         TextCellValue(ledgerName),
         TextCellValue(cleanNote),
@@ -234,22 +235,22 @@ class ExportService {
 
     // Sheet Tổng hợp
     if (opt['exportCategorySummary'] == true || opt['exportMonthlySummary'] == true) {
-      final summarySheetName = lang == 'English' ? 'Summary' : 'Tổng hợp';
+      final summarySheetName = AppTranslations.text(lang, 'Tổng hợp');
       final sumSheet = excel[summarySheetName];
 
       final totalInc = TotalsCalculator.calculateTotalIncome(transactions);
       final totalExp = TotalsCalculator.calculateTotalExpense(transactions);
       final balance = TotalsCalculator.calculateBalance(transactions);
 
-      sumSheet.appendRow([TextCellValue(lang == 'English' ? 'Financial Summary' : 'Tổng hợp tài chính')]);
-      sumSheet.appendRow([TextCellValue(lang == 'English' ? 'Total Income' : 'Tổng thu nhập'), IntCellValue(totalInc.toInt())]);
-      sumSheet.appendRow([TextCellValue(lang == 'English' ? 'Total Expense' : 'Tổng chi tiêu'), IntCellValue(totalExp.toInt())]);
-      sumSheet.appendRow([TextCellValue(lang == 'English' ? 'Balance' : 'Số dư thực tế'), IntCellValue(balance.toInt())]);
+      sumSheet.appendRow([TextCellValue(AppTranslations.text(lang, 'Tổng hợp tài chính'))]);
+      sumSheet.appendRow([TextCellValue(AppTranslations.text(lang, 'Tổng thu nhập')), IntCellValue(totalInc.toInt())]);
+      sumSheet.appendRow([TextCellValue(AppTranslations.text(lang, 'Tổng chi tiêu')), IntCellValue(totalExp.toInt())]);
+      sumSheet.appendRow([TextCellValue(AppTranslations.text(lang, 'Số dư thực tế')), IntCellValue(balance.toInt())]);
       sumSheet.appendRow([]);
 
       if (opt['exportCategorySummary'] == true) {
-        sumSheet.appendRow([TextCellValue(lang == 'English' ? 'By Category' : 'Tổng hợp theo danh mục')]);
-        sumSheet.appendRow([TextCellValue('Category'), TextCellValue('Amount')]);
+        sumSheet.appendRow([TextCellValue(AppTranslations.text(lang, 'Tổng hợp theo danh mục'))]);
+        sumSheet.appendRow([TextCellValue(AppTranslations.text(lang, 'Danh mục')), TextCellValue(AppTranslations.text(lang, 'Số tiền'))]);
         
         final Map<String, double> catSums = {};
         for (var t in transactions) {
@@ -258,7 +259,7 @@ class ExportService {
           }
         }
         catSums.forEach((cat, amt) {
-          sumSheet.appendRow([TextCellValue(cat), IntCellValue(amt.toInt())]);
+          sumSheet.appendRow([TextCellValue(AppTranslations.trCategory(lang, cat)), IntCellValue(amt.toInt())]);
         });
         sumSheet.appendRow([]);
       }
@@ -282,9 +283,9 @@ class ExportService {
     final lang = opt['language'] as String;
 
     List<List<dynamic>> rows = [];
-    final headers = lang == 'English'
-        ? ['Date', 'Time', 'Type', 'Category', 'Amount', 'Ledger', 'Note']
-        : ['Ngày', 'Giờ', 'Loại', 'Danh mục', 'Số tiền', 'Sổ', 'Ghi chú'];
+    final headers = ['Ngày', 'Giờ', 'Loại', 'Danh mục', 'Số tiền', 'Sổ', 'Ghi chú']
+        .map((h) => AppTranslations.text(lang, h))
+        .toList();
     rows.add(headers);
 
     for (var t in transactions) {
@@ -292,9 +293,9 @@ class ExportService {
       final timeStr = '${t.date.hour.toString().padLeft(2, '0')}:${t.date.minute.toString().padLeft(2, '0')}';
       final typeStr = _translateKind(t.kind, lang);
       final cleanNote = maskAccountNumbers(t.title);
-      final ledgerName = ledgerNames[t.ledgerId] ?? t.ledgerId ?? '';
+      final ledgerName = AppTranslations.trLedger(lang, ledgerNames[t.ledgerId] ?? t.ledgerId ?? '');
 
-      rows.add([dateStr, timeStr, typeStr, t.category, t.amount.toInt(), ledgerName, cleanNote]);
+      rows.add([dateStr, timeStr, typeStr, AppTranslations.trCategory(lang, t.category), t.amount.toInt(), ledgerName, cleanNote]);
     }
 
     String csvData = const ListToCsvConverter().convert(rows);

@@ -7,6 +7,7 @@ import '../utils/app_translations.dart';
 import '../widgets/add_edit_savings_goal_dialog.dart';
 import '../widgets/mousey_avatar.dart';
 import 'savings_goal_detail_screen.dart';
+import '../utils/app_language.dart';
 
 class SavingsTab extends StatefulWidget {
   final String selectedAvatarKey;
@@ -77,7 +78,7 @@ class _SavingsTabState extends State<SavingsTab> {
     showDialog(
       context: context,
       builder: (ctx) => AddEditSavingsGoalDialog(
-        selectedLanguage: widget.selectedLanguage,
+        selectedLanguage: context.lang,
         onSaved: () => _loadGoals(),
       ),
     );
@@ -85,7 +86,7 @@ class _SavingsTabState extends State<SavingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -266,7 +267,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            AppTranslations.tr(lang, 'Chưa có mục tiêu nào'),
+                            AppTranslations.tr(lang, context.t('Chưa có mục tiêu nào')),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -275,7 +276,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            AppTranslations.tr(lang, 'Thêm mục tiêu đầu tiên'),
+                            AppTranslations.tr(lang, context.t('Thêm mục tiêu đầu tiên')),
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
@@ -297,25 +298,25 @@ class _SavingsTabState extends State<SavingsTab> {
                         String subtitleText = '';
                         String monthlySuggestionStr = '';
                         if (goal.isCompleted) {
-                          subtitleText = 'Đã hoàn thành';
+                          subtitleText = context.t('Đã hoàn thành');
                         } else if (goal.deadline != null && goal.deadline!.isNotEmpty) {
                           final deadlineDate = DateTime.tryParse(goal.deadline!);
                           if (deadlineDate != null) {
                             final daysLeft = deadlineDate.difference(DateTime.now()).inDays;
                             if (daysLeft >= 0) {
-                              subtitleText = 'Còn $daysLeft ngày';
+                              subtitleText = context.t('Còn {daysLeft} ngày', {'daysLeft': daysLeft});
                               final monthsLeft = daysLeft > 0 ? daysLeft / 30.0 : 1.0;
                               final remainingAmt = goal.targetAmount - goal.currentAmount;
                               if (remainingAmt > 0 && monthsLeft > 0) {
                                 final monthlyNeeded = remainingAmt / monthsLeft;
-                                monthlySuggestionStr = 'Mỗi tháng cần để dành ${_formatCurrency(monthlyNeeded)} để kịp hạn';
+                                monthlySuggestionStr = context.t('Mỗi tháng cần để dành {value} để kịp hạn', {'value': _formatCurrency(monthlyNeeded)});
                               }
                             } else {
-                              subtitleText = 'Đã quá hạn';
+                              subtitleText = context.t('Đã quá hạn');
                             }
                           }
                         } else {
-                          subtitleText = 'Mục tiêu tích lũy';
+                          subtitleText = context.t('Mục tiêu tích lũy');
                         }
 
                         return InkWell(

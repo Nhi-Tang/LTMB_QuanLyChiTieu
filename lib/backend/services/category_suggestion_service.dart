@@ -9,6 +9,7 @@ import 'budget_alert_service.dart';
 import 'in_app_notification_service.dart';
 import 'daily_reminder_service.dart';
 import '../../core/utils/money_input_formatter.dart';
+import '../../frontend/utils/app_language.dart';
 
 class CategorySuggestionResult {
   final String? suggestedCategoryId; // Tên/ID danh mục gợi ý
@@ -201,8 +202,8 @@ class CategorySuggestionService {
         await DatabaseHelper.instance.insertPendingTransaction(transferItem, uid: uid);
 
         final formattedAmount = formatMoney(transferItem.amount);
-        final transferTitle = 'Chuyển khoản nội bộ tự động';
-        final transferBody = 'Đã chuyển $formattedAmount đ từ $sourceBank sang $targetBank';
+        final transferTitle = AppLanguage.instance.t('Chuyển khoản nội bộ tự động');
+        final transferBody = AppLanguage.instance.t('Đã chuyển {amount} đ từ {sourceBank} sang {targetBank}', {'amount': formattedAmount, 'sourceBank': sourceBank, 'targetBank': targetBank});
 
         await InAppNotificationService.instance.add(
           type: 'pending_tx',
@@ -225,7 +226,7 @@ class CategorySuggestionService {
     // Thêm thông báo nội bộ vào Trung tâm thông báo
     final formattedAmount = formatMoney(parsed.amount);
     final isInc = parsed.type == 'income';
-    final notifTitle = isInc ? 'Tài khoản vừa tăng' : 'Tài khoản vừa giảm';
+    final notifTitle = AppLanguage.instance.t(isInc ? 'Tài khoản vừa tăng' : 'Tài khoản vừa giảm');
     final signText = isInc ? '+' : '-';
     final notifBody = '$signText$formattedAmount đ · ${parsed.description}';
 

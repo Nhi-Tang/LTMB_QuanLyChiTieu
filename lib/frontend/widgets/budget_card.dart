@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../backend/services/budget_service.dart';
 import '../../core/widgets/money_text.dart';
 import '../../core/widgets/category_icon.dart';
+import '../utils/app_language.dart';
 
 class BudgetCard extends StatelessWidget {
   final BudgetStatus status;
@@ -37,8 +38,8 @@ class BudgetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final budget = status.budget;
     final categoryName = budget.categoryId == null || budget.categoryId!.isEmpty
-        ? 'Tổng ngân sách tháng'
-        : budget.categoryId!;
+        ? context.t('Tổng ngân sách tháng')
+        : context.tCategory(budget.categoryId!);
     final progressColor = _getProgressColor(status.level);
     final progressVal = (status.percent / 100.0).clamp(0.0, 1.0);
 
@@ -94,14 +95,14 @@ class BudgetCard extends StatelessWidget {
                                 color: Colors.blue.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: const Text(
-                                'Định kỳ',
+                              child: Text(
+                                context.t('Định kỳ'),
                                 style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
                               ),
                             ),
                           Expanded(
                             child: Text(
-                              budget.month != null ? 'Tháng ${budget.month}' : 'Mọi tháng',
+                              budget.month != null ? context.t('Tháng {month}', {'month': budget.month}) : context.t('Mọi tháng'),
                               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -147,7 +148,7 @@ class BudgetCard extends StatelessWidget {
                 Flexible(
                   child: MoneyText(
                     amount: status.limit,
-                    prefix: 'Hạn mức: ',
+                    prefix: context.t('Hạn mức: '),
                     alignment: Alignment.centerRight,
                     style: TextStyle(
                       fontSize: 13,
@@ -179,7 +180,7 @@ class BudgetCard extends StatelessWidget {
                 Flexible(
                   child: MoneyText(
                     amount: status.remaining.abs(),
-                    prefix: status.remaining >= 0 ? 'Còn lại: ' : 'Vượt: ',
+                    prefix: status.remaining >= 0 ? context.t('Còn lại: ') : context.t('Vượt: '),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -191,7 +192,7 @@ class BudgetCard extends StatelessWidget {
                 Flexible(
                   child: MoneyText(
                     amount: status.dailyRemaining,
-                    prefix: 'Chi tiêu/ngày: ',
+                    prefix: context.t('Chi tiêu/ngày: '),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],

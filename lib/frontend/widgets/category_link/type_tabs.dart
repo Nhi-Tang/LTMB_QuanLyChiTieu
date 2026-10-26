@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class TypeTabs extends StatelessWidget {
   final bool isExpense;
@@ -34,7 +35,7 @@ class TypeTabs extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Chi tiêu',
+                  context.t('Chi tiêu'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -55,7 +56,7 @@ class TypeTabs extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Thu nhập',
+                  context.t('Thu nhập'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,

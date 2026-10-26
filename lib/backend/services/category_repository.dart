@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import '../database/db_helper.dart';
 import '../models/category_model.dart';
 
+import '../../frontend/utils/app_language.dart';
 class CategoryRepository {
   static final CategoryRepository instance = CategoryRepository._init();
 
@@ -132,7 +133,7 @@ class CategoryRepository {
     final category = CategoryModel.fromMap(catResult.first);
 
     if (category.isDefault) {
-      throw Exception('Không thể xóa danh mục mặc định của hệ thống!');
+      throw Exception(AppLanguage.instance.t('Không thể xóa danh mục mặc định của hệ thống!'));
     }
 
     if (archiveInstead) {

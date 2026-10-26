@@ -5,6 +5,7 @@ import '../../core/widgets/money_text.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/mousey_avatar.dart';
+import '../utils/app_language.dart';
 
 class ReportsTab extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -186,7 +187,7 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   String get _aiInsightQuote {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final categories = _dynamicCategories;
     if (categories.isEmpty || _totalReportAmount == 0) {
       if (_reportTypeIndex == 1) {
@@ -201,7 +202,7 @@ class _ReportsTabState extends State<ReportsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -312,7 +313,7 @@ class _ReportsTabState extends State<ReportsTab> {
 
   // --- EXPENSE / INCOME TAB VIEW ---
   Widget _buildExpenseOrIncomeView() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final categories = _dynamicCategories;
     final displayedCategories = _showAllCategories
         ? categories
@@ -662,8 +663,8 @@ class _ReportsTabState extends State<ReportsTab> {
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                           child: Text(
                             _showAllCategories
-                                ? 'Thu gọn ^'
-                                : 'Hiện tất cả (${categories.length}) v',
+                                ? context.t('Thu gọn ^')
+                                : context.t('Hiện tất cả ({count}) v', {'count': categories.length}),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
@@ -775,7 +776,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${range}t',
+                            context.t('{range}t', {'range': range}),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -809,7 +810,7 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   List<String> _getRecent6MonthsLabels() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final now = DateTime.now();
     final List<String> labels = [];
     for (int i = 5; i >= 0; i--) {
@@ -859,7 +860,7 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   void _showTimeRangePicker() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final options = [
       'all_time',
       'this_month',
@@ -922,7 +923,7 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   void _showCategoryFilterPicker() {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final expenseCategories = [
       'Tất cả',
       'Ăn uống',
