@@ -121,9 +121,9 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7EB),
+      backgroundColor: const Color(0xFFF5FDFD),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFCF1D0),
+        backgroundColor: const Color(0xFFCCF7F7),
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -131,11 +131,11 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF5D4222),
+            color: Color(0xFF00463E),
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF5D4222)),
+        iconTheme: const IconThemeData(color: Color(0xFF00463E)),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded, size: 28),
@@ -148,14 +148,14 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           // Month Selector Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            color: const Color(0xFFFCF1D0).withValues(alpha: 0.5),
+            color: const Color(0xFFCCF7F7).withValues(alpha: 0.5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     context.t('Tháng chi tiêu'),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.brown[700]),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF00463E)),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -183,7 +183,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.brown.withValues(alpha: 0.08),
+                            color: const Color(0xFF00463E).withValues(alpha: 0.08),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -198,13 +198,13 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF5D4222),
+                                color: Color(0xFF00463E),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF5D4222)),
+                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF00463E)),
                         ],
                       ),
                     ),
@@ -231,17 +231,17 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.pie_chart_outline_rounded, size: 64, color: Colors.brown),
+                        const Icon(Icons.pie_chart_outline_rounded, size: 64, color: Color(0xFF00BFB5)),
                         const SizedBox(height: 16),
                         Text(
                           context.t('Chưa có ngân sách nào trong tháng này'),
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF5D4222)),
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF00463E)),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF5D4222),
-                            foregroundColor: const Color(0xFFFCF1D0),
+                            backgroundColor: const Color(0xFF00463E),
+                            foregroundColor: const Color(0xFFCCF7F7),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           ),

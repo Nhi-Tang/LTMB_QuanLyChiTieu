@@ -107,9 +107,9 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
-          color: Color(0xFFFFF7EB),
+          color: Color(0xFFF5FDFD),
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border(top: BorderSide(color: Color(0xFFEFE6D2), width: 1.5)),
+          border: Border(top: BorderSide(color: Color(0xFFCCF7F7), width: 1.5)),
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -163,11 +163,11 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                   contentPadding: const EdgeInsets.all(14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFEFE6D2)),
+                    borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFEFE6D2)),
+                    borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -190,7 +190,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                   children: _recentNotes.map((note) {
                     return ActionChip(
                       backgroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0xFFEFE6D2)),
+                      side: const BorderSide(color: Color(0xFFCCF7F7)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       label: Text(
                         note,
@@ -214,7 +214,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Color(0xFFEFE6D2)),
+                        side: const BorderSide(color: Color(0xFFCCF7F7)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {

@@ -940,7 +940,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFEFE8F6), Color(0xFFBDA9D4)],
+                      colors: [Color(0xFFCCF7F7), Color(0xFF66EBE5)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -980,7 +980,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFCCC6E1), Color(0xFFD4CCE2)],
+                      colors: [Color(0xFF66EBE5), Color(0xFFCCF7F7)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
