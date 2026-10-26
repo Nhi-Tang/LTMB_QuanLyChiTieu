@@ -94,7 +94,7 @@ class PlanCard extends StatelessWidget {
                           child: Text(
                             bestValueLabel ?? context.t('TIẾT KIỆM NHẤT'),
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.onTeal,
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
                             ),

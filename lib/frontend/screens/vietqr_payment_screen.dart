@@ -374,7 +374,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.onTeal,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -385,7 +385,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                     ? const SizedBox(
                         height: 24,
                         width: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(color: AppColors.onTeal, strokeWidth: 2),
                       )
                     : Text(
                         context.t('Hoàn tất chuyển khoản'),

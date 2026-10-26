@@ -139,7 +139,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text('OK', style: TextStyle(color: isSuccess ? AppColors.onTeal : Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -590,12 +590,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Icon(Icons.admin_panel_settings, color: Colors.white),
+            Icon(Icons.admin_panel_settings, color: AppColors.onTeal),
             SizedBox(width: 8),
             Flexible(
               child: Text(
                 'Mousey - Admin',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.onTeal),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -605,12 +605,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_outline, color: Colors.white),
+            icon: const Icon(Icons.person_outline, color: AppColors.onTeal),
             tooltip: context.t('Thông tin cá nhân Admin'),
             onPressed: _showAdminProfileDialog,
           ),
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: AppColors.onTeal),
             tooltip: context.t('Đăng xuất'),
             onPressed: _logout,
           ),
@@ -901,7 +901,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: themeColor,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.onTeal,
         onPressed: () => _showUserFormDialog(),
         icon: const Icon(Icons.person_add),
         label: Text(context.t('Thêm tài khoản'), style: TextStyle(fontWeight: FontWeight.bold)),
