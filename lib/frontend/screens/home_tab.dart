@@ -141,7 +141,7 @@ class _HomeTabState extends State<HomeTab> {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
-                color: Color(0xFF9282FF),
+                color: Color(0xFF00D1CC),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: SingleChildScrollView(
@@ -197,7 +197,7 @@ class _HomeTabState extends State<HomeTab> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFF9A80E3)),
+                        border: Border.all(color: const Color(0xFF33DEBF)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,7 +464,7 @@ class _HomeTabState extends State<HomeTab> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF9282FF), Color(0xFF5748AE)],
+                colors: [Color(0xFF00D1CC), Color(0xFF00BFB5)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),

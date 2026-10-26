@@ -214,7 +214,7 @@ class _ReportsTabState extends State<ReportsTab> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: const Color(0xFFD4CCE2),
+              color: const Color(0xFF66EBE5),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -239,7 +239,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFD4CCE2)),
+                      border: Border.all(color: const Color(0xFF66EBE5)),
                     ),
                     child: Row(
                       children: [
@@ -271,10 +271,10 @@ class _ReportsTabState extends State<ReportsTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFEFE8F6) : Colors.white,
+                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFCCF7F7) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFEFE8F6) : const Color(0xFFF2F2F2),
+                        color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFCCF7F7) : const Color(0xFFF2F2F2),
                       ),
                     ),
                     child: Row(
@@ -329,7 +329,7 @@ class _ReportsTabState extends State<ReportsTab> {
             gradient: const LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [Color(0xFF9282FF), Color(0xFF9A80E3)],
+              colors: [Color(0xFF00D1CC), Color(0xFF33DEBF)],
             ),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
@@ -433,7 +433,7 @@ class _ReportsTabState extends State<ReportsTab> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFD4CCE2)),
+            border: Border.all(color: const Color(0xFF66EBE5)),
           ),
           child: categories.isEmpty
               ? SizedBox(
@@ -447,7 +447,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             ? Icons.account_balance_wallet_outlined
                             : Icons.pie_chart_outline_rounded,
                         size: 52,
-                        color: const Color(0xFFCCC6E1),
+                        color: const Color(0xFF66EBE5),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -548,7 +548,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
 
                     const SizedBox(height: 20),
-                    const Divider(color: Color(0xFFD4CCE2), height: 1),
+                    const Divider(color: Color(0xFF66EBE5), height: 1),
                     const SizedBox(height: 12),
 
                     // Category List with Progress Bars
@@ -575,7 +575,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                         width: 38,
                                         height: 38,
                                         decoration: const BoxDecoration(
-                                          color: Color(0xFFCCC6E1),
+                                          color: Color(0xFF66EBE5),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Center(
@@ -625,7 +625,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     child: LinearProgressIndicator(
                                       value: (pct / 100.0).clamp(0.0, 1.0),
                                       minHeight: 10,
-                                      backgroundColor: const Color(0xFFEFE8F6),
+                                      backgroundColor: const Color(0xFFCCF7F7),
                                       valueColor: AlwaysStoppedAnimation<Color>(catColor),
                                     ),
                                   ),
@@ -699,7 +699,7 @@ class _ReportsTabState extends State<ReportsTab> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFCCC6E1),
+                color: const Color(0xFF66EBE5),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -725,7 +725,7 @@ class _ReportsTabState extends State<ReportsTab> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFCCC6E1)),
+            border: Border.all(color: const Color(0xFF66EBE5)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,7 +772,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           margin: const EdgeInsets.only(left: 3),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isSel ? const Color(0xFF222222) : const Color(0xFFCCC6E1),
+                            color: isSel ? const Color(0xFF222222) : const Color(0xFF66EBE5),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -906,7 +906,7 @@ class _ReportsTabState extends State<ReportsTab> {
                         AppTranslations.tr(lang, key),
                         style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
                       ),
-                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF6456A1)) : null,
+                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF00BFB5)) : null,
                       onTap: () {
                         setState(() => _timeRange = key);
                         Navigator.pop(ctx);
@@ -1006,10 +1006,10 @@ class _ReportsTabState extends State<ReportsTab> {
                           AppTranslations.trCategory(lang, cat),
                           style: TextStyle(
                             fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                            color: isSel ? const Color(0xFF9282FF) : Colors.black87,
+                            color: isSel ? const Color(0xFF00D1CC) : Colors.black87,
                           ),
                         ),
-                        trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF6456A1)) : null,
+                        trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF00BFB5)) : null,
                         onTap: () {
                           setState(() {
                             _selectedCategoryFilter = cat;
@@ -1117,7 +1117,7 @@ class StackedBarChartPainter extends CustomPainter {
       final val = monthlyTotals[i];
       if (val > 0) {
         final segH = (val / maxVal) * chartHeight;
-        final segPaint = Paint()..color = const Color(0xFFBDA9D4);
+        final segPaint = Paint()..color = const Color(0xFF66EBE5);
 
         final segRect = Rect.fromLTWH(x, chartHeight - segH, barWidth, segH);
         canvas.drawRect(segRect, segPaint);

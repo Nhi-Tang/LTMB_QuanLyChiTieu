@@ -30,7 +30,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
   List<SavingsTransactionModel> _transactions = [];
   bool _isLoading = true;
 
-  static const Color accentPurple = Color(0xFF9282FF);
+  static const Color accentPurple = Color(0xFF00D1CC);
 
   @override
   void initState() {
@@ -574,7 +574,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFD4CCE2)),
+                          border: Border.all(color: const Color(0xFF66EBE5)),
                         ),
                         child: Center(
                           child: Text(context.t('Chưa có lịch sử giao dịch tiết kiệm nào.'), style: TextStyle(color: Colors.grey)),
@@ -593,7 +593,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFFD4CCE2)),
+                              border: Border.all(color: const Color(0xFF66EBE5)),
                             ),
                             child: Row(
                               children: [
