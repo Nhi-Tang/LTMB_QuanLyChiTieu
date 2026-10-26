@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_colors.dart';
 
 class WalletChip extends StatelessWidget {
   final String selectedWallet;
@@ -18,25 +19,25 @@ class WalletChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5FDFD),
+          color: AppColors.tealWhite,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF66EBE5)),
+          border: Border.all(color: AppColors.tealLight),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.account_balance_wallet_outlined, size: 16, color: Color(0xFF00463E)),
+            const Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppColors.tealDark),
             const SizedBox(width: 6),
             Text(
               selectedWallet,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF00463E),
+                color: AppColors.tealDark,
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFF00463E)),
+            const Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.tealDark),
           ],
         ),
       ),

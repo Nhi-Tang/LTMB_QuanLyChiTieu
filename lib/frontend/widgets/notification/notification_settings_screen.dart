@@ -6,9 +6,8 @@ import 'permission_guide_screen.dart';
 import '../../utils/app_language.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
-  final String selectedLanguage;
 
-  const NotificationSettingsScreen({super.key, this.selectedLanguage = 'Tiếng Việt'});
+  const NotificationSettingsScreen({super.key});
 
   @override
   State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
@@ -93,7 +92,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     final formattedTime = '${_reminderHour.toString().padLeft(2, '0')}:${_reminderMinute.toString().padLeft(2, '0')}';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FDFD),
+      backgroundColor: AppColors.tealWhite,
       appBar: AppBar(
         title: Text(context.t('Tự động đọc thông báo ngân hàng')),
         backgroundColor: AppColors.primary,

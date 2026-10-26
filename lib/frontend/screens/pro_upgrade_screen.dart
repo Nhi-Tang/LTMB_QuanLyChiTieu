@@ -10,9 +10,8 @@ import 'vietqr_payment_screen.dart';
 import '../utils/app_language.dart';
 
 class ProUpgradeScreen extends StatefulWidget {
-  final String selectedLanguage;
 
-  const ProUpgradeScreen({super.key, this.selectedLanguage = 'Tiếng Việt'});
+  const ProUpgradeScreen({super.key});
 
   @override
   State<ProUpgradeScreen> createState() => _ProUpgradeScreenState();

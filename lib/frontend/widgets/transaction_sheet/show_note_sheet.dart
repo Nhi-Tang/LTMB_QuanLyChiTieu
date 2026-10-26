@@ -9,7 +9,6 @@ Future<String?> showNoteSheet({
   required BuildContext context,
   required String currentNote,
   String? category,
-  String selectedLanguage = 'Tiếng Việt',
 }) async {
   return await showModalBottomSheet<String>(
     context: context,
@@ -18,7 +17,6 @@ Future<String?> showNoteSheet({
     builder: (ctx) => _NoteSheetWidget(
       currentNote: currentNote,
       category: category,
-      selectedLanguage: selectedLanguage,
     ),
   );
 }
@@ -26,12 +24,10 @@ Future<String?> showNoteSheet({
 class _NoteSheetWidget extends StatefulWidget {
   final String currentNote;
   final String? category;
-  final String selectedLanguage;
 
   const _NoteSheetWidget({
     required this.currentNote,
     this.category,
-    required this.selectedLanguage,
   });
 
   @override
@@ -107,9 +103,9 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
-          color: Color(0xFFF5FDFD),
+          color: AppColors.tealWhite,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border(top: BorderSide(color: Color(0xFFCCF7F7), width: 1.5)),
+          border: Border(top: BorderSide(color: AppColors.tealPale, width: 1.5)),
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -163,11 +159,11 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                   contentPadding: const EdgeInsets.all(14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
+                    borderSide: const BorderSide(color: AppColors.tealPale),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
+                    borderSide: const BorderSide(color: AppColors.tealPale),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -190,7 +186,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                   children: _recentNotes.map((note) {
                     return ActionChip(
                       backgroundColor: Colors.white,
-                      side: const BorderSide(color: Color(0xFFCCF7F7)),
+                      side: const BorderSide(color: AppColors.tealPale),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       label: Text(
                         note,
@@ -214,7 +210,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Color(0xFFCCF7F7)),
+                        side: const BorderSide(color: AppColors.tealPale),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {

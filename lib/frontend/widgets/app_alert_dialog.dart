@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 Future<void> showAppAlertDialog({
   required BuildContext context,
@@ -14,7 +15,7 @@ Future<void> showAppAlertDialog({
         children: [
           Icon(
             isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-            color: isSuccess ? const Color(0xFF00BFB5) : Colors.red,
+            color: isSuccess ? AppColors.teal : Colors.red,
             size: 28,
           ),
           const SizedBox(width: 10),
@@ -33,12 +34,12 @@ Future<void> showAppAlertDialog({
       actions: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSuccess ? const Color(0xFF00BFB5) : Colors.red,
-            foregroundColor: isSuccess ? const Color(0xFF00463E) : Colors.white,
+            backgroundColor: isSuccess ? AppColors.teal : Colors.red,
+            foregroundColor: isSuccess ? AppColors.tealDark : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: () => Navigator.pop(ctx),
-          child: Text('OK', style: TextStyle(color: isSuccess ? const Color(0xFF00463E) : Colors.white, fontWeight: FontWeight.bold)),
+          child: Text('OK', style: TextStyle(color: isSuccess ? AppColors.tealDark : Colors.white, fontWeight: FontWeight.bold)),
         ),
       ],
     ),
