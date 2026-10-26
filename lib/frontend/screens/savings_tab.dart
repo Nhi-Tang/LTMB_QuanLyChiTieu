@@ -214,7 +214,7 @@ class _SavingsTabState extends State<SavingsTab> {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accentBeigy,
-                  foregroundColor: const Color(0xFF5D4222),
+                  foregroundColor: const Color(0xFF00463E),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
@@ -234,7 +234,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 ),
                 label: Text(
                   AppTranslations.tr(lang, 'create_goal'),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
                 ),
               ),
             ],

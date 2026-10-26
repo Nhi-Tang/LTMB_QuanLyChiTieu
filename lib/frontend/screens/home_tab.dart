@@ -416,7 +416,7 @@ class _HomeTabState extends State<HomeTab> {
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.85),
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFECE7DB)),
+                          border: Border.all(color: const Color(0xFFCCF7F7)),
                         ),
                         child: Stack(
                           alignment: Alignment.center,
@@ -535,7 +535,7 @@ class _HomeTabState extends State<HomeTab> {
                                       style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
-                                        color: Color(0xFF5D4222),
+                                        color: Color(0xFF00463E),
                                       ),
                                     ),
                                     MoneyText(
@@ -564,7 +564,7 @@ class _HomeTabState extends State<HomeTab> {
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.75),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFF0E2CD)),
+                            border: Border.all(color: const Color(0xFFCCF7F7)),
                           ),
                           child: Row(
                             children: [
@@ -586,7 +586,7 @@ class _HomeTabState extends State<HomeTab> {
                                       style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
-                                        color: Color(0xFF5D4222),
+                                        color: Color(0xFF00463E),
                                       ),
                                     ),
                                     MoneyText(
@@ -661,7 +661,7 @@ class _HomeTabState extends State<HomeTab> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFECE7DB)),
+                      border: Border.all(color: const Color(0xFFCCF7F7)),
                     ),
                     child: Column(
                       children: budgetStatuses.take(2).map((s) {
@@ -740,7 +740,7 @@ class _HomeTabState extends State<HomeTab> {
                                   child: LinearProgressIndicator(
                                     value: (pct / 100.0).clamp(0.0, 1.0),
                                     minHeight: 8,
-                                    backgroundColor: const Color(0xFFF2EFE6),
+                                    backgroundColor: const Color(0xFFE6FBFB),
                                     valueColor: AlwaysStoppedAnimation<Color>(barColor),
                                   ),
                                 ),
@@ -825,7 +825,7 @@ class _HomeTabState extends State<HomeTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFECE7DB)),
+                    border: Border.all(color: const Color(0xFFCCF7F7)),
                   ),
                   child: Material(
                     color: Colors.transparent,
@@ -835,7 +835,7 @@ class _HomeTabState extends State<HomeTab> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: widget.transactions.take(5).length,
-                    separatorBuilder: (ctx, i) => const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+                    separatorBuilder: (ctx, i) => const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
                     itemBuilder: (ctx, index) {
                       final item = widget.transactions[index];
 

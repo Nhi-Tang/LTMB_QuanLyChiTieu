@@ -1046,7 +1046,7 @@ class DonutChartPainter extends CustomPainter {
       ..strokeCap = StrokeCap.butt;
 
     if (percentages.isEmpty || percentages.fold(0.0, (a, b) => a + b) == 0) {
-      paint.color = const Color(0xFFE8E5D8);
+      paint.color = const Color(0xFFE6FBFB);
       canvas.drawCircle(center, radius, paint);
       return;
     }
@@ -1106,7 +1106,7 @@ class StackedBarChartPainter extends CustomPainter {
       final chartHeight = size.height - 28;
 
       // Draw light background column
-      final bgPaint = Paint()..color = const Color(0xFFF5F3EC);
+      final bgPaint = Paint()..color = const Color(0xFFF5FDFD);
       final RRect bgRect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, 0, barWidth, chartHeight),
         const Radius.circular(6),
