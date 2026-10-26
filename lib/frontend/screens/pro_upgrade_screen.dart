@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/asset_icon.dart';
 import '../../backend/services/pro_service.dart';
 import '../../core/constants/pricing.dart';
 import '../theme/app_colors.dart';
@@ -152,22 +153,22 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 ),
                 const SizedBox(height: 12),
                 _buildBenefitItem(
-                  icon: Icons.menu_book_rounded,
+                  icon: 'ui_sach',
                   title: AppTranslations.tr(lang, 'benefit_1_title'),
                   subtitle: AppTranslations.tr(lang, 'benefit_1_sub'),
                 ),
                 _buildBenefitItem(
-                  icon: Icons.table_chart_rounded,
+                  icon: 'ui_tai_xuong',
                   title: AppTranslations.tr(lang, 'benefit_2_title'),
                   subtitle: AppTranslations.tr(lang, 'benefit_2_sub'),
                 ),
                 _buildBenefitItem(
-                  icon: Icons.notifications_active_rounded,
+                  icon: 'ui_chuong_thong_bao',
                   title: AppTranslations.tr(lang, 'benefit_3_title'),
                   subtitle: AppTranslations.tr(lang, 'benefit_3_sub'),
                 ),
                 _buildBenefitItem(
-                  icon: Icons.cloud_sync_rounded,
+                  icon: 'ui_dong_bo',
                   title: AppTranslations.tr(lang, 'benefit_4_title'),
                   subtitle: AppTranslations.tr(lang, 'benefit_4_sub'),
                 ),
@@ -266,20 +267,12 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
     );
   }
 
-  Widget _buildBenefitItem({required IconData icon, required String title, required String subtitle}) {
+  Widget _buildBenefitItem({required String icon, required String title, required String subtitle}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Icon(icon, color: AppColors.primary, size: 22),
-          ),
+          AssetIcon(icon, size: 44),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

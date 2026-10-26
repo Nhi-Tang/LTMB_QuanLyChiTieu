@@ -7,6 +7,7 @@ import '../../backend/services/sync_service.dart';
 import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../backend/services/ledger_repository.dart';
+import '../../core/widgets/asset_icon.dart';
 import '../../core/widgets/settings_tile.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -385,7 +386,10 @@ class _ProfileTabState extends State<ProfileTab> {
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                         labelText: AppTranslations.tr(lang, 'full_name'),
-                        prefixIcon: Icon(Icons.person, color: accentBeige),
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: AssetIcon('tab_ca_nhan', size: 26),
+                        ),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ và tên') : null,
@@ -396,7 +400,10 @@ class _ProfileTabState extends State<ProfileTab> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: AppTranslations.tr(lang, 'email_or_phone'),
-                        prefixIcon: Icon(Icons.email, color: accentBeige),
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: AssetIcon('ui_thu', size: 26),
+                        ),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email / SĐT') : null,
@@ -492,7 +499,7 @@ class _ProfileTabState extends State<ProfileTab> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
               children: [
-                Icon(Icons.menu_book_rounded, color: darkBeige),
+                const AssetIcon('ui_sach', size: 28),
                 SizedBox(width: 8),
                 Text(context.t('Thêm sổ sách mới'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ],
@@ -625,7 +632,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       final isSel = _activeLedgerId == id;
 
                       return ListTile(
-                        leading: Icon(Icons.menu_book_rounded, color: accentBeige),
+                        leading: const AssetIcon('ui_sach'),
                         title: Text(
                           name,
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -990,7 +997,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.workspace_premium_rounded, color: Color(0xFFF57C00), size: 36),
+                      const AssetIcon('ui_ngoi_sao', size: 40),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -1036,7 +1043,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.workspace_premium_rounded, color: AppColors.tealDark, size: 36),
+                      const AssetIcon('ui_ngoi_sao', size: 40),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -1088,7 +1095,7 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Icon(Icons.person_outline_rounded, color: accentBeige),
+                leading: const AssetIcon('tab_ca_nhan'),
                 title: Text(AppTranslations.tr(lang, 'personal_info'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: Text('(${widget.currentUser.name})', style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.edit_outlined, color: accentBeige),
@@ -1105,7 +1112,7 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Icon(Icons.mark_email_unread_outlined, color: accentBeige),
+                leading: const AssetIcon('ui_thu'),
                 title: Row(
                   children: [
                     Expanded(
@@ -1136,7 +1143,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
-                leading: Icon(Icons.notifications_active_outlined, color: accentBeige),
+                leading: const AssetIcon('ui_chuong_thong_bao'),
                 title: Row(
                   children: [
                     Expanded(
@@ -1187,7 +1194,7 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Icon(Icons.menu_book_rounded, color: accentBeige),
+                leading: const AssetIcon('ui_sach'),
                 title: Text(AppTranslations.tr(lang, 'ledger_book'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: Text(_activeLedgerName, style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
@@ -1195,7 +1202,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
-                leading: Icon(Icons.category_outlined, color: accentBeige),
+                leading: const AssetIcon('cat_tat_ca'),
                 title: Text(AppTranslations.tr(lang, 'categories_manager'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: Text(AppTranslations.tr(lang, 'categories_count_subtitle'), style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
@@ -1203,7 +1210,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
-                leading: Icon(Icons.file_download_outlined, color: accentBeige),
+                leading: const AssetIcon('ui_tai_xuong'),
                 title: Row(
                   children: [
                     Expanded(
@@ -1239,7 +1246,7 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Icon(Icons.language_rounded, color: accentBeige),
+                leading: const AssetIcon('cat_ngon_ngu'),
                 title: Text(AppTranslations.tr(lang, 'language'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: Text(context.lang, style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
@@ -1247,7 +1254,12 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
-                leading: Icon(Icons.dark_mode_outlined, color: accentBeige),
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: const BoxDecoration(color: Color(0xFFFFFDF8), shape: BoxShape.circle),
+                  child: const Icon(Icons.dark_mode_outlined, color: Color(0xFF2E2E2E), size: 20),
+                ),
                 title: Text(context.t('Giao diện'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: Text(context.t(_themeModeLabels[AppTheme.instance.value]!), style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
@@ -1255,7 +1267,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SwitchListTile(
-                secondary: Icon(Icons.notifications_active_outlined, color: accentBeige),
+                secondary: const AssetIcon('ui_loa'),
                 title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(AppTranslations.tr(lang, 'reminder_subtitle'), style: TextStyle(fontSize: 12, color: AppColors.grey500)),
                 value: _dailyReminderEnabled,
@@ -1266,7 +1278,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SwitchListTile(
-                secondary: Icon(Icons.pie_chart_outline_rounded, color: accentBeige),
+                secondary: const AssetIcon('tab_bao_cao'),
                 title: Text(AppTranslations.tr(lang, 'budget_alerts_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(AppTranslations.tr(lang, 'budget_alerts_subtitle'), style: TextStyle(fontSize: 12, color: AppColors.grey500)),
                 value: _budgetAlertsEnabled,
@@ -1288,7 +1300,7 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Icon(Icons.cloud_sync_rounded, color: accentBeige),
+                leading: const AssetIcon('ui_dong_bo'),
                 title: Text(AppTranslations.tr(lang, 'sync_status_title'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: (() {
                   final translatedStatus = AppTranslations.tr(lang, 'sync_state_$_syncStateKey');
@@ -1320,14 +1332,7 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
-                ),
+                leading: const AssetIcon('ui_thung_rac'),
                 title: Text(AppTranslations.tr(lang, 'delete_all_data'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 subtitle: Text(AppTranslations.tr(lang, 'delete_all_data_sub'), style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
@@ -1344,21 +1349,21 @@ class _ProfileTabState extends State<ProfileTab> {
           SettingsTileGroup(
             children: [
               SettingsTile(
-                leading: Icon(Icons.star_rate_rounded, color: accentBeige),
+                leading: const AssetIcon('ui_ngoi_sao'),
                 title: Text(AppTranslations.tr(lang, 'rate_app'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showRatingDialog,
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
-                leading: Icon(Icons.headset_mic_outlined, color: accentBeige),
+                leading: const AssetIcon('ui_micro'),
                 title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showSupportDialog,
               ),
               Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
-                leading: Icon(Icons.info_outline_rounded, color: accentBeige),
+                leading: const AssetIcon('ui_thong_tin'),
                 title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: Text('v1.0.0 (Pro Ready)', style: TextStyle(fontSize: 13, color: AppColors.grey500, fontWeight: FontWeight.bold)),
               ),
@@ -1374,11 +1379,9 @@ class _ProfileTabState extends State<ProfileTab> {
             children: [
               SettingsTile(
                 leading: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(color: Colors.red.shade50, shape: BoxShape.circle),
                   child: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
                 ),
                 title: Text(
