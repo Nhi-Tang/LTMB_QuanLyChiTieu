@@ -804,11 +804,11 @@ class _HomeTabState extends State<HomeTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFECE7DB)),
+                    border: Border.all(color: const Color(0xFFCCF7F7)),
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.receipt_long_rounded, size: 48, color: Color(0xFFE5D3AF)),
+                      const Icon(Icons.receipt_long_rounded, size: 48, color: Color(0xFF66EBE5)),
                       const SizedBox(height: 8),
                       Text(
                         AppTranslations.tr(lang, 'no_recent_transactions'),

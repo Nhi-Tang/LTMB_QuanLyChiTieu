@@ -11,8 +11,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  static const Color primaryBeige = Color(0xFFE5D3AF);
-  static const Color themeColor = Color(0xFFFCF1D0);
+  static const Color primaryBeige = Color(0xFF00BFB5);
+  static const Color themeColor = Color(0xFFCCF7F7);
 
   bool _isLogin = true;
 
@@ -150,7 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryBeige,
-                  foregroundColor: const Color(0xFF5D4222),
+                  foregroundColor: const Color(0xFF00463E),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: isLoading
@@ -208,11 +208,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF5D4222)),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF00463E)),
                       )
                     : Text(
                         step == 1 ? context.t('TIẾP TỤC') : context.t('CẬP NHẬT MẬT KHẨU'),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
                       ),
               ),
             ],
@@ -580,7 +580,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: themeColor,
-                            foregroundColor: const Color(0xFF5D4222),
+                            foregroundColor: const Color(0xFF00463E),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -592,7 +592,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                              color: Color(0xFF5D4222),
+                              color: Color(0xFF00463E),
                               strokeWidth: 2,
                             ),
                           )
@@ -601,7 +601,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF5D4222),
+                              color: Color(0xFF00463E),
                             ),
                           ),
                         ),
