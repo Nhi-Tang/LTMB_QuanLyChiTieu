@@ -14,6 +14,12 @@ import 'sync_service.dart';
 import '../../frontend/utils/app_language.dart';
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  /// Thông báo cần hiện ở màn đăng nhập sau khi app tự đăng xuất (vd. tài khoản bị khóa).
+  /// AuthScreen đọc rồi xóa.
+  static String? pendingNotice;
+
+  static String get lockedMessage => AppLanguage.instance.t('Tài khoản của bạn đã bị khóa bởi Quản trị viên.');
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
@@ -56,6 +62,10 @@ class AuthService {
 
       final idToken = await getIdToken(forceRefresh: true);
       UserModel localUser = await _syncWithBackendOrLocal(firebaseUser, idToken, 'google.com');
+      if (!localUser.isActive) {
+        await _signOutLocked();
+        throw Exception(lockedMessage);
+      }
       return localUser;
     } catch (e) {
       throw Exception(_mapFirebaseErrorToVietnamese(e.toString()));
@@ -89,7 +99,12 @@ class AuthService {
       if (user == null) throw Exception(AppLanguage.instance.t('Đăng nhập thất bại.'));
 
       final idToken = await getIdToken(forceRefresh: true);
-      return await _syncWithBackendOrLocal(user, idToken, 'password');
+      final localUser = await _syncWithBackendOrLocal(user, idToken, 'password');
+      if (!localUser.isActive) {
+        await _signOutLocked();
+        throw Exception(lockedMessage);
+      }
+      return localUser;
     } catch (e) {
       throw Exception(_mapFirebaseErrorToVietnamese(e.toString()));
     }
@@ -139,8 +154,17 @@ class AuthService {
       final provider = firebaseUser.providerData.isNotEmpty 
           ? firebaseUser.providerData.first.providerId 
           : 'password';
-      await _syncWithBackendOrLocal(firebaseUser, idToken, provider);
+      final localUser = await _syncWithBackendOrLocal(firebaseUser, idToken, provider);
+      if (!localUser.isActive) await _signOutLocked();
+    } on FirebaseAuthException catch (e) {
+      // Admin khóa tài khoản thì Firebase vô hiệu hóa user và thu hồi token của phiên đang mở
+      if (e.code == 'user-disabled' || e.code == 'user-token-expired') await _signOutLocked();
     } catch (_) {}
+  }
+
+  Future<void> _signOutLocked() async {
+    pendingNotice = lockedMessage;
+    await signOut();
   }
 
   Future<UserModel> _syncWithBackendOrLocal(User firebaseUser, String? idToken, String provider) async {
@@ -180,6 +204,9 @@ class AuthService {
       if (doc.exists) {
         final data = doc.data()!;
         final cloudPlan = data['plan'] as String? ?? 'free';
+        // isActive do Admin đặt qua backend; chỉ đọc, không ghi đè từ máy người dùng
+        final cloudActive = data['isActive'];
+        if (cloudActive is bool) userModel = userModel.copyWith(isActive: cloudActive);
         final cloudExpiry = data['proExpiredAt'] as String?;
         if (cloudPlan == 'pro') {
           userModel = userModel.copyWith(plan: 'pro', proExpiredAt: cloudExpiry);
@@ -203,8 +230,7 @@ class AuthService {
       await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
         'name': userModel.name,
         'email': userModel.email,
-        // role / plan / proExpiredAt / trialUsed do backend quản lý (firestore.rules chặn client ghi)
-        'isActive': userModel.isActive,
+        // role / plan / proExpiredAt / trialUsed / isActive do backend quản lý (firestore.rules chặn client ghi)
         'createdAt': userModel.createdAt,
         'photoUrl': userModel.photoUrl,
         'provider': userModel.provider,
@@ -256,7 +282,7 @@ class AuthService {
     } else if (error.contains('popup-closed-by-user') || error.contains('canceled')) {
       return AppLanguage.instance.t('Bạn đã hủy quá trình đăng nhập.');
     } else if (error.contains('user-disabled')) {
-      return AppLanguage.instance.t('Tài khoản này đã bị vô hiệu hóa.');
+      return lockedMessage;
     } else if (error.contains('invalid-credential') || error.contains('wrong-password') || error.contains('user-not-found') || error.contains('invalid-email')) {
       return AppLanguage.instance.t('Email/SĐT hoặc mật khẩu không chính xác.');
     } else if (error.contains('email-already-in-use')) {

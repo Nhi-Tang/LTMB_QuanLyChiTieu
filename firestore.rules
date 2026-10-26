@@ -18,7 +18,8 @@ service cloud.firestore {
 
     // Các trường chỉ backend (Admin SDK) được ghi
     function serverFields() {
-      return ['role', 'plan', 'planType', 'planSource', 'proExpiredAt', 'trialUsed'];
+      // isActive: Admin khóa/mở qua backend (/admin/users/{uid}/active), người dùng không tự mở khóa
+      return ['role', 'plan', 'planType', 'planSource', 'proExpiredAt', 'trialUsed', 'isActive'];
     }
 
     // Dữ liệu đồng bộ từ SQLite luôn có updatedAt dạng epoch millis
