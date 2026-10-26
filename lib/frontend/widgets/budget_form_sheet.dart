@@ -6,6 +6,7 @@ import '../../backend/services/category_repository.dart';
 import '../../core/utils/money_input_formatter.dart';
 import '../../core/widgets/category_icon.dart';
 import '../utils/app_language.dart';
+import '../theme/app_colors.dart';
 
 class BudgetFormSheet extends StatefulWidget {
   final String ledgerId;
@@ -189,7 +190,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
     );
 
     return Material(
-      color: const Color(0xFFF5FDFD),
+      color: AppColors.tealWhite,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       clipBehavior: Clip.antiAlias,
       child: Container(
@@ -208,7 +209,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00463E).withValues(alpha: 0.2),
+                    color: AppColors.tealDark.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -224,11 +225,11 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF00463E),
+                      color: AppColors.tealDark,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Color(0xFF00463E)),
+                    icon: const Icon(Icons.close_rounded, color: AppColors.tealDark),
                     onPressed: () => Navigator.pop(context),
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
@@ -243,11 +244,11 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 children: [
                   Text(
                     context.t('Chọn danh mục ngân sách'),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                   ),
                   Text(
                     _selectedCategory != null ? context.tCategory(_selectedCategory!) : context.t('Tổng ngân sách'),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF00D1CC)),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.tealBright),
                   ),
                 ],
               ),
@@ -266,26 +267,26 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                               width: double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
-                                color: _selectedCategory == null ? const Color(0xFFCCF7F7) : Colors.white,
+                                color: _selectedCategory == null ? AppColors.tealPale : Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: _selectedCategory == null ? const Color(0xFF00D1CC) : const Color(0xFFCCF7F7),
+                                  color: _selectedCategory == null ? AppColors.tealBright : AppColors.tealPale,
                                   width: _selectedCategory == null ? 1.5 : 1,
                                 ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.pie_chart_outline_rounded, color: Color(0xFF00463E), size: 22),
+                                  const Icon(Icons.pie_chart_outline_rounded, color: AppColors.tealDark, size: 22),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       context.t('Tổng ngân sách tháng (Toàn bộ chi tiêu)'),
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   if (_selectedCategory == null)
-                                    const Icon(Icons.check_circle_rounded, color: Color(0xFF00463E), size: 18),
+                                    const Icon(Icons.check_circle_rounded, color: AppColors.tealDark, size: 18),
                                 ],
                               ),
                             ),
@@ -317,10 +318,10 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFFCCF7F7) : Colors.white,
+                                    color: isSelected ? AppColors.tealPale : Colors.white,
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
-                                      color: isSelected ? const Color(0xFF00D1CC) : const Color(0xFFCCF7F7),
+                                      color: isSelected ? AppColors.tealBright : AppColors.tealPale,
                                       width: isSelected ? 1.5 : 1,
                                     ),
                                   ),
@@ -337,7 +338,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                            color: const Color(0xFF00463E),
+                                            color: AppColors.tealDark,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -356,7 +357,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
               // Amount Input
               Text(
                 context.t('Hạn mức (VNĐ)'),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -389,14 +390,14 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
               SwitchListTile(
                 title: Text(
                   context.t('Ngân sách định kỳ'),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                 ),
                 subtitle: Text(
                   context.t('Áp dụng tự động cho mọi tháng'),
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 value: _isRecurring,
-                activeThumbColor: const Color(0xFF00463E),
+                activeThumbColor: AppColors.tealDark,
                 onChanged: (val) {
                   setState(() {
                     _isRecurring = val;
@@ -412,8 +413,8 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00463E),
-                    foregroundColor: const Color(0xFFCCF7F7),
+                    backgroundColor: AppColors.tealDark,
+                    foregroundColor: AppColors.tealPale,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

@@ -6,15 +6,14 @@ import '../utils/app_translations.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/budget_form_sheet.dart';
 import '../utils/app_language.dart';
+import '../theme/app_colors.dart';
 
 class BudgetsScreen extends StatefulWidget {
   final String ledgerId;
-  final String selectedLanguage;
 
   const BudgetsScreen({
     super.key,
     this.ledgerId = 'default_ledger',
-    this.selectedLanguage = 'Tiếng Việt',
   });
 
   @override
@@ -121,9 +120,9 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FDFD),
+      backgroundColor: AppColors.tealWhite,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFCCF7F7),
+        backgroundColor: AppColors.tealPale,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -131,11 +130,11 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF00463E),
+            color: AppColors.tealDark,
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF00463E)),
+        iconTheme: const IconThemeData(color: AppColors.tealDark),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded, size: 28),
@@ -148,14 +147,14 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           // Month Selector Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            color: const Color(0xFFCCF7F7).withValues(alpha: 0.5),
+            color: AppColors.tealPale.withValues(alpha: 0.5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     context.t('Tháng chi tiêu'),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: const Color(0xFF00463E)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -183,7 +182,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF00463E).withValues(alpha: 0.08),
+                            color: AppColors.tealDark.withValues(alpha: 0.08),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -198,13 +197,13 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF00463E),
+                                color: AppColors.tealDark,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF00463E)),
+                          const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.tealDark),
                         ],
                       ),
                     ),
@@ -231,17 +230,17 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.pie_chart_outline_rounded, size: 64, color: Color(0xFF00BFB5)),
+                        const Icon(Icons.pie_chart_outline_rounded, size: 64, color: AppColors.teal),
                         const SizedBox(height: 16),
                         Text(
                           context.t('Chưa có ngân sách nào trong tháng này'),
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Color(0xFF00463E)),
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.tealDark),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00463E),
-                            foregroundColor: const Color(0xFFCCF7F7),
+                            backgroundColor: AppColors.tealDark,
+                            foregroundColor: AppColors.tealPale,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           ),
@@ -261,7 +260,6 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     final status = budgetStatuses[index];
                     return BudgetCard(
                       status: status,
-                      selectedLanguage: context.lang,
                       onEdit: () => _showAddEditBudget(editingBudget: status.budget),
                       onDelete: () => status.budget.id != null ? _deleteBudget(status.budget.id!) : null,
                     );

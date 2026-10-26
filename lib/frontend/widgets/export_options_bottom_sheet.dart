@@ -5,22 +5,19 @@ import '../../backend/services/export_service.dart';
 import '../utils/app_language.dart';
 
 class ExportOptionsBottomSheet extends StatefulWidget {
-  final String selectedLanguage;
   final String currentLedgerId;
 
   const ExportOptionsBottomSheet({
     super.key,
-    required this.selectedLanguage,
     required this.currentLedgerId,
   });
 
-  static Future<void> show(BuildContext context, {required String selectedLanguage, required String currentLedgerId}) async {
+  static Future<void> show(BuildContext context, {required String currentLedgerId}) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => ExportOptionsBottomSheet(
-        selectedLanguage: selectedLanguage,
         currentLedgerId: currentLedgerId,
       ),
     );
@@ -184,7 +181,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Color(0xFFF5FDFD),
+        color: AppColors.tealWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -263,7 +260,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
                   Text(context.t('Chọn Sổ sách'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: _ledgerSelection,
+                    initialValue: _ledgerSelection,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -283,7 +280,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
                   if (_ledgerSelection == 'specific') ...[
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedLedgerId,
+                      initialValue: _selectedLedgerId,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -326,25 +323,25 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
                   const SizedBox(height: 16),
 
                   Text(context.t('Định dạng file'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('Excel (.xlsx)'),
-                          value: 'xlsx',
-                          groupValue: _format,
-                          onChanged: (v) => setState(() => _format = v ?? 'xlsx'),
+                  RadioGroup<String>(
+                    groupValue: _format,
+                    onChanged: (v) => setState(() => _format = v ?? _format),
+                    child: const Row(
+                      children: [
+                        Expanded(
+                          child: RadioListTile<String>(
+                            title: Text('Excel (.xlsx)'),
+                            value: 'xlsx',
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('CSV (.csv)'),
-                          value: 'csv',
-                          groupValue: _format,
-                          onChanged: (v) => setState(() => _format = v ?? 'csv'),
+                        Expanded(
+                          child: RadioListTile<String>(
+                            title: Text('CSV (.csv)'),
+                            value: 'csv',
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

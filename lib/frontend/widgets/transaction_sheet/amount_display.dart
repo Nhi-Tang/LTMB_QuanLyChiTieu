@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'wallet_chip.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
 class AmountDisplay extends StatelessWidget {
   final String expression;
@@ -23,7 +24,7 @@ class AmountDisplay extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFCCF7F7)),
+        border: Border.all(color: AppColors.tealPale),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -37,7 +38,7 @@ class AmountDisplay extends StatelessWidget {
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.8,
-                  color: Color(0xFF706C66),
+                  color: AppColors.textMuted,
                 ),
               ),
               const SizedBox(height: 4),
@@ -46,7 +47,7 @@ class AmountDisplay extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
-                  color: isExpense ? const Color(0xFFE53935) : const Color(0xFF43A047),
+                  color: isExpense ? AppColors.expense : AppColors.incomeLight,
                 ),
               ),
             ],

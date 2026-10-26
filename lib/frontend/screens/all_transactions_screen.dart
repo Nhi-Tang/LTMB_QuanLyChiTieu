@@ -5,15 +5,14 @@ import '../../core/widgets/money_text.dart';
 import '../../core/widgets/category_icon.dart';
 import '../utils/app_translations.dart';
 import '../utils/app_language.dart';
+import '../theme/app_colors.dart';
 
 class AllTransactionsScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
-  final String selectedLanguage;
 
   const AllTransactionsScreen({
     super.key,
     required this.transactions,
-    this.selectedLanguage = 'Tiếng Việt',
   });
 
   @override
@@ -58,7 +57,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFFF5FDFD),
+          color: AppColors.tealWhite,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -84,7 +83,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   categoryOrIconKey: item.category,
                   size: 48,
                   bgColor: isExpense ? const Color(0xFFFFEBEE) : const Color(0xFFE8F5E9),
-                  iconColor: isExpense ? const Color(0xFFC62828) : const Color(0xFF2E7D32),
+                  iconColor: isExpense ? AppColors.expenseStrong : AppColors.income,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -93,7 +92,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     children: [
                       Text(
                         item.title.isNotEmpty ? item.title : item.category,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
@@ -113,7 +112,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFCCF7F7)),
+                border: Border.all(color: AppColors.tealPale),
               ),
               child: Column(
                 children: [
@@ -127,7 +126,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: isExpense ? const Color(0xFFC62828) : const Color(0xFF2E7D32),
+                          color: isExpense ? AppColors.expenseStrong : AppColors.income,
                         ),
                       ),
                     ],
@@ -139,7 +138,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                       Text(context.t('Ngày giờ:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
                       Text(
                         formattedDateTime,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                       ),
                     ],
                   ),
@@ -153,7 +152,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: isExpense ? const Color(0xFFC62828) : const Color(0xFF2E7D32),
+                          color: isExpense ? AppColors.expenseStrong : AppColors.income,
                         ),
                       ),
                     ],
@@ -193,13 +192,13 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const accentBeige = Color(0xFFCCF7F7);
-    const darkBeige = Color(0xFF00463E);
+    const accentBeige = AppColors.tealPale;
+    const darkBeige = AppColors.tealDark;
     final lang = context.lang;
     final transactionsList = _filteredTransactions;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FDFD),
+      backgroundColor: AppColors.tealWhite,
       appBar: AppBar(
         title: Text(
           AppTranslations.tr(lang, 'recent_transactions'),
@@ -229,15 +228,15 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                           )
                         : null,
                     filled: true,
-                    fillColor: const Color(0xFFF5FDFD),
+                    fillColor: AppColors.tealWhite,
                     contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
+                      borderSide: const BorderSide(color: AppColors.tealPale),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
+                      borderSide: const BorderSide(color: AppColors.tealPale),
                     ),
                   ),
                 ),
@@ -320,14 +319,14 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFCCF7F7)),
+                            border: Border.all(color: AppColors.tealPale),
                           ),
                           child: Row(
                             children: [
                               CategoryIcon(
                                 categoryOrIconKey: item.category,
                                 size: 44,
-                                bgColor: const Color(0xFFF5FDFD),
+                                bgColor: AppColors.tealWhite,
                                 iconColor: darkBeige,
                               ),
                               const SizedBox(width: 14),
@@ -349,7 +348,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                                       '${AppTranslations.trCategory(lang, item.category)} · ${_formatDateTime(item.date)}',
                                       style: const TextStyle(
                                         fontSize: 12,
-                                        color: Color(0xFF9E9E9E),
+                                        color: AppColors.unselectedTab,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -363,7 +362,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: item.isExpense ? const Color(0xFFC62828) : const Color(0xFF2E7D32),
+                                  color: item.isExpense ? AppColors.expenseStrong : AppColors.income,
                                 ),
                               ),
                             ],

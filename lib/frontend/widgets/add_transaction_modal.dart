@@ -4,16 +4,15 @@ import '../../backend/models/transaction_model.dart';
 import '../utils/app_translations.dart';
 import 'app_alert_dialog.dart';
 import '../utils/app_language.dart';
+import '../theme/app_colors.dart';
 
 class AddTransactionModal extends StatefulWidget {
   final bool defaultExpense;
-  final String selectedLanguage;
   final Function(TransactionItem item) onSave;
 
   const AddTransactionModal({
     super.key,
     required this.defaultExpense,
-    this.selectedLanguage = 'Tiếng Việt',
     required this.onSave,
   });
 
@@ -27,7 +26,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
 
-  static const Color accentBeige = Color(0xFF66EBE5);
+  static const Color accentBeige = AppColors.tealLight;
 
   @override
   void initState() {

@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime _selectedMonth;
   late UserModel _currentUser;
   String _selectedAvatarKey = 'mousey';
-  String get _selectedLanguage => AppLanguage.instance.value;
+  String get _lang => AppLanguage.instance.value;
 
   // Transactions list
   final List<TransactionItem> _transactions = [];
@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = _selectedLanguage;
+    final lang = _lang;
 
     final navItems = [
       NotchTabItemData(
@@ -164,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 HomeTab(
                   currentUser: _currentUser,
                   selectedAvatarKey: _selectedAvatarKey,
-                  selectedLanguage: _selectedLanguage,
                   selectedMonth: _selectedMonth,
                   totalIncome: _totalIncome,
                   totalExpense: _totalExpense,
@@ -177,16 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 SavingsTab(
                   selectedAvatarKey: _selectedAvatarKey,
                   userName: _currentUser.name,
-                  selectedLanguage: _selectedLanguage,
                 ),
                 ReportsTab(
                   transactions: _transactions,
-                  selectedLanguage: _selectedLanguage,
                 ),
                 ProfileTab(
                   currentUser: _currentUser,
                   selectedAvatarKey: _selectedAvatarKey,
-                  selectedLanguage: _selectedLanguage,
                   onUserUpdated: (updatedUser) {
                     setState(() {
                       _currentUser = updatedUser;

@@ -9,12 +9,10 @@ import '../utils/app_language.dart';
 
 class ReportsTab extends StatefulWidget {
   final List<TransactionItem> transactions;
-  final String selectedLanguage;
 
   const ReportsTab({
     super.key,
     required this.transactions,
-    this.selectedLanguage = 'Tiếng Việt',
   });
 
   @override
@@ -28,18 +26,11 @@ class _ReportsTabState extends State<ReportsTab> {
   bool _showAllCategories = false;
   int _trendMonthRange = 6; // 3t, 6t, 12t, 24t
 
-  @override
-  void didUpdateWidget(covariant ReportsTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
-      setState(() {});
-    }
-  }
 
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'Ăn uống':
-        return const Color(0xFFE53935);
+        return AppColors.expense;
       case 'Hóa đơn':
         return const Color(0xFF78909C);
       case 'Di chuyển':
@@ -74,7 +65,7 @@ class _ReportsTabState extends State<ReportsTab> {
       case 'Tiền Nợ':
         return const Color(0xFFD32F2F);
       case 'Lương':
-        return const Color(0xFF43A047);
+        return AppColors.incomeLight;
       case 'Thưởng':
         return const Color(0xFF00ACC1);
       case 'Đầu tư':
@@ -214,7 +205,7 @@ class _ReportsTabState extends State<ReportsTab> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: const Color(0xFF66EBE5),
+              color: AppColors.tealLight,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -239,7 +230,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF66EBE5)),
+                      border: Border.all(color: AppColors.tealLight),
                     ),
                     child: Row(
                       children: [
@@ -251,7 +242,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF222222),
+                              color: AppColors.ink,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -271,10 +262,10 @@ class _ReportsTabState extends State<ReportsTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFCCF7F7) : Colors.white,
+                      color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: _selectedCategoryFilter != 'Tất cả' ? const Color(0xFFCCF7F7) : const Color(0xFFF2F2F2),
+                        color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : AppColors.background,
                       ),
                     ),
                     child: Row(
@@ -289,7 +280,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF222222),
+                              color: AppColors.ink,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -329,7 +320,7 @@ class _ReportsTabState extends State<ReportsTab> {
             gradient: const LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [Color(0xFF00D1CC), Color(0xFF33DEBF)],
+              colors: [AppColors.tealBright, AppColors.mint],
             ),
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
@@ -420,7 +411,7 @@ class _ReportsTabState extends State<ReportsTab> {
             fontSize: 13,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.0,
-            color: Color(0xFF706C66),
+            color: AppColors.textMuted,
           ),
         ),
 
@@ -433,7 +424,7 @@ class _ReportsTabState extends State<ReportsTab> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF66EBE5)),
+            border: Border.all(color: AppColors.tealLight),
           ),
           child: categories.isEmpty
               ? SizedBox(
@@ -447,7 +438,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             ? Icons.account_balance_wallet_outlined
                             : Icons.pie_chart_outline_rounded,
                         size: 52,
-                        color: const Color(0xFF66EBE5),
+                        color: AppColors.tealLight,
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -455,7 +446,7 @@ class _ReportsTabState extends State<ReportsTab> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF222222),
+                          color: AppColors.ink,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -518,7 +509,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                               style: const TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w600,
-                                                color: Color(0xFF222222),
+                                                color: AppColors.ink,
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -533,7 +524,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                         style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xFF222222),
+                                          color: AppColors.ink,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -548,7 +539,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
 
                     const SizedBox(height: 20),
-                    const Divider(color: Color(0xFF66EBE5), height: 1),
+                    const Divider(color: AppColors.tealLight, height: 1),
                     const SizedBox(height: 12),
 
                     // Category List with Progress Bars
@@ -575,7 +566,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                         width: 38,
                                         height: 38,
                                         decoration: const BoxDecoration(
-                                          color: Color(0xFF66EBE5),
+                                          color: AppColors.tealLight,
                                           shape: BoxShape.circle,
                                         ),
                                         child: Center(
@@ -592,7 +583,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                           style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF222222),
+                                            color: AppColors.ink,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -610,7 +601,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF222222),
+                                      color: AppColors.ink,
                                     ),
                                   ),
                                 ),
@@ -625,7 +616,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     child: LinearProgressIndicator(
                                       value: (pct / 100.0).clamp(0.0, 1.0),
                                       minHeight: 10,
-                                      backgroundColor: const Color(0xFFCCF7F7),
+                                      backgroundColor: AppColors.tealPale,
                                       valueColor: AlwaysStoppedAnimation<Color>(catColor),
                                     ),
                                   ),
@@ -639,7 +630,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF706C66),
+                                      color: AppColors.textMuted,
                                     ),
                                   ),
                                 ),
@@ -691,7 +682,7 @@ class _ReportsTabState extends State<ReportsTab> {
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
-                  color: Color(0xFF706C66),
+                  color: AppColors.textMuted,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -699,7 +690,7 @@ class _ReportsTabState extends State<ReportsTab> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF66EBE5),
+                color: AppColors.tealLight,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -725,7 +716,7 @@ class _ReportsTabState extends State<ReportsTab> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF66EBE5)),
+            border: Border.all(color: AppColors.tealLight),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -744,7 +735,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w900,
-                            color: Color(0xFF222222),
+                            color: AppColors.ink,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -772,7 +763,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           margin: const EdgeInsets.only(left: 3),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isSel ? const Color(0xFF222222) : const Color(0xFF66EBE5),
+                            color: isSel ? AppColors.ink : AppColors.tealLight,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -851,7 +842,7 @@ class _ReportsTabState extends State<ReportsTab> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
-              color: isSel ? const Color(0xFF222222) : const Color(0xFF706C66),
+              color: isSel ? AppColors.ink : AppColors.textMuted,
             ),
           ),
         ),
@@ -906,7 +897,7 @@ class _ReportsTabState extends State<ReportsTab> {
                         AppTranslations.tr(lang, key),
                         style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
                       ),
-                      trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF00BFB5)) : null,
+                      trailing: isSel ? const Icon(Icons.check_circle, color: AppColors.teal) : null,
                       onTap: () {
                         setState(() => _timeRange = key);
                         Navigator.pop(ctx);
@@ -1006,10 +997,10 @@ class _ReportsTabState extends State<ReportsTab> {
                           AppTranslations.trCategory(lang, cat),
                           style: TextStyle(
                             fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                            color: isSel ? const Color(0xFF00D1CC) : Colors.black87,
+                            color: isSel ? AppColors.tealBright : Colors.black87,
                           ),
                         ),
-                        trailing: isSel ? const Icon(Icons.check_circle, color: Color(0xFF00BFB5)) : null,
+                        trailing: isSel ? const Icon(Icons.check_circle, color: AppColors.teal) : null,
                         onTap: () {
                           setState(() {
                             _selectedCategoryFilter = cat;
@@ -1046,7 +1037,7 @@ class DonutChartPainter extends CustomPainter {
       ..strokeCap = StrokeCap.butt;
 
     if (percentages.isEmpty || percentages.fold(0.0, (a, b) => a + b) == 0) {
-      paint.color = const Color(0xFFE6FBFB);
+      paint.color = AppColors.tealMist;
       canvas.drawCircle(center, radius, paint);
       return;
     }
@@ -1106,7 +1097,7 @@ class StackedBarChartPainter extends CustomPainter {
       final chartHeight = size.height - 28;
 
       // Draw light background column
-      final bgPaint = Paint()..color = const Color(0xFFF5FDFD);
+      final bgPaint = Paint()..color = AppColors.tealWhite;
       final RRect bgRect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, 0, barWidth, chartHeight),
         const Radius.circular(6),
@@ -1117,7 +1108,7 @@ class StackedBarChartPainter extends CustomPainter {
       final val = monthlyTotals[i];
       if (val > 0) {
         final segH = (val / maxVal) * chartHeight;
-        final segPaint = Paint()..color = const Color(0xFF66EBE5);
+        final segPaint = Paint()..color = AppColors.tealLight;
 
         final segRect = Rect.fromLTWH(x, chartHeight - segH, barWidth, segH);
         canvas.drawRect(segRect, segPaint);
@@ -1129,7 +1120,7 @@ class StackedBarChartPainter extends CustomPainter {
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF706C66),
+          color: AppColors.textMuted,
         ),
       );
       textPainter.layout();
@@ -1165,7 +1156,7 @@ class _SmallPillText extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-          color: isActive ? const Color(0xFF222222) : const Color(0xFF888480),
+          color: isActive ? AppColors.ink : const Color(0xFF888480),
         ),
       ),
     );

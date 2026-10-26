@@ -8,18 +8,15 @@ import '../../theme/app_colors.dart';
 import '../../utils/app_language.dart';
 
 class PendingInboxSheet extends StatefulWidget {
-  final String selectedLanguage;
   final VoidCallback? onTransactionsUpdated;
 
   const PendingInboxSheet({
     super.key,
-    this.selectedLanguage = 'Tiếng Việt',
     this.onTransactionsUpdated,
   });
 
   static Future<void> show(
     BuildContext context, {
-    String selectedLanguage = 'Tiếng Việt',
     VoidCallback? onTransactionsUpdated,
   }) async {
     await showModalBottomSheet(
@@ -27,7 +24,6 @@ class PendingInboxSheet extends StatefulWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => PendingInboxSheet(
-        selectedLanguage: selectedLanguage,
         onTransactionsUpdated: onTransactionsUpdated,
       ),
     );
@@ -243,7 +239,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     return Container(
       height: media.size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Color(0xFFF5FDFD),
+        color: AppColors.tealWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(

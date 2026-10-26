@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
 class DateChip extends StatelessWidget {
   final DateTime selectedDate;
@@ -27,21 +28,21 @@ class DateChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5FDFD),
+          color: AppColors.tealWhite,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF66EBE5)),
+          border: Border.all(color: AppColors.tealLight),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.calendar_today_rounded, size: 14, color: Color(0xFF00463E)),
+            const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.tealDark),
             const SizedBox(width: 4),
             Text(
               _formatDate(selectedDate),
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF00463E),
+                color: AppColors.tealDark,
               ),
             ),
           ],

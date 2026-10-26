@@ -10,13 +10,11 @@ import '../utils/app_language.dart';
 
 class AddEditSavingsGoalDialog extends StatefulWidget {
   final SavingsGoalModel? goalToEdit;
-  final String selectedLanguage;
   final VoidCallback onSaved;
 
   const AddEditSavingsGoalDialog({
     super.key,
     this.goalToEdit,
-    this.selectedLanguage = 'Tiếng Việt',
     required this.onSaved,
   });
 
@@ -86,7 +84,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
   Widget build(BuildContext context) {
     final lang = context.lang;
     final isEditing = widget.goalToEdit != null;
-    const accentPurple = Color(0xFF66EBE5);
+    const accentPurple = AppColors.tealLight;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

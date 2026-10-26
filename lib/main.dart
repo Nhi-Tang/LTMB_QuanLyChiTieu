@@ -11,6 +11,7 @@ import 'frontend/screens/auth_screen.dart';
 import 'frontend/screens/home_screen.dart';
 import 'frontend/screens/admin_management_screen.dart';
 import 'frontend/utils/app_language.dart';
+import 'frontend/theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,9 +106,9 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Color(0xFFF5FDFD),
+            backgroundColor: AppColors.tealWhite,
             body: Center(
-              child: CircularProgressIndicator(color: Color(0xFF00BFB5)),
+              child: CircularProgressIndicator(color: AppColors.teal),
             ),
           );
         }
@@ -120,9 +121,9 @@ class AuthGate extends StatelessWidget {
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
-                  backgroundColor: Color(0xFFF5FDFD),
+                  backgroundColor: AppColors.tealWhite,
                   body: Center(
-                    child: CircularProgressIndicator(color: Color(0xFF00BFB5)),
+                    child: CircularProgressIndicator(color: AppColors.teal),
                   ),
                 );
               }
