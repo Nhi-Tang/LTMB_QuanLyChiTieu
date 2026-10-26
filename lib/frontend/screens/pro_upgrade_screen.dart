@@ -87,7 +87,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
         children: [
           SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            padding: const EdgeInsets.only(bottom: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -141,123 +141,131 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                    const SizedBox(height: 24),
 
-                Text(
-                  AppTranslations.tr(lang, 'pro_benefits'),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _buildBenefitItem(
-                  icon: 'ui_sach',
-                  title: AppTranslations.tr(lang, 'benefit_1_title'),
-                  subtitle: AppTranslations.tr(lang, 'benefit_1_sub'),
-                ),
-                _buildBenefitItem(
-                  icon: 'ui_tai_xuong',
-                  title: AppTranslations.tr(lang, 'benefit_2_title'),
-                  subtitle: AppTranslations.tr(lang, 'benefit_2_sub'),
-                ),
-                _buildBenefitItem(
-                  icon: 'ui_chuong_thong_bao',
-                  title: AppTranslations.tr(lang, 'benefit_3_title'),
-                  subtitle: AppTranslations.tr(lang, 'benefit_3_sub'),
-                ),
-                _buildBenefitItem(
-                  icon: 'ui_dong_bo',
-                  title: AppTranslations.tr(lang, 'benefit_4_title'),
-                  subtitle: AppTranslations.tr(lang, 'benefit_4_sub'),
-                ),
-                const SizedBox(height: 24),
+                    Text(
+                      AppTranslations.tr(lang, 'pro_benefits'),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildBenefitItem(
+                      icon: 'ui_sach',
+                      title: AppTranslations.tr(lang, 'benefit_1_title'),
+                      subtitle: AppTranslations.tr(lang, 'benefit_1_sub'),
+                    ),
+                    _buildBenefitItem(
+                      icon: 'ui_tai_xuong',
+                      title: AppTranslations.tr(lang, 'benefit_2_title'),
+                      subtitle: AppTranslations.tr(lang, 'benefit_2_sub'),
+                    ),
+                    _buildBenefitItem(
+                      icon: 'ui_chuong_thong_bao',
+                      title: AppTranslations.tr(lang, 'benefit_3_title'),
+                      subtitle: AppTranslations.tr(lang, 'benefit_3_sub'),
+                    ),
+                    _buildBenefitItem(
+                      icon: 'ui_dong_bo',
+                      title: AppTranslations.tr(lang, 'benefit_4_title'),
+                      subtitle: AppTranslations.tr(lang, 'benefit_4_sub'),
+                    ),
+                    const SizedBox(height: 24),
 
-                Text(
-                  AppTranslations.tr(lang, 'choose_plan'),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                PlanCard(
-                  title: AppTranslations.tr(lang, 'yearly_plan'),
-                  price: '200.000đ',
-                  period: context.t('năm'),
-                  savings: AppTranslations.tr(lang, 'yearly_saving'),
-                  isBestValue: true,
-                  bestValueLabel: AppTranslations.tr(lang, 'best_value'),
-                  isSelected: _selectedPlan == 'yearly',
-                  onTap: () => setState(() => _selectedPlan = 'yearly'),
-                ),
-                const SizedBox(height: 12),
-                PlanCard(
-                  title: AppTranslations.tr(lang, 'monthly_plan'),
-                  price: '20.000đ',
-                  period: context.t('tháng'),
-                  isSelected: _selectedPlan == 'monthly',
-                  onTap: () => setState(() => _selectedPlan = 'monthly'),
-                ),
-                const SizedBox(height: 32),
+                    Text(
+                      AppTranslations.tr(lang, 'choose_plan'),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    PlanCard(
+                      title: AppTranslations.tr(lang, 'yearly_plan'),
+                      price: '200.000đ',
+                      period: context.t('năm'),
+                      savings: AppTranslations.tr(lang, 'yearly_saving'),
+                      isBestValue: true,
+                      bestValueLabel: AppTranslations.tr(lang, 'best_value'),
+                      isSelected: _selectedPlan == 'yearly',
+                      onTap: () => setState(() => _selectedPlan = 'yearly'),
+                    ),
+                    const SizedBox(height: 12),
+                    PlanCard(
+                      title: AppTranslations.tr(lang, 'monthly_plan'),
+                      price: '20.000đ',
+                      period: context.t('tháng'),
+                      isSelected: _selectedPlan == 'monthly',
+                      onTap: () => setState(() => _selectedPlan = 'monthly'),
+                    ),
+                    const SizedBox(height: 32),
 
-                ListenableBuilder(
-                  listenable: ProService.instance,
-                  builder: (context, _) {
-                    final trialUsed = ProService.instance.trialUsed;
-                    return Column(
-                      children: [
-                        if (!trialUsed) ...[
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                    ListenableBuilder(
+                      listenable: ProService.instance,
+                      builder: (context, _) {
+                        final trialUsed = ProService.instance.trialUsed;
+                        return Column(
+                          children: [
+                            if (!trialUsed) ...[
+                              SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: AppColors.onTeal,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  onPressed: _isLoading ? null : _handleStartTrial,
+                                  child: Text(
+                                    AppTranslations.tr(lang, 'start_trial_btn'),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              onPressed: _isLoading ? null : _handleStartTrial,
-                              child: Text(
-                                AppTranslations.tr(lang, 'start_trial_btn'),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              const SizedBox(height: 12),
+                            ],
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  side: BorderSide(color: AppColors.primary, width: 1.5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                onPressed: _isLoading ? null : _handleUpgrade,
+                                child: Text(
+                                  '${AppTranslations.tr(lang, 'subscribe_now')} (${_selectedPlan == 'yearly' ? '200.000đ/${context.t('năm')}' : '20.000đ/${context.t('tháng')}'})',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: BorderSide(color: AppColors.primary, width: 1.5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            onPressed: _isLoading ? null : _handleUpgrade,
-                            child: Text(
-                              '${AppTranslations.tr(lang, 'subscribe_now')} (${_selectedPlan == 'yearly' ? '200.000đ/${context.t('năm')}' : '20.000đ/${context.t('tháng')}'})',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                          ],
+                        );
+                      },
+                    ),
+                    ],
+                  ),
                 ),
               ],
             ),
