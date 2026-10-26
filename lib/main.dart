@@ -27,12 +27,38 @@ Future<void> main() async {
 class MouseyApp extends StatelessWidget {
   const MouseyApp({super.key});
 
+  // Tỉ lệ thu nhỏ toàn bộ giao diện (1.0 = kích thước gốc)
+  static const double uiScale = 0.9;
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Mousey',
       debugShowCheckedModeBanner: false,
-      home: AuthGate(),
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final scaledSize = mq.size / uiScale;
+        return MediaQuery(
+          data: mq.copyWith(
+            size: scaledSize,
+            padding: mq.padding / uiScale,
+            viewPadding: mq.viewPadding / uiScale,
+            viewInsets: mq.viewInsets / uiScale,
+            // Không phóng to chữ theo cỡ chữ hệ thống của máy
+            textScaler: mq.textScaler.clamp(maxScaleFactor: 1.0),
+          ),
+          child: FittedBox(
+            fit: BoxFit.fill,
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: scaledSize.width,
+              height: scaledSize.height,
+              child: child,
+            ),
+          ),
+        );
+      },
+      home: const AuthGate(),
     );
   }
 }
