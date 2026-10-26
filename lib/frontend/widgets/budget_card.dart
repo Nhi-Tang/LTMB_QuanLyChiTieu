@@ -3,13 +3,13 @@ import '../../backend/services/budget_service.dart';
 import '../../core/widgets/money_text.dart';
 import '../../core/widgets/category_icon.dart';
 import '../utils/app_language.dart';
+import '../theme/app_colors.dart';
 
 class BudgetCard extends StatelessWidget {
   final BudgetStatus status;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final String selectedLanguage;
 
   const BudgetCard({
     super.key,
@@ -17,20 +17,19 @@ class BudgetCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
-    this.selectedLanguage = 'Tiếng Việt',
   });
 
   Color _getProgressColor(String level) {
     switch (level) {
       case 'exceeded':
-        return const Color(0xFFE53935); // Đỏ
+        return AppColors.expense; // Đỏ
       case 'reached':
         return const Color(0xFFF4511E); // Cam đậm
       case 'warning':
         return const Color(0xFFF57C00); // Vàng/Cam
       case 'ok':
       default:
-        return const Color(0xFF43A047); // Xanh lá
+        return AppColors.incomeLight; // Xanh lá
     }
   }
 
@@ -54,7 +53,7 @@ class BudgetCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00463E).withValues(alpha: 0.08),
+              color: AppColors.tealDark.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -80,7 +79,7 @@ class BudgetCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF00463E),
+                          color: AppColors.tealDark,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

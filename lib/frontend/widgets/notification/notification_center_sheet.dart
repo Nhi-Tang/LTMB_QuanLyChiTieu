@@ -11,20 +11,17 @@ import 'pending_inbox.dart';
 import '../../utils/app_language.dart';
 
 class NotificationCenterSheet extends StatefulWidget {
-  final String selectedLanguage;
   final String ledgerId;
   final VoidCallback? onTransactionsUpdated;
 
   const NotificationCenterSheet({
     super.key,
-    required this.selectedLanguage,
     required this.ledgerId,
     this.onTransactionsUpdated,
   });
 
   static Future<void> show(
     BuildContext context, {
-    required String selectedLanguage,
     required String ledgerId,
     VoidCallback? onTransactionsUpdated,
   }) async {
@@ -33,7 +30,6 @@ class NotificationCenterSheet extends StatefulWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => NotificationCenterSheet(
-        selectedLanguage: selectedLanguage,
         ledgerId: ledgerId,
         onTransactionsUpdated: onTransactionsUpdated,
       ),
@@ -95,7 +91,6 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       case 'pending_tx':
         PendingInboxSheet.show(
           context,
-          selectedLanguage: context.lang,
           onTransactionsUpdated: widget.onTransactionsUpdated,
         );
         break;
@@ -108,7 +103,6 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
           MaterialPageRoute(
             builder: (context) => BudgetsScreen(
               ledgerId: widget.ledgerId,
-              selectedLanguage: context.lang,
             ),
           ),
         );
@@ -206,7 +200,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
     return Container(
       height: media.size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Color(0xFFF5FDFD),
+        color: AppColors.tealWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -374,11 +368,11 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       onDismissed: (_) => _deleteNotification(notif.id),
       child: Card(
         margin: const EdgeInsets.only(bottom: 10),
-        color: notif.isRead ? Colors.white : const Color(0xFFF5FDFD),
+        color: notif.isRead ? Colors.white : AppColors.tealWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: notif.isRead ? const Color(0xFFCCF7F7) : AppColors.primary.withValues(alpha: 0.4),
+            color: notif.isRead ? AppColors.tealPale : AppColors.primary.withValues(alpha: 0.4),
             width: notif.isRead ? 1 : 1.5,
           ),
         ),

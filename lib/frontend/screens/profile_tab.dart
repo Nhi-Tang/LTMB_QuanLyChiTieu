@@ -22,7 +22,6 @@ import '../utils/app_language.dart';
 class ProfileTab extends StatefulWidget {
   final UserModel currentUser;
   final String selectedAvatarKey;
-  final String selectedLanguage;
   final Function(UserModel updatedUser) onUserUpdated;
   final Function(String newAvatarKey) onAvatarChanged;
   final Function(String newLanguage) onLanguageChanged;
@@ -32,7 +31,6 @@ class ProfileTab extends StatefulWidget {
     super.key,
     required this.currentUser,
     required this.selectedAvatarKey,
-    required this.selectedLanguage,
     required this.onUserUpdated,
     required this.onAvatarChanged,
     required this.onLanguageChanged,
@@ -53,13 +51,6 @@ class _ProfileTabState extends State<ProfileTab> {
   String? _lastSyncTimeFormatted;
   int _pendingCount = 0;
 
-  @override
-  void didUpdateWidget(covariant ProfileTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
-      setState(() {});
-    }
-  }
 
   static const Color primaryBeige = AppColors.primaryBeige;
   static const Color darkBeige = AppColors.darkBeige;
@@ -136,7 +127,7 @@ class _ProfileTabState extends State<ProfileTab> {
     if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ProUpgradeScreen(selectedLanguage: context.lang)),
+        MaterialPageRoute(builder: (context) => ProUpgradeScreen()),
       );
       return;
     }
@@ -711,8 +702,6 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showExportFileDialog() {
-    final lang = context.lang;
-
     if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
       Navigator.push(
         context,
@@ -723,7 +712,6 @@ class _ProfileTabState extends State<ProfileTab> {
 
     ExportOptionsBottomSheet.show(
       context,
-      selectedLanguage: lang,
       currentLedgerId: TransactionService.instance.currentLedgerId,
     );
   }
@@ -866,7 +854,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFCCF7F7)),
+                    border: Border.all(color: AppColors.tealPale),
                   ),
                   child: Row(
                     children: [
@@ -888,7 +876,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF222222),
+                                      color: AppColors.ink,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -915,7 +903,7 @@ class _ProfileTabState extends State<ProfileTab> {
                               widget.currentUser.email,
                               style: const TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF706C66),
+                                color: AppColors.textMuted,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -940,7 +928,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFCCF7F7), Color(0xFF66EBE5)],
+                      colors: [AppColors.tealPale, AppColors.tealLight],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -980,7 +968,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF66EBE5), Color(0xFFCCF7F7)],
+                      colors: [AppColors.tealLight, AppColors.tealPale],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -995,7 +983,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.workspace_premium_rounded, color: Color(0xFF00463E), size: 36),
+                      const Icon(Icons.workspace_premium_rounded, color: AppColors.tealDark, size: 36),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -1018,7 +1006,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00463E),
+                          backgroundColor: AppColors.tealDark,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1089,12 +1077,11 @@ class _ProfileTabState extends State<ProfileTab> {
                 onTap: () {
                   PendingInboxSheet.show(
                     context,
-                    selectedLanguage: context.lang,
                     onTransactionsUpdated: _loadPendingCount,
                   );
                 },
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
                 leading: const Icon(Icons.notifications_active_outlined, color: accentBeige),
                 title: Row(
@@ -1131,7 +1118,6 @@ class _ProfileTabState extends State<ProfileTab> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => NotificationSettingsScreen(
-                        selectedLanguage: context.lang,
                       ),
                     ),
                   );
@@ -1154,7 +1140,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showLedgerPickerSheet,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
                 leading: const Icon(Icons.category_outlined, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'categories_manager'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
@@ -1162,7 +1148,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showCategoriesManagerSheet,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
                 leading: const Icon(Icons.file_download_outlined, color: accentBeige),
                 title: Row(
@@ -1206,7 +1192,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showLanguagePickerSheet,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SwitchListTile(
                 secondary: const Icon(Icons.notifications_active_outlined, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -1217,7 +1203,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   setState(() => _dailyReminderEnabled = val);
                 },
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SwitchListTile(
                 secondary: const Icon(Icons.pie_chart_outline_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'budget_alerts_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -1302,14 +1288,14 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showRatingDialog,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
                 leading: const Icon(Icons.headset_mic_outlined, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showSupportDialog,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
+              const Divider(height: 1, indent: 56, color: AppColors.tealMist),
               SettingsTile(
                 leading: const Icon(Icons.info_outline_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),

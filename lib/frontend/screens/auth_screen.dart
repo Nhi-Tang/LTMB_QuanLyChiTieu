@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../backend/services/auth_service.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../utils/app_language.dart';
+import '../theme/app_colors.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -11,8 +12,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  static const Color primaryBeige = Color(0xFF00BFB5);
-  static const Color themeColor = Color(0xFFCCF7F7);
+  static const Color primaryBeige = AppColors.teal;
+  static const Color themeColor = AppColors.tealPale;
 
   bool _isLogin = true;
 
@@ -150,7 +151,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryBeige,
-                  foregroundColor: const Color(0xFF00463E),
+                  foregroundColor: AppColors.tealDark,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: isLoading
@@ -208,11 +209,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF00463E)),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.tealDark),
                       )
                     : Text(
                         step == 1 ? context.t('TIẾP TỤC') : context.t('CẬP NHẬT MẬT KHẨU'),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.tealDark),
                       ),
               ),
             ],
@@ -580,7 +581,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: themeColor,
-                            foregroundColor: const Color(0xFF00463E),
+                            foregroundColor: AppColors.tealDark,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -592,7 +593,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                              color: Color(0xFF00463E),
+                              color: AppColors.tealDark,
                               strokeWidth: 2,
                             ),
                           )
@@ -601,7 +602,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF00463E),
+                              color: AppColors.tealDark,
                             ),
                           ),
                         ),

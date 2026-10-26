@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
 class TransactionTypeTabs extends StatelessWidget {
   final int selectedIndex; // 0: Chi tiêu, 1: Thu nhập, 2: Chuyển khoản
@@ -17,13 +18,13 @@ class TransactionTypeTabs extends StatelessWidget {
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFCCF7F7),
+        color: AppColors.tealPale,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
         children: [
-          _buildTab(0, context.t('Chi tiêu'), Icons.arrow_downward_rounded, const Color(0xFFE53935)),
-          _buildTab(1, context.t('Thu nhập'), Icons.arrow_upward_rounded, const Color(0xFF43A047)),
+          _buildTab(0, context.t('Chi tiêu'), Icons.arrow_downward_rounded, AppColors.expense),
+          _buildTab(1, context.t('Thu nhập'), Icons.arrow_upward_rounded, AppColors.incomeLight),
           _buildTab(2, context.t('Chuyển khoản'), Icons.swap_horiz_rounded, const Color(0xFF1E88E5)),
         ],
       ),

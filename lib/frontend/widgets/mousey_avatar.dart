@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class MouseyAvatar extends StatelessWidget {
   final double size;
@@ -8,7 +9,7 @@ class MouseyAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryBeige = Color(0xFFCCF7F7);
+    const primaryBeige = AppColors.tealPale;
     return Container(
       width: size,
       height: size,
@@ -25,7 +26,7 @@ class MouseyAvatar extends StatelessWidget {
           errorBuilder: (ctx, err, stack) => CircleAvatar(
             radius: size / 2,
             backgroundColor: primaryBeige,
-            child: Icon(Icons.person, size: size * 0.6, color: const Color(0xFF00463E)),
+            child: Icon(Icons.person, size: size * 0.6, color: AppColors.tealDark),
           ),
         ),
       ),
@@ -38,7 +39,7 @@ Widget buildUserAvatar({
   required String userName,
   double size = 50,
 }) {
-  const primaryPurple = Color(0xFFCCF7F7);
+  const primaryPurple = AppColors.tealPale;
 
   if (avatarKey.isNotEmpty &&
       (avatarKey.contains('/') || avatarKey.contains('\\')) &&
@@ -94,7 +95,7 @@ Widget buildGoalIcon(String? icon, {double size = 24}) {
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (ctx, err, stack) => Icon(Icons.savings_rounded, size: size, color: const Color(0xFF00463E)),
+        errorBuilder: (ctx, err, stack) => Icon(Icons.savings_rounded, size: size, color: AppColors.tealDark),
       ),
     );
   }

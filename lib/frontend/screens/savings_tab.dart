@@ -12,13 +12,11 @@ import '../utils/app_language.dart';
 class SavingsTab extends StatefulWidget {
   final String selectedAvatarKey;
   final String userName;
-  final String selectedLanguage;
 
   const SavingsTab({
     super.key,
     required this.selectedAvatarKey,
     required this.userName,
-    this.selectedLanguage = 'Tiếng Việt',
   });
 
   @override
@@ -32,13 +30,6 @@ class _SavingsTabState extends State<SavingsTab> {
   static const Color darkBeigy = AppColors.textPrimary;
   static const Color accentBeigy = AppColors.accent;
 
-  @override
-  void didUpdateWidget(covariant SavingsTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedLanguage != widget.selectedLanguage) {
-      setState(() {});
-    }
-  }
 
   @override
   void initState() {
@@ -78,7 +69,6 @@ class _SavingsTabState extends State<SavingsTab> {
     showDialog(
       context: context,
       builder: (ctx) => AddEditSavingsGoalDialog(
-        selectedLanguage: context.lang,
         onSaved: () => _loadGoals(),
       ),
     );
@@ -101,7 +91,7 @@ class _SavingsTabState extends State<SavingsTab> {
               gradient: const LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [Color(0xFF00D1CC), Color(0xFF00BFB5)],
+                colors: [AppColors.tealBright, AppColors.teal],
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
@@ -206,7 +196,7 @@ class _SavingsTabState extends State<SavingsTab> {
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
-                    color: Color(0xFF706C66),
+                    color: AppColors.textMuted,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -214,7 +204,7 @@ class _SavingsTabState extends State<SavingsTab> {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accentBeigy,
-                  foregroundColor: const Color(0xFF00463E),
+                  foregroundColor: AppColors.tealDark,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
@@ -234,7 +224,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 ),
                 label: Text(
                   AppTranslations.tr(lang, 'create_goal'),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                 ),
               ),
             ],
@@ -252,7 +242,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: const Color(0xFFCCF7F7)),
+                        border: Border.all(color: AppColors.tealPale),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -271,7 +261,7 @@ class _SavingsTabState extends State<SavingsTab> {
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF222222),
+                              color: AppColors.ink,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -326,7 +316,6 @@ class _SavingsTabState extends State<SavingsTab> {
                               MaterialPageRoute(
                                 builder: (context) => SavingsGoalDetailScreen(
                                   goal: goal,
-                                  selectedLanguage: lang,
                                   onGoalUpdated: _loadGoals,
                                 ),
                               ),
@@ -338,7 +327,7 @@ class _SavingsTabState extends State<SavingsTab> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF66EBE5)),
+                              border: Border.all(color: AppColors.tealLight),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,7 +338,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                       width: 44,
                                       height: 44,
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFFCCF7F7),
+                                        color: AppColors.tealPale,
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
@@ -363,7 +352,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                         children: [
                                           Text(
                                             goal.name,
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 2),
@@ -396,7 +385,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     Flexible(
                                       child: MoneyText(
                                         amount: goal.currentAmount,
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF222222)),
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.ink),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -415,7 +404,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                   child: LinearProgressIndicator(
                                     value: progress.clamp(0.0, 1.0),
                                     minHeight: 10,
-                                    backgroundColor: const Color(0xFF66EBE5),
+                                    backgroundColor: AppColors.tealLight,
                                     valueColor: const AlwaysStoppedAnimation<Color>(accentBeigy),
                                   ),
                                 ),
@@ -424,7 +413,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFCCF7F7),
+                                      color: AppColors.tealPale,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(

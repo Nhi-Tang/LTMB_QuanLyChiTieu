@@ -74,7 +74,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5FDFD),
+      backgroundColor: AppColors.tealWhite,
       appBar: AppBar(
         title: Text(context.t('Hướng dẫn cấp quyền & Tối ưu pin')),
         backgroundColor: AppColors.primary,
@@ -222,7 +222,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFCCF7F7)),
+                      border: Border.all(color: AppColors.tealPale),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.05),
