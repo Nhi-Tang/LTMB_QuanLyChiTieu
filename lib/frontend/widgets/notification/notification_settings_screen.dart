@@ -93,7 +93,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     final formattedTime = '${_reminderHour.toString().padLeft(2, '0')}:${_reminderMinute.toString().padLeft(2, '0')}';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7EB),
+      backgroundColor: const Color(0xFFF5FDFD),
       appBar: AppBar(
         title: Text(context.t('Tự động đọc thông báo ngân hàng')),
         backgroundColor: AppColors.primary,

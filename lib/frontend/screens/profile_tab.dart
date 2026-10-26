@@ -866,7 +866,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFECE7DB)),
+                    border: Border.all(color: const Color(0xFFCCF7F7)),
                   ),
                   child: Row(
                     children: [
@@ -995,7 +995,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.workspace_premium_rounded, color: Color(0xFF5C3D1E), size: 36),
+                      const Icon(Icons.workspace_premium_rounded, color: Color(0xFF00463E), size: 36),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -1018,7 +1018,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5C3D1E),
+                          backgroundColor: const Color(0xFF00463E),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1094,7 +1094,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   );
                 },
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SettingsTile(
                 leading: const Icon(Icons.notifications_active_outlined, color: accentBeige),
                 title: Row(
@@ -1154,7 +1154,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showLedgerPickerSheet,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SettingsTile(
                 leading: const Icon(Icons.category_outlined, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'categories_manager'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
@@ -1162,7 +1162,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showCategoriesManagerSheet,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SettingsTile(
                 leading: const Icon(Icons.file_download_outlined, color: accentBeige),
                 title: Row(
@@ -1206,7 +1206,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showLanguagePickerSheet,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SwitchListTile(
                 secondary: const Icon(Icons.notifications_active_outlined, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -1217,7 +1217,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   setState(() => _dailyReminderEnabled = val);
                 },
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SwitchListTile(
                 secondary: const Icon(Icons.pie_chart_outline_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'budget_alerts_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -1302,14 +1302,14 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showRatingDialog,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SettingsTile(
                 leading: const Icon(Icons.headset_mic_outlined, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: _showSupportDialog,
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2EFE6)),
+              const Divider(height: 1, indent: 56, color: Color(0xFFE6FBFB)),
               SettingsTile(
                 leading: const Icon(Icons.info_outline_rounded, color: accentBeige),
                 title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),

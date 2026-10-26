@@ -58,7 +58,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
         decoration: const BoxDecoration(
-          color: Color(0xFFFFF7EB),
+          color: Color(0xFFF5FDFD),
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -93,7 +93,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     children: [
                       Text(
                         item.title.isNotEmpty ? item.title : item.category,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
@@ -113,7 +113,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFECE7DB)),
+                border: Border.all(color: const Color(0xFFCCF7F7)),
               ),
               child: Column(
                 children: [
@@ -139,7 +139,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                       Text(context.t('Ngày giờ:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
                       Text(
                         formattedDateTime,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF5D4222)),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00463E)),
                       ),
                     ],
                   ),
@@ -193,13 +193,13 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const accentBeige = Color(0xFFE5D3AF);
-    const darkBeige = Color(0xFF5D4222);
+    const accentBeige = Color(0xFFCCF7F7);
+    const darkBeige = Color(0xFF00463E);
     final lang = context.lang;
     final transactionsList = _filteredTransactions;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7EB),
+      backgroundColor: const Color(0xFFF5FDFD),
       appBar: AppBar(
         title: Text(
           AppTranslations.tr(lang, 'recent_transactions'),
@@ -229,15 +229,15 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                           )
                         : null,
                     filled: true,
-                    fillColor: const Color(0xFFFFF7EB),
+                    fillColor: const Color(0xFFF5FDFD),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFFECE7DB)),
+                      borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFFECE7DB)),
+                      borderSide: const BorderSide(color: Color(0xFFCCF7F7)),
                     ),
                   ),
                 ),
@@ -320,14 +320,14 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFECE7DB)),
+                            border: Border.all(color: const Color(0xFFCCF7F7)),
                           ),
                           child: Row(
                             children: [
                               CategoryIcon(
                                 categoryOrIconKey: item.category,
                                 size: 44,
-                                bgColor: const Color(0xFFFFF7EB),
+                                bgColor: const Color(0xFFF5FDFD),
                                 iconColor: darkBeige,
                               ),
                               const SizedBox(width: 14),

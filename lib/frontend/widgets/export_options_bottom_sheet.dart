@@ -184,7 +184,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Color(0xFFFFF7EB),
+        color: Color(0xFFF5FDFD),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
