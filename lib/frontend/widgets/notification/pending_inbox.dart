@@ -4,6 +4,7 @@ import '../../../backend/models/pending_transaction_model.dart';
 import '../../../backend/services/transaction_service.dart';
 import '../../../backend/services/category_repository.dart';
 import '../../../backend/models/category_model.dart';
+import '../../../core/widgets/category_icon.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_language.dart';
 
@@ -205,13 +206,10 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                           final cat = displayCats[index];
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            leading: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(CategoryModel.getIconData(cat.iconKey), color: AppColors.primary, size: 22),
+                            leading: CategoryIcon(
+                              categoryOrIconKey: cat.name,
+                              iconKey: cat.iconKey,
+                              size: 42,
                             ),
                             title: Text(
                               context.tCategory(cat.name),

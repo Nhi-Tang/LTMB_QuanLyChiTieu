@@ -97,7 +97,8 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: CategoryIcon(
-                      categoryOrIconKey: _nameController.text.isNotEmpty ? _nameController.text : _selectedIconKey,
+                      categoryOrIconKey: _nameController.text,
+                      iconKey: _selectedIconKey,
                       size: 28,
                     ),
                   ),
