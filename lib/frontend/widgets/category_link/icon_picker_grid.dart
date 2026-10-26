@@ -34,9 +34,7 @@ class IconPickerGrid extends StatelessWidget {
     {'key': 'card_giftcard_rounded', 'label': 'Quà tặng'},
     {'key': 'storefront_rounded', 'label': 'Bán hàng'},
     {'key': 'trending_up_rounded', 'label': 'Đầu tư'},
-    {'key': 'star_rounded', 'label': 'Ngôi sao'},
-    {'key': 'favorite_rounded', 'label': 'Yêu thích'},
-    {'key': 'flight_rounded', 'label': 'Du lịch'},
+    {'key': 'favorite_rounded', 'label': 'Kết hôn'},
     {'key': 'category_rounded', 'label': 'Khác'},
   ];
 
@@ -55,7 +53,6 @@ class IconPickerGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = availableIcons[index];
         final key = item['key']!;
-        final label = item['label']!;
         final isSelected = selectedIconKey == key;
 
         return InkWell(
@@ -72,7 +69,7 @@ class IconPickerGrid extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: CategoryIcon(
-              categoryOrIconKey: label,
+              categoryOrIconKey: key,
               size: 32,
             ),
           ),

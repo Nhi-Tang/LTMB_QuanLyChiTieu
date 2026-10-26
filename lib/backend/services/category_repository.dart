@@ -49,11 +49,13 @@ class CategoryRepository {
     );
     final unlinkedIds = unlinkedResult.map((row) => row['categoryId'] as int).toSet();
 
-    return categoriesResult.map((map) {
+    final categories = categoriesResult.map((map) {
       final id = map['id'] as int;
       final isUnlinked = unlinkedIds.contains(id);
       return CategoryModel.fromMap(map, isLinked: !isUnlinked);
     }).toList();
+    CategoryModel.rememberIconKeys(categories);
+    return categories;
   }
 
   /// Lấy tất cả danh mục theo loại (bao gồm cả đã lưu trữ hoặc chưa liên kết)
@@ -65,7 +67,19 @@ class CategoryRepository {
       whereArgs: [type],
       orderBy: 'sortOrder ASC, id ASC',
     );
-    return result.map((map) => CategoryModel.fromMap(map, isLinked: true)).toList();
+    final categories = result.map((map) => CategoryModel.fromMap(map, isLinked: true)).toList();
+    CategoryModel.rememberIconKeys(categories);
+    return categories;
+  }
+
+  /// Nạp sẵn iconKey của mọi danh mục để giao dịch thuộc danh mục tự tạo hiện đúng icon.
+  Future<void> loadIconKeys() async {
+    try {
+      await getAllCategories('expense');
+      await getAllCategories('income');
+    } catch (e) {
+      debugPrint('loadIconKeys error: $e');
+    }
   }
 
   Future<List<CategoryModel>> getCategories({required String type}) async {
@@ -87,6 +101,7 @@ class CategoryRepository {
       nextOrder = (maxOrderResult.first['maxOrder'] as int) + 1;
     }
 
+    CategoryModel.rememberIconKeys([category]);
     final categoryId = await db.insert('categories', {
       'name': category.name,
       'iconKey': category.iconKey,
@@ -111,6 +126,7 @@ class CategoryRepository {
   Future<int> updateCategory(CategoryModel category) async {
     final db = await DatabaseHelper.instance.database;
     final now = DateTime.now().toIso8601String();
+    CategoryModel.rememberIconKeys([category]);
     return await db.update(
       'categories',
       {
