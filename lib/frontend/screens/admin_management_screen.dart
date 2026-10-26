@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
-import 'auth_screen.dart';
+import '../../backend/services/auth_service.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
 
@@ -573,11 +573,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     );
   }
 
-  void _logout() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const AuthScreen()),
-    );
+  // Đăng xuất Firebase thật sự để AuthGate tự chuyển về màn đăng nhập. Trước đây chỉ
+  // thay màn hình bằng AuthScreen nên AuthGate bị gỡ khỏi cây: đăng nhập lại thành công
+  // nhưng không còn ai chuyển vào app, người dùng bị kẹt ở màn đăng nhập.
+  Future<void> _logout() async {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await AuthService().signOut();
   }
 
   @override
