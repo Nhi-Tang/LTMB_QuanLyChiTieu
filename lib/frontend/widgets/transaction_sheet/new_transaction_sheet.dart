@@ -140,7 +140,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
       currentNote: _note,
       category: _selectedCategory,
     );
-    if (result != null) {
+    if (result != null && mounted) {
       setState(() => _note = result);
     }
   }
@@ -249,7 +249,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2030),
                       );
-                      if (picked != null) {
+                      if (picked != null && mounted) {
                         setState(() => _selectedDate = picked);
                       }
                     },

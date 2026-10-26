@@ -571,11 +571,13 @@ class _ProfileTabState extends State<ProfileTab> {
                           if (e is FreePlanLimitException) {
                             if (!ctx.mounted) return;
                             Navigator.pop(ctx); // Đóng dialog nhập tên sổ
+                            if (!mounted) return;
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
                             );
                           } else {
+                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
                             );

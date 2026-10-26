@@ -168,7 +168,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                         firstDate: DateTime(2020),
                         lastDate: DateTime(2030),
                       );
-                      if (picked != null) {
+                      if (picked != null && mounted) {
                         setState(() {
                           _selectedMonth = DateTime(picked.year, picked.month, 1);
                         });

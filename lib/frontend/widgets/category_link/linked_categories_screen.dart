@@ -38,13 +38,14 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
     try {
       final type = _isExpense ? 'expense' : 'income';
       final list = await CategoryRepository.instance.getCategoriesForLedger(widget.ledgerId, type);
+      if (!mounted) return;
       setState(() {
         _categories = list;
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('Error loading categories: $e');
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

@@ -184,8 +184,9 @@ class _AuthScreenState extends State<AuthScreen> {
                               setDialogState(() => isLoading = false);
                               if (!dialogCtx.mounted) return;
                               Navigator.pop(dialogCtx);
+                              if (!mounted) return;
                               showAppAlertDialog(
-                                context: dialogCtx,
+                                context: context,
                                 title: AppLanguage.instance.t('Thành công'),
                                 message: AppLanguage.instance.t('Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.'),
                                 isSuccess: true,
@@ -265,6 +266,7 @@ class _AuthScreenState extends State<AuthScreen> {
           isSuccess: true,
         );
 
+        if (!mounted) return;
         setState(() {
           _isLogin = true;
           _passwordController.clear();

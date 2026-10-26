@@ -42,6 +42,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
   Future<void> _loadTransactions() async {
     setState(() => _isLoading = true);
     final txs = await DatabaseHelper.instance.getSavingsTransactions(_goal.id ?? '');
+    if (!mounted) return;
     setState(() {
       _transactions = txs;
       _isLoading = false;
@@ -215,6 +216,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
   void _markAsCompleted() async {
     final updated = _goal.copyWith(isCompleted: true);
     await DatabaseHelper.instance.updateSavingsGoal(updated);
+    if (!mounted) return;
     setState(() {
       _goal = updated;
     });
@@ -320,6 +322,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                     onSaved: () async {
                       final goals = await DatabaseHelper.instance.getSavingsGoals();
                       final updated = goals.firstWhere((g) => g.id == _goal.id);
+                      if (!mounted) return;
                       setState(() => _goal = updated);
                       widget.onGoalUpdated();
                     },
@@ -345,6 +348,7 @@ class _SavingsGoalDetailScreenState extends State<SavingsGoalDetailScreen> {
                         await DatabaseHelper.instance.deleteSavingsGoal(_goal.id ?? '');
                         if (!ctx.mounted) return;
                         Navigator.pop(ctx);
+                        if (!mounted) return;
                         Navigator.pop(context);
                         widget.onGoalUpdated();
                       },
