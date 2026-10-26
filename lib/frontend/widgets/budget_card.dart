@@ -49,7 +49,7 @@ class BudgetCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -76,7 +76,7 @@ class BudgetCard extends StatelessWidget {
                     children: [
                       Text(
                         categoryName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AppColors.tealDark,
@@ -102,7 +102,7 @@ class BudgetCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               budget.month != null ? context.t('Tháng {month}', {'month': budget.month}) : context.t('Mọi tháng'),
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              style: TextStyle(fontSize: 12, color: AppColors.grey600),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -113,7 +113,7 @@ class BudgetCard extends StatelessWidget {
                 ),
                 if (onEdit != null)
                   IconButton(
-                    icon: const Icon(Icons.edit_rounded, size: 18, color: Colors.grey),
+                    icon: Icon(Icons.edit_rounded, size: 18, color: AppColors.grey500),
                     onPressed: onEdit,
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(8),
@@ -151,7 +151,7 @@ class BudgetCard extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[700],
+                      color: AppColors.grey700,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -166,7 +166,7 @@ class BudgetCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progressVal,
                 minHeight: 10,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: AppColors.grey200,
                 valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               ),
             ),
@@ -183,7 +183,7 @@ class BudgetCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: status.remaining >= 0 ? Colors.grey[600] : Colors.red,
+                      color: status.remaining >= 0 ? AppColors.grey600 : Colors.red,
                     ),
                   ),
                 ),
@@ -194,7 +194,7 @@ class BudgetCard extends StatelessWidget {
                     prefix: context.t('Chi tiêu/ngày: '),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: AppColors.grey600,
                     ),
                   ),
                 ),

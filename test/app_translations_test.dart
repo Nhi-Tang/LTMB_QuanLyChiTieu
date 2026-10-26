@@ -43,6 +43,14 @@ void main() {
     });
   });
 
+  test('tên tháng ngắn cho nhãn biểu đồ', () {
+    final oct = DateTime(2026, 10, 1);
+    expect(AppTranslations.formatMonthShort('Tiếng Việt', oct), 'T10');
+    expect(AppTranslations.formatMonthShort('English (US)', oct), 'Oct');
+    expect(AppTranslations.formatMonthShort('日本語 (Japanese)', oct), '10月');
+    expect(AppTranslations.formatMonthShort('한국어 (Korean)', oct), '10월');
+  });
+
   group('AppTranslations.trCategory', () {
     test('dịch danh mục mặc định cho mọi ngôn ngữ', () {
       expect(AppTranslations.trCategory('English (US)', 'Ăn uống'), 'Food & Drinks');

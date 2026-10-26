@@ -130,7 +130,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         ),
         content: Text(
           message,
-          style: const TextStyle(fontSize: 14, color: Colors.black87),
+          style: TextStyle(fontSize: 14, color: AppColors.black87),
         ),
         actions: [
           ElevatedButton(
@@ -190,7 +190,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -467,7 +467,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               children: [
                 Text(
                   context.t('Xem và chỉnh sửa thông tin tài khoản Quản trị viên:'),
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                  style: TextStyle(fontSize: 13, color: AppColors.grey500),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -478,7 +478,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: context.t('Họ và tên'),
-                    prefixIcon: const Icon(Icons.person, color: AppColors.teal),
+                    prefixIcon: Icon(Icons.person, color: AppColors.teal),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -493,7 +493,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: context.t('Email / Số điện thoại'),
-                    prefixIcon: const Icon(Icons.email, color: AppColors.teal),
+                    prefixIcon: Icon(Icons.email, color: AppColors.teal),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -507,12 +507,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.teal,
-              foregroundColor: AppColors.tealDark,
+              foregroundColor: AppColors.onTeal,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () async {
@@ -582,10 +582,10 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = AppColors.teal;
+    final themeColor = AppColors.teal;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.pageBg,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -667,15 +667,15 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(color: AppColors.grey300),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(color: AppColors.grey300),
                 ),
               ),
             ),
@@ -692,7 +692,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: AppColors.grey800,
                   ),
                 ),
                 IconButton(
@@ -713,11 +713,11 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.person_off_outlined, size: 64, color: Colors.grey[400]),
+                            Icon(Icons.person_off_outlined, size: 64, color: AppColors.grey400),
                             const SizedBox(height: 12),
                             Text(
                               context.t('Không tìm thấy tài khoản nào'),
-                              style: TextStyle(color: Colors.grey[600], fontSize: 15),
+                              style: TextStyle(color: AppColors.grey600, fontSize: 15),
                             ),
                           ],
                         ),
@@ -802,7 +802,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                           user.email,
                                           style: TextStyle(
                                             fontSize: 13,
-                                            color: Colors.grey[600],
+                                            color: AppColors.grey600,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
@@ -919,7 +919,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -938,14 +938,14 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[900],
+                color: AppColors.grey900,
               ),
             ),
             Text(
               title,
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey[600],
+                color: AppColors.grey600,
               ),
             ),
           ],

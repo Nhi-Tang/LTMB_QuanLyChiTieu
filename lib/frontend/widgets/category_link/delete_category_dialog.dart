@@ -37,7 +37,7 @@ class _DeleteCategoryDialogState extends State<DeleteCategoryDialog> {
         ),
         content: Text(
           context.t('Danh mục "{name}" là danh mục mặc định của hệ thống và không thể xóa.', {'name': context.tCategory(widget.category.name)}),
-          style: const TextStyle(fontSize: 14, color: AppColors.textMain),
+          style: TextStyle(fontSize: 14, color: AppColors.textMain),
         ),
         actions: [
           ElevatedButton(
@@ -61,7 +61,7 @@ class _DeleteCategoryDialogState extends State<DeleteCategoryDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
         children: [
-          const Icon(Icons.delete_outline_rounded, color: AppColors.unlinkRed, size: 28),
+          Icon(Icons.delete_outline_rounded, color: AppColors.unlinkRed, size: 28),
           const SizedBox(width: 8),
           Text(context.t('Xóa danh mục'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
@@ -73,7 +73,7 @@ class _DeleteCategoryDialogState extends State<DeleteCategoryDialog> {
           children: [
             Text(
               context.t('Bạn có chắc chắn muốn xóa danh mục "{name}" không?', {'name': context.tCategory(widget.category.name)}),
-              style: const TextStyle(fontSize: 14, color: AppColors.textMain),
+              style: TextStyle(fontSize: 14, color: AppColors.textMain),
             ),
             const SizedBox(height: 16),
             CheckboxListTile(

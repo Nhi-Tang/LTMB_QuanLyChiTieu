@@ -179,7 +179,7 @@ class CalculatorKeypad extends StatelessWidget {
                   Flexible(
                     child: Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: MouseyColors.textMain,

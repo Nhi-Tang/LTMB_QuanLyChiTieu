@@ -209,7 +209,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
             fontSize: 18,
           ),
         ),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -226,7 +226,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
+                  Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Text(
                     context.t('Đơn hàng hết hạn sau: '),
@@ -234,7 +234,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                   ),
                   Text(
                     _formattedTime,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -264,7 +264,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                 children: [
                   Text(
                     planType == 'yearly' ? context.t('Gói PRO 1 Năm') : context.t('Gói PRO 1 Tháng'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -273,7 +273,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                   const SizedBox(height: 4),
                   Text(
                     '${formatMoney(amount as num)}đ',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -421,7 +421,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(width: 8),
           Flexible(
@@ -444,7 +444,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                   const SizedBox(width: 8),
                   InkWell(
                     onTap: () => _copyToClipboard(rawText ?? value, labelName ?? label),
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.all(4),
                       child: Icon(Icons.copy_rounded, size: 16, color: AppColors.primary),
                     ),

@@ -60,7 +60,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
               onSurface: AppColors.darkBeige,
@@ -100,7 +100,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -113,7 +113,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                       children: [
                         SwitchListTile(
                           activeTrackColor: AppColors.primary,
-                          secondary: const Icon(Icons.notifications_active_rounded, color: AppColors.darkBeige),
+                          secondary: Icon(Icons.notifications_active_rounded, color: AppColors.darkBeige),
                           title: Text(context.t('Tự động đọc thông báo ngân hàng'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           subtitle: Text(context.t('Tự động quét thông báo từ Vietcombank, MB, Techcombank, MoMo,...'), style: TextStyle(fontSize: 12)),
                           value: _bankNotificationsEnabled,
@@ -125,7 +125,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                         const Divider(height: 1),
                         SwitchListTile(
                           activeTrackColor: AppColors.primary,
-                          secondary: const Icon(Icons.verified_rounded, color: AppColors.darkBeige),
+                          secondary: Icon(Icons.verified_rounded, color: AppColors.darkBeige),
                           title: Text(context.t('Tự động xác nhận khi độ tin cậy cao'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           subtitle: Text(context.t('Khi phát hiện danh mục khớp 3+ lần trong lịch sử, tự động ghi nhận giao dịch'), style: TextStyle(fontSize: 12)),
                           value: _autoConfirmHighConfidence,
@@ -136,7 +136,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                         ),
                         const Divider(height: 1),
                         ListTile(
-                          leading: const Icon(Icons.alarm_rounded, color: AppColors.darkBeige),
+                          leading: Icon(Icons.alarm_rounded, color: AppColors.darkBeige),
                           title: Text(
                             context.t('Nhắc nhở tổng hợp lúc {formattedTime}', {'formattedTime': formattedTime}),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -156,7 +156,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                   ),
                                   child: Text(
                                     formattedTime,
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primary),
                                   ),
                                 ),
                               ),
@@ -181,13 +181,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   Card(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     child: ListTile(
-                      leading: const CircleAvatar(
+                      leading: CircleAvatar(
                         backgroundColor: AppColors.accentBeige,
-                        child: Icon(Icons.security_rounded, color: AppColors.darkBeige),
+                        child: Icon(Icons.security_rounded, color: AppColors.onTeal),
                       ),
                       title: Text(context.t('Hướng dẫn cấp quyền & Tối ưu pin'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       subtitle: Text(context.t('Bật quyền truy cập thông báo và duy trì chạy ngầm'), style: TextStyle(fontSize: 12)),
-                      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.darkBeige),
+                      trailing: Icon(Icons.chevron_right_rounded, color: AppColors.darkBeige),
                       onTap: () {
                         Navigator.push(
                           context,

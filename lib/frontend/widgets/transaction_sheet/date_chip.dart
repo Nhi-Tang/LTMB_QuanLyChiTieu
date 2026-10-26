@@ -35,11 +35,11 @@ class DateChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.tealDark),
+            Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.tealDark),
             const SizedBox(width: 4),
             Text(
               _formatDate(selectedDate),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: AppColors.tealDark,

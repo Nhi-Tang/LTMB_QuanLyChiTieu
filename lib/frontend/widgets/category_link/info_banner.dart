@@ -55,7 +55,7 @@ class _InfoBannerState extends State<InfoBanner> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.info_outline_rounded,
             color: AppColors.primaryGreen,
             size: 20,
@@ -87,7 +87,7 @@ class _InfoBannerState extends State<InfoBanner> {
           ),
           GestureDetector(
             onTap: _dismissBanner,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(2.0),
               child: Icon(
                 Icons.close_rounded,

@@ -27,8 +27,8 @@ class _SavingsTabState extends State<SavingsTab> {
   List<SavingsGoalModel> _goals = [];
   bool _isLoading = true;
 
-  static const Color darkBeigy = AppColors.textPrimary;
-  static const Color accentBeigy = AppColors.accent;
+  static Color get darkBeigy => AppColors.textPrimary;
+  static Color get accentBeigy => AppColors.accent;
 
 
   @override
@@ -88,7 +88,7 @@ class _SavingsTabState extends State<SavingsTab> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [AppColors.tealBright, AppColors.teal],
@@ -151,7 +151,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: AppColors.surface.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -168,7 +168,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       Expanded(
                         child: Text(
                           AppTranslations.tr(lang, 'mousey_quote_home'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -192,7 +192,7 @@ class _SavingsTabState extends State<SavingsTab> {
               Expanded(
                 child: Text(
                   AppTranslations.tr(lang, 'savings_goals'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
@@ -204,7 +204,7 @@ class _SavingsTabState extends State<SavingsTab> {
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accentBeigy,
-                  foregroundColor: AppColors.tealDark,
+                  foregroundColor: AppColors.onTeal,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
@@ -224,7 +224,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 ),
                 label: Text(
                   AppTranslations.tr(lang, 'create_goal'),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                 ),
               ),
             ],
@@ -234,13 +234,13 @@ class _SavingsTabState extends State<SavingsTab> {
 
           // List of Goals or Empty State
           _isLoading
-              ? const Center(child: CircularProgressIndicator(color: accentBeigy))
+              ? Center(child: CircularProgressIndicator(color: accentBeigy))
               : _goals.isEmpty
                   ? Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(color: AppColors.tealPale),
                       ),
@@ -258,7 +258,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           const SizedBox(height: 14),
                           Text(
                             AppTranslations.tr(lang, context.t('Chưa có mục tiêu nào')),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.ink,
@@ -268,7 +268,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           Text(
                             AppTranslations.tr(lang, context.t('Thêm mục tiêu đầu tiên')),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            style: TextStyle(fontSize: 12, color: AppColors.grey500),
                           ),
                         ],
                       ),
@@ -325,7 +325,7 @@ class _SavingsTabState extends State<SavingsTab> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: AppColors.tealLight),
                             ),
@@ -337,7 +337,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     Container(
                                       width: 44,
                                       height: 44,
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
                                         color: AppColors.tealPale,
                                         shape: BoxShape.circle,
                                       ),
@@ -352,7 +352,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                         children: [
                                           Text(
                                             goal.name,
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 2),
@@ -361,7 +361,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color: goal.isCompleted ? accentBeigy : Colors.grey[600],
+                                              color: goal.isCompleted ? accentBeigy : AppColors.grey600,
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -372,7 +372,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     Flexible(
                                       child: Text(
                                         '$percent%',
-                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: accentBeigy),
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: accentBeigy),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -385,7 +385,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     Flexible(
                                       child: MoneyText(
                                         amount: goal.currentAmount,
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.ink),
+                                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.ink),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -393,7 +393,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                       child: MoneyText(
                                         amount: goal.targetAmount,
                                         alignment: Alignment.centerRight,
-                                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                        style: TextStyle(fontSize: 13, color: AppColors.grey500),
                                       ),
                                     ),
                                   ],
@@ -405,7 +405,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                     value: progress.clamp(0.0, 1.0),
                                     minHeight: 10,
                                     backgroundColor: AppColors.tealLight,
-                                    valueColor: const AlwaysStoppedAnimation<Color>(accentBeigy),
+                                    valueColor: AlwaysStoppedAnimation<Color>(accentBeigy),
                                   ),
                                 ),
                                 if (monthlySuggestionStr.isNotEmpty) ...[
@@ -418,12 +418,12 @@ class _SavingsTabState extends State<SavingsTab> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.lightbulb_outline_rounded, size: 14, color: accentBeigy),
+                                        Icon(Icons.lightbulb_outline_rounded, size: 14, color: accentBeigy),
                                         const SizedBox(width: 6),
                                         Expanded(
                                           child: Text(
                                             monthlySuggestionStr,
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: darkBeigy),
+                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: darkBeigy),
                                           ),
                                         ),
                                       ],
