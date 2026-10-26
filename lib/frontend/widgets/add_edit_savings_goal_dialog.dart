@@ -176,7 +176,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                       firstDate: DateTime.now(),
                       lastDate: DateTime(2040),
                     );
-                    if (picked != null) {
+                    if (picked != null && mounted) {
                       setState(() => _selectedDeadline = picked);
                     }
                   },

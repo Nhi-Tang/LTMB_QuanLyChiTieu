@@ -123,7 +123,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
       lastDate: DateTime(2030),
       initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _dateRangePreset = 'custom';
         _startDate = picked.start;

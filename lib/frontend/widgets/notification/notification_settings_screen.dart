@@ -72,7 +72,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       },
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _reminderHour = picked.hour;
         _reminderMinute = picked.minute;

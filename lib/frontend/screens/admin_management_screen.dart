@@ -391,6 +391,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         await _dbHelper.updateUser(updatedUser);
                         if (!dialogContext.mounted) return;
                         Navigator.pop(dialogContext);
+                        if (!mounted) return;
                         _showAlertDialog(
                           title: AppLanguage.instance.t('Cập nhật thành công'),
                           message: AppLanguage.instance.t('Đã cập nhật thông tin tài khoản!'),
@@ -408,15 +409,16 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         await _dbHelper.registerUser(newUser);
                         if (!dialogContext.mounted) return;
                         Navigator.pop(dialogContext);
+                        if (!mounted) return;
                         _showAlertDialog(
                           title: AppLanguage.instance.t('Tạo tài khoản thành công'),
                           message: AppLanguage.instance.t('Đã tạo tài khoản mới thành công!'),
                           isSuccess: true,
                         );
                       }
-                      _loadUsers();
+                      if (mounted) _loadUsers();
                     } catch (e) {
-                      if (!dialogContext.mounted) return;
+                      if (!mounted) return;
                       _showAlertDialog(
                         title: AppLanguage.instance.t('Lỗi'),
                         message: e.toString().replaceAll('Exception: ', ''),
@@ -547,6 +549,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
 
                 await _dbHelper.updateUser(updatedAdmin);
 
+                if (!mounted) return;
                 setState(() {
                   _currentAdmin = updatedAdmin;
                 });
