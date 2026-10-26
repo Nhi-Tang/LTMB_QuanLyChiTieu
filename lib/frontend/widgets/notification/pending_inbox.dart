@@ -488,9 +488,13 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                                   Navigator.pop(ctx);
                                   setState(() {
                                     _typeOverrides[item.id] = 'expense';
-                                    if (_categoryOverrides[item.id] == null || _categoryOverrides[item.id] == 'Chuyển tiền') {
-                                      _categoryOverrides[item.id] = 'Khác';
-                                    }
+                                    // Chỉ giữ danh mục đã chọn nếu nó là danh mục chi tiêu,
+                                    // tránh lưu khoản chi với danh mục thu nhập (vd. Lương)
+                                    final current = _categoryOverrides[item.id];
+                                    final keep = current != null &&
+                                        current != 'Chuyển tiền' &&
+                                        _expenseCategories.any((c) => c.name == current);
+                                    if (!keep) _categoryOverrides[item.id] = 'Khác';
                                   });
                                 },
                               ),

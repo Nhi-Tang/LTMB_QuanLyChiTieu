@@ -326,6 +326,8 @@ class SyncService {
           'category': remoteData['category'],
           'amount': remoteData['amount'],
           'is_expense': remoteData['is_expense'],
+          'kind': remoteData['kind'],
+          'transferGroupId': remoteData['transferGroupId'],
           'date': remoteData['date'],
           'ledgerId': remoteLedgerId,
           'updatedAt': remoteUpdatedAt,
@@ -343,6 +345,9 @@ class SyncService {
               'category': remoteData['category'],
               'amount': remoteData['amount'],
               'is_expense': remoteData['is_expense'],
+              // Đồng bộ cả kind để báo cáo (lọc theo kind) không giữ loại cũ khi is_expense đổi
+              'kind': remoteData['kind'],
+              'transferGroupId': remoteData['transferGroupId'],
               'date': remoteData['date'],
               'ledgerId': remoteLedgerId,
               'updatedAt': remoteUpdatedAt,
