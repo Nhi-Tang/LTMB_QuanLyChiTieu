@@ -78,22 +78,12 @@ class AuthService {
         }
       }
 
-      UserCredential credential;
-      try {
-        credential = await _firebaseAuth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      } catch (authErr) {
-        try {
-          credential = await _firebaseAuth.createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-        } catch (_) {
-          rethrow;
-        }
-      }
+      // Chỉ đăng nhập. Trước đây đăng nhập lỗi (kể cả sai mật khẩu) thì tự tạo tài khoản
+      // mới với email đó; tạo tài khoản chỉ đi qua màn Đăng ký.
+      final credential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
       final user = credential.user;
       if (user == null) throw Exception(AppLanguage.instance.t('Đăng nhập thất bại.'));
