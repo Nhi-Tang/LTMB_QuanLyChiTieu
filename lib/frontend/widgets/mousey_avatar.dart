@@ -18,7 +18,7 @@ class MouseyAvatar extends StatelessWidget {
       ),
       child: ClipOval(
         child: Image.asset(
-          'assets/avatar/avatar.jpg',
+          'assets/avatar/avatar_moi.jpg',
           width: size,
           height: size,
           fit: BoxFit.cover,
