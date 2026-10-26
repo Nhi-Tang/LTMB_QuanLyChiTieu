@@ -26,6 +26,11 @@ void main() {
       );
     });
 
+    test('gợi ý số tiền trong ô nhập', () {
+      expect(AppTranslations.text('Tiếng Việt', 'VD: {amount}', {'amount': '5.000.000'}), 'VD: 5.000.000');
+      expect(AppTranslations.text('English (US)', 'VD: {amount}', {'amount': '5.000.000'}), 'e.g. 5.000.000');
+    });
+
     test('câu chưa có bản dịch thì giữ tiếng Việt', () {
       expect(AppTranslations.text('English (US)', 'Câu chưa dịch'), 'Câu chưa dịch');
     });
