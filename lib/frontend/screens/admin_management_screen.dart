@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
-import 'auth_screen.dart';
+import '../../backend/services/api_client.dart';
+import '../../backend/services/auth_service.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
+import '../../core/widgets/asset_icon.dart';
 
 class AdminManagementScreen extends StatefulWidget {
   final UserModel currentAdmin;
@@ -146,6 +148,22 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     );
   }
 
+  /// Khóa/mở tài khoản qua backend: Firebase vô hiệu hóa user (chặn đăng nhập, thu hồi phiên)
+  /// và ghi isActive lên Firestore. Trước đây chỉ sửa SQLite của máy Admin nên lần tải
+  /// danh sách sau lấy lại isActive từ Firestore và khóa mất tác dụng.
+  Future<void> _setUserActive(UserModel user, bool active) async {
+    final uid = user.uid;
+    if (uid == null || uid.isEmpty) {
+      throw Exception(context.t('Tài khoản chưa đồng bộ lên máy chủ, không thể khóa.'));
+    }
+    try {
+      await ApiClient.instance.post('/admin/users/$uid/active', {'active': active});
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+    await _dbHelper.insertOrUpdateUser(user.copyWith(isActive: active));
+  }
+
   Future<void> _toggleUserStatus(UserModel user) async {
     if (user.id == widget.currentAdmin.id) {
       if (!mounted) return;
@@ -157,7 +175,17 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       return;
     }
 
-    await _dbHelper.toggleUserActiveStatus(user.id!, user.isActive);
+    try {
+      await _setUserActive(user, !user.isActive);
+    } catch (e) {
+      if (!mounted) return;
+      _showAlertDialog(
+        title: context.t('Lỗi'),
+        message: e.toString().replaceAll('Exception: ', ''),
+        isSuccess: false,
+      );
+      return;
+    }
     if (!mounted) return;
     await _loadUsers();
     if (!mounted) return;
@@ -253,7 +281,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       textCapitalization: TextCapitalization.none,
                       decoration: InputDecoration(
                         labelText: context.t('Họ và tên'),
-                        prefixIcon: Icon(Icons.person_outline),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('tab_ca_nhan', size: 26)),
                       ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ tên') : null,
@@ -270,7 +298,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       ],
                       decoration: InputDecoration(
                         labelText: context.t('Email / Số điện thoại'),
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
                       ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập email') : null,
@@ -286,7 +314,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       ],
                       decoration: InputDecoration(
                         labelText: context.t('Mật khẩu'),
-                        prefixIcon: Icon(Icons.lock_outline),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_khoa', size: 26)),
                       ),
                       validator: (v) =>
                           (v == null || v.isEmpty) ? context.t('Vui lòng nhập mật khẩu') : null,
@@ -382,6 +410,9 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                           );
                         }
 
+                        if (isActive != userToEdit.isActive) {
+                          await _setUserActive(userToEdit, isActive);
+                        }
                         final updatedUser = userToEdit.copyWith(
                           name: newName,
                           email: newEmail,
@@ -478,7 +509,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: context.t('Họ và tên'),
-                    prefixIcon: Icon(Icons.person, color: AppColors.teal),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('tab_ca_nhan', size: 26)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -493,7 +524,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: context.t('Email / Số điện thoại'),
-                    prefixIcon: Icon(Icons.email, color: AppColors.teal),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -573,11 +604,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     );
   }
 
-  void _logout() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const AuthScreen()),
-    );
+  // Đăng xuất Firebase thật sự để AuthGate tự chuyển về màn đăng nhập. Trước đây chỉ
+  // thay màn hình bằng AuthScreen nên AuthGate bị gỡ khỏi cây: đăng nhập lại thành công
+  // nhưng không còn ai chuyển vào app, người dùng bị kẹt ở màn đăng nhập.
+  Future<void> _logout() async {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    await AuthService().signOut();
   }
 
   @override

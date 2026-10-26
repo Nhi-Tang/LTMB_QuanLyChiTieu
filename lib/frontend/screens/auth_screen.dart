@@ -3,6 +3,7 @@ import '../../backend/services/auth_service.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
+import '../../core/widgets/asset_icon.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -34,6 +35,19 @@ class _AuthScreenState extends State<AuthScreen> {
   RegExp(r'^[a-zA-Z0-9._+\-]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)+$');
   static final RegExp _phoneRegex = RegExp(r'^(0|\+84)\d{9}$');
   static final RegExp _asciiRegex = RegExp(r'^[\x20-\x7E]+$');
+
+  @override
+  void initState() {
+    super.initState();
+    // App vừa tự đăng xuất (vd. tài khoản bị Admin khóa): báo cho người dùng biết lý do
+    final notice = AuthService.pendingNotice;
+    if (notice != null) {
+      AuthService.pendingNotice = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showAlertDialog(title: context.t('Tài khoản bị khóa'), message: notice, isSuccess: false);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -74,7 +88,7 @@ class _AuthScreenState extends State<AuthScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
               children: [
-                Icon(Icons.lock_reset_rounded, color: primaryBeige, size: 28),
+                const AssetIcon('ui_khoa', size: 32),
                 const SizedBox(width: 8),
                 Text(
                   step == 1 ? context.t('Khôi phục mật khẩu') : context.t('Đặt lại mật khẩu mới'),
@@ -99,7 +113,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: context.t('Email / Số điện thoại'),
-                        prefixIcon: const Icon(Icons.email_outlined),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email hoặc SĐT') : null,
@@ -115,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: context.t('Mật khẩu mới'),
-                        prefixIcon: const Icon(Icons.lock_outline),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_khoa', size: 26)),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) {
@@ -130,7 +144,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: context.t('Xác nhận mật khẩu mới'),
-                        prefixIcon: const Icon(Icons.lock_reset_outlined),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_khoa', size: 26)),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       validator: (v) {
@@ -276,6 +290,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
+        AuthService.pendingNotice = null; // đã báo ngay tại đây
         _showAlertDialog(
           title: context.t('Thông báo'),
           message: e.toString().replaceAll('Exception: ', ''),
@@ -296,6 +311,7 @@ class _AuthScreenState extends State<AuthScreen> {
       // AuthGate will automatically handle navigation via authStateChanges()
     } catch (e) {
       if (mounted) {
+        AuthService.pendingNotice = null; // đã báo ngay tại đây
         _showAlertDialog(
           title: context.t('Đăng nhập Google thất bại'),
           message: e.toString().replaceAll('Exception: ', ''),
@@ -311,12 +327,15 @@ class _AuthScreenState extends State<AuthScreen> {
 
   InputDecoration _inputDecoration({
     required String label,
-    required IconData icon,
+    IconData? icon,
+    String? asset,
     Widget? suffixIcon,
   }) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon),
+      prefixIcon: asset != null
+          ? Padding(padding: const EdgeInsets.all(10), child: AssetIcon(asset, size: 26))
+          : Icon(icon),
       suffixIcon: suffixIcon,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -330,7 +349,7 @@ class _AuthScreenState extends State<AuthScreen> {
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              color: selected ? themeColor : Colors.transparent,
+              color: selected ? AppColors.surface : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
@@ -338,7 +357,7 @@ class _AuthScreenState extends State<AuthScreen> {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: selected ? AppColors.grey700 : AppColors.black,
+                color: selected ? AppColors.ink : AppColors.textMuted,
               ),
             ),
           ),
@@ -348,8 +367,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Container(
       height: 48,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.grey500,
+        color: AppColors.tealLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -448,7 +468,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             textCapitalization: TextCapitalization.words,
                             decoration: _inputDecoration(
                               label: context.t('Họ và tên'),
-                              icon: Icons.person_outline,
+                              asset: 'tab_ca_nhan',
                             ),
                             validator: (value) {
                               if (!_isLogin && (value == null || value.trim().isEmpty)) {
@@ -469,7 +489,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           textCapitalization: TextCapitalization.none,
                           decoration: _inputDecoration(
                             label: context.t('Email hoặc Số điện thoại'),
-                            icon: Icons.email_outlined,
+                            asset: 'ui_thu',
                           ),
                           validator: (value) {
                             final v = value?.trim() ?? '';
@@ -493,7 +513,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           textCapitalization: TextCapitalization.none,
                           decoration: _inputDecoration(
                             label: context.t('Mật khẩu'),
-                            icon: Icons.lock_outline,
+                            asset: 'ui_khoa',
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -529,7 +549,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             textCapitalization: TextCapitalization.none,
                             decoration: _inputDecoration(
                               label: context.t('Xác nhận mật khẩu'),
-                              icon: Icons.lock_reset_outlined,
+                              asset: 'ui_khoa',
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscureConfirmPassword

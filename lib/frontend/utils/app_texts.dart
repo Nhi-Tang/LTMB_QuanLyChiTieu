@@ -461,4 +461,5 @@ const Map<String, List<String>> appTexts = {
   'Sáng': ['Light', 'ライト', '浅色', '라이트'],
   'Tối': ['Dark', 'ダーク', '深色', '다크'],
   'Theo hệ thống': ['System default', 'システム設定に従う', '跟随系统', '시스템 설정'],
+  'Tài khoản chưa đồng bộ lên máy chủ, không thể khóa.': ['This account has not been synced to the server yet, so it cannot be locked.', 'このアカウントはまだサーバーに同期されていないため、ロックできません。', '该账户尚未同步到服务器，无法锁定。', '이 계정은 아직 서버에 동기화되지 않아 잠글 수 없습니다.'],
 };
