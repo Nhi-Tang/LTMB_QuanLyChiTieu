@@ -166,8 +166,8 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
       builder: (ctx) {
         return Container(
           height: MediaQuery.of(ctx).size.height * 0.6,
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -179,7 +179,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
+                    color: AppColors.grey400,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -187,7 +187,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
               const SizedBox(height: 16),
               Text(
                 context.t('Chọn danh mục ({type})', {'type': context.t(item.type == 'expense' ? 'Chi tiêu' : 'Thu nhập')}),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.darkBeige),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.darkBeige),
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -196,7 +196,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                         child: Text(
                           context.t('Chưa có danh mục nào.\nVui lòng thêm ở màn hình Cài đặt.'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: AppColors.grey500),
                         ),
                       )
                     : ListView.builder(
@@ -238,7 +238,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
 
     return Container(
       height: media.size.height * 0.85,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.tealWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -250,7 +250,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade400,
+              color: AppColors.grey400,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -262,12 +262,12 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(Icons.mark_email_unread_rounded, color: AppColors.darkBeige, size: 20),
+                      Icon(Icons.mark_email_unread_rounded, color: AppColors.darkBeige, size: 20),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           context.t('Chờ xác nhận ({count})', {'count': _pendingItems.length}),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkBeige,
@@ -286,7 +286,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: _confirmAll,
-                    icon: const Icon(Icons.done_all_rounded, size: 16, color: AppColors.primary),
+                    icon: Icon(Icons.done_all_rounded, size: 16, color: AppColors.primary),
                     label: Text(
                       context.t('Xác nhận tất cả'),
                       style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
@@ -300,7 +300,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
           // Content List
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : _pendingItems.isEmpty
                     ? _buildEmptyState()
                     : ListView.builder(
@@ -326,7 +326,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
             'assets/avatar/avatar.jpg',
             width: 80,
             height: 80,
-            errorBuilder: (context, error, stackTrace) => const Icon(
+            errorBuilder: (context, error, stackTrace) => Icon(
               Icons.check_circle_outline_rounded,
               size: 80,
               color: AppColors.primary,
@@ -345,7 +345,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
           Text(
             context.t('Khi ngân hàng có thông báo mới, Mousey sẽ tự động ghi nhận bản nháp ở đây.'),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Colors.grey),
+            style: TextStyle(fontSize: 13, color: AppColors.grey500),
           ),
         ],
       ),
@@ -375,7 +375,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
         break;
       case 'none':
       default:
-        confidenceColor = Colors.grey;
+        confidenceColor = AppColors.grey500;
         confidenceLabel = context.t('Chưa phân loại');
         break;
     }
@@ -409,7 +409,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                         ),
                         child: Text(
                           item.bankName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: AppColors.darkBeige,
@@ -421,7 +421,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                         Flexible(
                           child: Text(
                             isExpense ? context.t('TK trừ: ***{accountLast4}', {'accountLast4': item.accountLast4}) : context.t('TK nhận: ***{accountLast4}', {'accountLast4': item.accountLast4}),
-                            style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontSize: 12, color: AppColors.grey500, fontWeight: FontWeight.w500),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -432,7 +432,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                 const SizedBox(width: 8),
                 Text(
                   timeStr,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: AppColors.grey500),
                 ),
               ],
             ),
@@ -446,10 +446,10 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                 Expanded(
                   child: Text(
                     item.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.black87,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -562,12 +562,12 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.category_rounded, size: 14, color: AppColors.darkBeige),
+                        Icon(Icons.category_rounded, size: 14, color: AppColors.darkBeige),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             context.tCategory(currentCat),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: AppColors.darkBeige,
@@ -575,7 +575,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.darkBeige),
+                        Icon(Icons.arrow_drop_down, size: 16, color: AppColors.darkBeige),
                       ],
                     ),
                   ),
@@ -610,7 +610,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   onPressed: () => _dismissItem(item),
-                  child: Text(context.t('Bỏ qua'), style: TextStyle(color: Colors.grey)),
+                  child: Text(context.t('Bỏ qua'), style: TextStyle(color: AppColors.grey500)),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(

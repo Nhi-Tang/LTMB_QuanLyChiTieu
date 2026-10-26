@@ -222,14 +222,14 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 children: [
                   Text(
                     isEditing ? context.t('Sửa Ngân Sách') : context.t('Thêm Ngân Sách Mới'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppColors.tealDark,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.tealDark),
+                    icon: Icon(Icons.close_rounded, color: AppColors.tealDark),
                     onPressed: () => Navigator.pop(context),
                     constraints: const BoxConstraints(),
                     padding: EdgeInsets.zero,
@@ -248,7 +248,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                   ),
                   Text(
                     _selectedCategory != null ? context.tCategory(_selectedCategory!) : context.t('Tổng ngân sách'),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.tealBright),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.tealBright),
                   ),
                 ],
               ),
@@ -267,7 +267,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                               width: double.infinity,
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
-                                color: _selectedCategory == null ? AppColors.tealPale : Colors.white,
+                                color: _selectedCategory == null ? AppColors.tealPale : AppColors.surface,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: _selectedCategory == null ? AppColors.tealBright : AppColors.tealPale,
@@ -276,7 +276,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.pie_chart_outline_rounded, color: AppColors.tealDark, size: 22),
+                                  Icon(Icons.pie_chart_outline_rounded, color: AppColors.tealDark, size: 22),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -286,7 +286,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                                     ),
                                   ),
                                   if (_selectedCategory == null)
-                                    const Icon(Icons.check_circle_rounded, color: AppColors.tealDark, size: 18),
+                                    Icon(Icons.check_circle_rounded, color: AppColors.tealDark, size: 18),
                                 ],
                               ),
                             ),
@@ -318,7 +318,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? AppColors.tealPale : Colors.white,
+                                    color: isSelected ? AppColors.tealPale : AppColors.surface,
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
                                       color: isSelected ? AppColors.tealBright : AppColors.tealPale,
@@ -367,14 +367,14 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 inputFormatters: [MoneyInputFormatter()],
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.surface,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                   hintText: context.t('VD: {amount}', {'amount': '5.000.000'}),
-                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  hintStyle: TextStyle(color: AppColors.grey400),
                   suffixText: 'đ',
                 ),
                 validator: (value) {
@@ -397,7 +397,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 ),
                 subtitle: Text(
                   context.t('Áp dụng tự động cho mọi tháng'),
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: AppColors.grey500),
                 ),
                 value: _isRecurring,
                 activeThumbColor: AppColors.tealDark,

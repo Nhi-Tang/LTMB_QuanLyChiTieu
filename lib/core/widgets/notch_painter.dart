@@ -9,9 +9,10 @@ class NotchPainter extends CustomPainter {
 
   NotchPainter({
     required this.notchCenterX,
-    this.backgroundColor = Colors.white,
-    this.borderColor = AppColors.borderBeige,
-  });
+    Color? backgroundColor,
+    Color? borderColor,
+  })  : backgroundColor = backgroundColor ?? AppColors.surface,
+        borderColor = borderColor ?? AppColors.borderBeige;
 
   @override
   void paint(Canvas canvas, Size size) {

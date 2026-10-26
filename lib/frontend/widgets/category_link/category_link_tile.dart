@@ -46,7 +46,7 @@ class CategoryLinkTile extends StatelessWidget {
             children: [
               ReorderableDragStartListener(
                 index: index,
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.only(right: 8.0),
                   child: Icon(Icons.drag_indicator_rounded, color: AppColors.unselectedTab, size: 20),
                 ),
@@ -77,7 +77,7 @@ class CategoryLinkTile extends StatelessWidget {
                   child: Container(
                     width: 26,
                     height: 26,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.unlinkRed,
                       shape: BoxShape.circle,
                     ),
@@ -91,7 +91,7 @@ class CategoryLinkTile extends StatelessWidget {
                   child: Container(
                     width: 26,
                     height: 26,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.primaryGreen,
                       shape: BoxShape.circle,
                     ),

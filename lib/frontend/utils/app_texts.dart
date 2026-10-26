@@ -457,4 +457,8 @@ const Map<String, List<String>> appTexts = {
   'Khóa TK': ['Lock account', 'アカウントをロック', '锁定账户', '계정 잠금'],
   'Mở khóa': ['Unlock', 'ロック解除', '解锁', '잠금 해제'],
   'VD: {amount}': ['e.g. {amount}', '例：{amount}', '例如：{amount}', '예: {amount}'],
+  'Giao diện': ['Appearance', '外観', '外观', '화면 모드'],
+  'Sáng': ['Light', 'ライト', '浅色', '라이트'],
+  'Tối': ['Dark', 'ダーク', '深色', '다크'],
+  'Theo hệ thống': ['System default', 'システム設定に従う', '跟随系统', '시스템 설정'],
 };

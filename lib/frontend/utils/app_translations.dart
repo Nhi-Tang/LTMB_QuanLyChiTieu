@@ -1028,6 +1028,19 @@ class AppTranslations {
     return 'Tháng ${date.month}/${date.year}';
   }
 
+  /// Tên tháng ngắn cho nhãn trục biểu đồ (T10, Oct, 10月, 10월).
+  static String formatMonthShort(String langCode, DateTime date) {
+    final code = _mapLanguageToCode(langCode);
+    if (code == 'en') {
+      return _getMonthNameEn(date.month).substring(0, 3);
+    } else if (code == 'ja' || code == 'zh') {
+      return '${date.month}月';
+    } else if (code == 'ko') {
+      return '${date.month}월';
+    }
+    return 'T${date.month}';
+  }
+
   static String _getMonthNameEn(int month) {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',

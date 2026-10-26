@@ -49,7 +49,7 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.backgroundCream,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -76,14 +76,14 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                 children: [
                   Text(
                     isEditing ? context.t('Chỉnh sửa danh mục') : context.t('Thêm danh mục mới'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textMain,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textSub),
+                    icon: Icon(Icons.close_rounded, color: AppColors.textSub),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -105,15 +105,15 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                   fillColor: AppColors.cardCream,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.borderBeige),
+                    borderSide: BorderSide(color: AppColors.borderBeige),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.borderBeige),
+                    borderSide: BorderSide(color: AppColors.borderBeige),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                    borderSide: BorderSide(color: AppColors.primaryGreen, width: 2),
                   ),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập tên danh mục') : null,

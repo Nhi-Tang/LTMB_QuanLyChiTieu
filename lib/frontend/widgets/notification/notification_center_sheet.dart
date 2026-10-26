@@ -199,7 +199,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
 
     return Container(
       height: media.size.height * 0.85,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.tealWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -211,7 +211,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade400,
+              color: AppColors.grey400,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -222,11 +222,11 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.notifications_active_rounded, color: AppColors.darkBeige, size: 22),
+                    Icon(Icons.notifications_active_rounded, color: AppColors.darkBeige, size: 22),
                     const SizedBox(width: 8),
                     Text(
                       AppTranslations.tr(lang, context.t('Thông báo')),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.darkBeige,
@@ -236,10 +236,10 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                 ),
                 TextButton.icon(
                   onPressed: _markAllRead,
-                  icon: const Icon(Icons.done_all_rounded, size: 16, color: AppColors.primary),
+                  icon: Icon(Icons.done_all_rounded, size: 16, color: AppColors.primary),
                   label: Text(
                     AppTranslations.tr(lang, 'mark_all_read'),
-                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                 ),
               ],
@@ -250,14 +250,14 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
           // Content List
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                ? Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
                       // Pending Drafts Card
                       if (_pendingDraftCount > 0) ...[
                         Card(
-                          color: const Color(0xFFFFF3E0),
+                          color: AppColors.warningBg,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(color: Colors.orange.shade300),
@@ -273,7 +273,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                             ),
                             subtitle: Text(
                               context.t('Nhấn để xem và xác nhận các khoản nháp từ thông báo ngân hàng'),
-                              style: TextStyle(fontSize: 12, color: Colors.black87),
+                              style: TextStyle(fontSize: 12, color: AppColors.black87),
                             ),
                             trailing: const Icon(Icons.chevron_right_rounded, color: Colors.orange),
                             onTap: () {
@@ -294,7 +294,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                         if (todayNotifs.isNotEmpty) ...[
                           Text(
                             AppTranslations.tr(lang, 'today_section'),
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.grey500),
                           ),
                           const SizedBox(height: 8),
                           ...todayNotifs.map((n) => _buildNotificationTile(n)),
@@ -303,7 +303,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                         if (earlierNotifs.isNotEmpty) ...[
                           Text(
                             AppTranslations.tr(lang, 'earlier_section'),
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.grey500),
                           ),
                           const SizedBox(height: 8),
                           ...earlierNotifs.map((n) => _buildNotificationTile(n)),
@@ -327,7 +327,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
             'assets/avatar/avatar.jpg',
             width: 80,
             height: 80,
-            errorBuilder: (ctx, err, stack) => const Icon(
+            errorBuilder: (ctx, err, stack) => Icon(
               Icons.notifications_none_rounded,
               size: 80,
               color: AppColors.primary,
@@ -336,13 +336,13 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
           const SizedBox(height: 16),
           Text(
             AppTranslations.tr(lang, 'no_notifications'),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkBeige),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkBeige),
           ),
           const SizedBox(height: 6),
           Text(
             AppTranslations.tr(lang, 'no_notifications_subtitle'),
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: Colors.grey),
+            style: TextStyle(fontSize: 13, color: AppColors.grey500),
           ),
         ],
       ),
@@ -368,7 +368,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       onDismissed: (_) => _deleteNotification(notif.id),
       child: Card(
         margin: const EdgeInsets.only(bottom: 10),
-        color: notif.isRead ? Colors.white : AppColors.tealWhite,
+        color: notif.isRead ? AppColors.surface : AppColors.tealWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
@@ -422,7 +422,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: AppColors.primary,
                                 shape: BoxShape.circle,
                               ),
@@ -441,14 +441,14 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                           }
                           return notif.body;
                         }(),
-                        style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.35),
+                        style: TextStyle(fontSize: 13, color: AppColors.black87, height: 1.35),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
                       Text(
                         _formatRelativeTime(notif.createdAt),
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        style: TextStyle(fontSize: 11, color: AppColors.grey500),
                       ),
                     ],
                   ),

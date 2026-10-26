@@ -29,9 +29,9 @@ class HomeTab extends StatefulWidget {
   final VoidCallback onAddIncome;
   final VoidCallback onAddExpense;
 
-  static const Color primaryBeige = AppColors.primaryBeige;
-  static const Color darkBeige = AppColors.darkBeige;
-  static const Color accentBeige = AppColors.accentBeige;
+  static Color get primaryBeige => AppColors.primaryBeige;
+  static Color get darkBeige => AppColors.darkBeige;
+  static Color get accentBeige => AppColors.accentBeige;
 
   const HomeTab({
     super.key,
@@ -135,7 +135,7 @@ class _HomeTabState extends State<HomeTab> {
             ),
             child: Container(
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.tealBright,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
@@ -149,7 +149,7 @@ class _HomeTabState extends State<HomeTab> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade400,
+                          color: AppColors.grey400,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -162,7 +162,7 @@ class _HomeTabState extends State<HomeTab> {
                         CategoryIcon(
                           categoryOrIconKey: item.category,
                           size: 48,
-                          bgColor: isExpense ? const Color(0xFFFFEBEE) : const Color(0xFFE8F5E9),
+                          bgColor: isExpense ? AppColors.expenseBg : AppColors.incomeBg,
                           iconColor: isExpense ? AppColors.expenseStrong : AppColors.income,
                         ),
                         const SizedBox(width: 14),
@@ -172,12 +172,12 @@ class _HomeTabState extends State<HomeTab> {
                             children: [
                               Text(
                                 context.tCategory(item.category),
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 context.t('Danh mục cố định'),
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                                style: TextStyle(fontSize: 12, color: AppColors.grey500),
                               ),
                             ],
                           ),
@@ -190,7 +190,7 @@ class _HomeTabState extends State<HomeTab> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: AppColors.mint),
                       ),
@@ -198,7 +198,7 @@ class _HomeTabState extends State<HomeTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 1. Tên ghi chú (Editable)
-                          Text(context.t('Ghi chú / Tên giao dịch:'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text(context.t('Ghi chú / Tên giao dịch:'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.grey500)),
                           const SizedBox(height: 6),
                           TextField(
                             controller: titleController,
@@ -212,7 +212,7 @@ class _HomeTabState extends State<HomeTab> {
                           const SizedBox(height: 14),
 
                           // 2. Số tiền (Editable)
-                          Text(context.t('Số tiền (đ):'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text(context.t('Số tiền (đ):'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.grey500)),
                           const SizedBox(height: 6),
                           TextField(
                             controller: amountController,
@@ -241,10 +241,10 @@ class _HomeTabState extends State<HomeTab> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(context.t('Thời gian:'), style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text(context.t('Thời gian:'), style: TextStyle(fontSize: 12, color: AppColors.grey500)),
                               Text(
                                 formattedDateTime,
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
                               ),
                             ],
                           ),
@@ -373,7 +373,7 @@ class _HomeTabState extends State<HomeTab> {
                         children: [
                           Text(
                             widget.currentUser.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: HomeTab.darkBeige,
@@ -408,14 +408,14 @@ class _HomeTabState extends State<HomeTab> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: AppColors.surface.withValues(alpha: 0.85),
                           shape: BoxShape.circle,
                           border: Border.all(color: AppColors.tealPale),
                         ),
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            const Icon(Icons.notifications_none_rounded, color: HomeTab.darkBeige, size: 22),
+                            Icon(Icons.notifications_none_rounded, color: HomeTab.darkBeige, size: 22),
                             if (totalBadge > 0)
                               Positioned(
                                 right: 2,
@@ -457,7 +457,7 @@ class _HomeTabState extends State<HomeTab> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [AppColors.tealBright, AppColors.teal],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
@@ -505,7 +505,7 @@ class _HomeTabState extends State<HomeTab> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: AppColors.surface.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
                           ),
@@ -513,7 +513,7 @@ class _HomeTabState extends State<HomeTab> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: AppColors.income,
                                   shape: BoxShape.circle,
                                 ),
@@ -526,7 +526,7 @@ class _HomeTabState extends State<HomeTab> {
                                   children: [
                                     Text(
                                       AppTranslations.tr(lang, 'income'),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
                                         color: AppColors.tealDark,
@@ -534,7 +534,7 @@ class _HomeTabState extends State<HomeTab> {
                                     ),
                                     MoneyText(
                                       amount: widget.totalIncome,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.income,
@@ -556,7 +556,7 @@ class _HomeTabState extends State<HomeTab> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.75),
+                            color: AppColors.surface.withValues(alpha: 0.75),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppColors.tealPale),
                           ),
@@ -564,7 +564,7 @@ class _HomeTabState extends State<HomeTab> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: AppColors.expenseStrong,
                                   shape: BoxShape.circle,
                                 ),
@@ -577,7 +577,7 @@ class _HomeTabState extends State<HomeTab> {
                                   children: [
                                     Text(
                                       AppTranslations.tr(lang, 'expense'),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w500,
                                         color: AppColors.tealDark,
@@ -585,7 +585,7 @@ class _HomeTabState extends State<HomeTab> {
                                     ),
                                     MoneyText(
                                       amount: widget.totalExpense,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.expenseStrong,
@@ -622,7 +622,7 @@ class _HomeTabState extends State<HomeTab> {
                     children: [
                       Text(
                         AppTranslations.tr(lang, 'budget_overview').toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textMuted,
@@ -640,7 +640,7 @@ class _HomeTabState extends State<HomeTab> {
                         },
                         child: Text(
                           AppTranslations.tr(lang, 'view_all'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: HomeTab.darkBeige,
@@ -653,7 +653,7 @@ class _HomeTabState extends State<HomeTab> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: AppColors.tealPale),
                     ),
@@ -708,7 +708,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Expanded(
                                       child: Text(
                                         name,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
                                           color: HomeTab.darkBeige,
@@ -720,7 +720,7 @@ class _HomeTabState extends State<HomeTab> {
                                       amount: s.spent,
                                       prefix: '',
                                       suffix: ' / ${formatMoney(s.limit)} đ',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                         color: HomeTab.darkBeige,
@@ -757,7 +757,7 @@ class _HomeTabState extends State<HomeTab> {
             children: [
               Text(
                 AppTranslations.tr(lang, 'recent_transactions').toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: HomeTab.darkBeige,
@@ -777,7 +777,7 @@ class _HomeTabState extends State<HomeTab> {
                 },
                 child: Text(
                   AppTranslations.tr(lang, 'view_all'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: HomeTab.darkBeige,
@@ -795,17 +795,17 @@ class _HomeTabState extends State<HomeTab> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppColors.tealPale),
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.receipt_long_rounded, size: 48, color: AppColors.tealLight),
+                      Icon(Icons.receipt_long_rounded, size: 48, color: AppColors.tealLight),
                       const SizedBox(height: 8),
                       Text(
                         AppTranslations.tr(lang, 'no_recent_transactions'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: HomeTab.darkBeige,
@@ -816,7 +816,7 @@ class _HomeTabState extends State<HomeTab> {
                 )
               : Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppColors.tealPale),
                   ),
@@ -828,7 +828,7 @@ class _HomeTabState extends State<HomeTab> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: widget.transactions.take(5).length,
-                    separatorBuilder: (ctx, i) => const Divider(height: 1, indent: 56, color: AppColors.tealMist),
+                    separatorBuilder: (ctx, i) => Divider(height: 1, indent: 56, color: AppColors.tealMist),
                     itemBuilder: (ctx, index) {
                       final item = widget.transactions[index];
 
@@ -837,12 +837,12 @@ class _HomeTabState extends State<HomeTab> {
                         leading: CategoryIcon(
                           categoryOrIconKey: item.category,
                           size: 40,
-                          bgColor: item.isExpense ? const Color(0xFFFFEBEE) : const Color(0xFFE8F5E9),
+                          bgColor: item.isExpense ? AppColors.expenseBg : AppColors.incomeBg,
                           iconColor: item.isExpense ? AppColors.expense : const Color(0xFF4CAF50),
                         ),
                         title: Text(
                           item.title.isNotEmpty ? item.title : context.tCategory(item.category),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: AppColors.ink,
@@ -851,7 +851,7 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                         subtitle: Text(
                           _formatDateTime(item.date),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: AppColors.grey500),
                           overflow: TextOverflow.ellipsis,
                         ),
                         trailing: MoneyText(

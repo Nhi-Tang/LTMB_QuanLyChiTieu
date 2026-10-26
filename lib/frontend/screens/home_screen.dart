@@ -80,19 +80,19 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(context.t('Hủy'), style: const TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accentBeige,
-              foregroundColor: AppColors.darkBeige,
+              foregroundColor: AppColors.onTeal,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () async {
               Navigator.pop(ctx);
               await AuthService().signOut();
             },
-            child: Text(context.t('Đăng xuất'), style: const TextStyle(color: AppColors.darkBeige, fontWeight: FontWeight.bold)),
+            child: Text(context.t('Đăng xuất'), style: TextStyle(color: AppColors.darkBeige, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

@@ -12,6 +12,7 @@ import 'frontend/screens/home_screen.dart';
 import 'frontend/screens/admin_management_screen.dart';
 import 'frontend/utils/app_language.dart';
 import 'frontend/theme/app_colors.dart';
+import 'frontend/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ Future<void> main() async {
   }
   await ProService.instance.init();
   await AppLanguage.instance.load(uid: FirebaseAuth.instance.currentUser?.uid);
+  await AppTheme.instance.load();
   runApp(const MouseyApp());
 }
 
@@ -37,24 +39,38 @@ class MouseyApp extends StatefulWidget {
   State<MouseyApp> createState() => _MouseyAppState();
 }
 
-class _MouseyAppState extends State<MouseyApp> {
+class _MouseyAppState extends State<MouseyApp> with WidgetsBindingObserver {
   static const double uiScale = MouseyApp.uiScale;
 
   @override
   void initState() {
     super.initState();
-    AppLanguage.instance.addListener(_onLanguageChanged);
+    WidgetsBinding.instance.addObserver(this);
+    AppLanguage.instance.addListener(_rebuildAll);
+    AppTheme.instance.addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
-    AppLanguage.instance.removeListener(_onLanguageChanged);
+    WidgetsBinding.instance.removeObserver(this);
+    AppLanguage.instance.removeListener(_rebuildAll);
+    AppTheme.instance.removeListener(_onThemeChanged);
     super.dispose();
   }
 
-  // Đổi ngôn ngữ thì dựng lại toàn bộ cây widget, kể cả các màn hình,
-  // dialog và bottom sheet đang mở, để mọi chữ cùng đổi theo.
-  void _onLanguageChanged() {
+  @override
+  void didChangePlatformBrightness() {
+    AppTheme.instance.onPlatformBrightnessChanged();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
+    _rebuildAll();
+  }
+
+  // Đổi ngôn ngữ hoặc giao diện sáng/tối thì dựng lại toàn bộ cây widget,
+  // kể cả các màn hình, dialog và bottom sheet đang mở, để mọi thứ cùng đổi theo.
+  void _rebuildAll() {
     void rebuild(Element el) {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
@@ -67,6 +83,9 @@ class _MouseyAppState extends State<MouseyApp> {
     return MaterialApp(
       title: 'Mousey',
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: AppTheme.instance.value,
       builder: (context, child) {
         final mq = MediaQuery.of(context);
         final scaledSize = mq.size / uiScale;
@@ -95,17 +114,42 @@ class _MouseyAppState extends State<MouseyApp> {
   }
 }
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  // Giữ stream/future qua các lần dựng lại (đổi ngôn ngữ, sáng/tối) để không
+  // hiện lại màn chờ và không tạo lại HomeScreen, làm mất tab đang mở.
+  final Stream<User?> _authChanges = FirebaseAuth.instance.authStateChanges();
+  String? _uid;
+  Future<UserModel?>? _userFuture;
+
+  Future<UserModel?> _loadUser(User firebaseUser) {
+    if (_userFuture == null || _uid != firebaseUser.uid) {
+      _uid = firebaseUser.uid;
+      _userFuture = DatabaseHelper.instance.getCurrentUser(firebaseUser.uid).then((user) {
+        // Background sync with backend & Pro status (non-blocking on network error)
+        AuthService().syncSessionInBackground(firebaseUser);
+        SyncService.instance.syncAll();
+        ProService.instance.init();
+        return user;
+      });
+    }
+    return _userFuture!;
+  }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
+      stream: _authChanges,
       initialData: FirebaseAuth.instance.currentUser,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
+          return Scaffold(
             backgroundColor: AppColors.tealWhite,
             body: Center(
               child: CircularProgressIndicator(color: AppColors.teal),
@@ -117,10 +161,10 @@ class AuthGate extends StatelessWidget {
           final firebaseUser = snapshot.data!;
 
           return FutureBuilder<UserModel?>(
-            future: DatabaseHelper.instance.getCurrentUser(firebaseUser.uid),
+            future: _loadUser(firebaseUser),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
+                return Scaffold(
                   backgroundColor: AppColors.tealWhite,
                   body: Center(
                     child: CircularProgressIndicator(color: AppColors.teal),
@@ -140,11 +184,6 @@ class AuthGate extends StatelessWidget {
                 createdAt: DateTime.now().toIso8601String(),
               );
 
-              // Background sync with backend & Pro status (non-blocking on network error)
-              AuthService().syncSessionInBackground(firebaseUser);
-              SyncService.instance.syncAll();
-              ProService.instance.init();
-
               if (localUser.isAdmin) {
                 return AdminManagementScreen(
                   key: ValueKey('admin_${firebaseUser.uid}'),
@@ -160,6 +199,8 @@ class AuthGate extends StatelessWidget {
           );
         }
 
+        _uid = null;
+        _userFuture = null;
         return const AuthScreen();
       },
     );

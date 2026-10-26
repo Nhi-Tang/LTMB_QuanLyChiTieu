@@ -22,7 +22,7 @@ class AmountDisplay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.tealPale),
       ),

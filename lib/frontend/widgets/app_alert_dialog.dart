@@ -29,17 +29,17 @@ Future<void> showAppAlertDialog({
       ),
       content: Text(
         message,
-        style: const TextStyle(fontSize: 14, color: Colors.black87),
+        style: TextStyle(fontSize: 14, color: AppColors.black87),
       ),
       actions: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: isSuccess ? AppColors.teal : Colors.red,
-            foregroundColor: isSuccess ? AppColors.tealDark : Colors.white,
+            foregroundColor: isSuccess ? AppColors.onTeal : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: () => Navigator.pop(ctx),
-          child: Text('OK', style: TextStyle(color: isSuccess ? AppColors.tealDark : Colors.white, fontWeight: FontWeight.bold)),
+          child: Text('OK', style: TextStyle(color: isSuccess ? AppColors.onTeal : Colors.white, fontWeight: FontWeight.bold)),
         ),
       ],
     ),

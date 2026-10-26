@@ -93,7 +93,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -134,7 +134,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           ),
           overflow: TextOverflow.ellipsis,
         ),
-        iconTheme: const IconThemeData(color: AppColors.tealDark),
+        iconTheme: IconThemeData(color: AppColors.tealDark),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded, size: 28),
@@ -178,7 +178,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -194,7 +194,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                           Flexible(
                             child: Text(
                               _formatMonthYear(_selectedMonth),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.tealDark,
@@ -203,7 +203,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.tealDark),
+                          Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.tealDark),
                         ],
                       ),
                     ),
@@ -230,7 +230,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.pie_chart_outline_rounded, size: 64, color: AppColors.teal),
+                        Icon(Icons.pie_chart_outline_rounded, size: 64, color: AppColors.teal),
                         const SizedBox(height: 16),
                         Text(
                           context.t('Chưa có ngân sách nào trong tháng này'),

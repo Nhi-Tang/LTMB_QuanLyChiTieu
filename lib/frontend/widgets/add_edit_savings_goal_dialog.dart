@@ -84,7 +84,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
   Widget build(BuildContext context) {
     final lang = context.lang;
     final isEditing = widget.goalToEdit != null;
-    const accentPurple = AppColors.tealLight;
+    final accentPurple = AppColors.tealLight;
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -185,7 +185,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[400]!),
+                      border: Border.all(color: AppColors.grey400),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -194,7 +194,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                         Expanded(
                           child: Row(
                             children: [
-                              const Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey),
+                              Icon(Icons.calendar_today_outlined, size: 18, color: AppColors.grey500),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -202,7 +202,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                                       ? AppTranslations.tr(lang, 'deadline_optional')
                                       : context.t('Hạn: {day}/{month}/{year}', {'day': _selectedDeadline!.day, 'month': _selectedDeadline!.month, 'year': _selectedDeadline!.year}),
                                   style: TextStyle(
-                                    color: _selectedDeadline == null ? Colors.grey[600] : Colors.black87,
+                                    color: _selectedDeadline == null ? AppColors.grey600 : AppColors.black87,
                                     fontWeight: _selectedDeadline != null ? FontWeight.bold : FontWeight.normal,
                                   ),
                                 ),
@@ -210,13 +210,13 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                        Icon(Icons.arrow_drop_down, color: AppColors.grey500),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(AppTranslations.tr(lang, 'choose_icon'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
+                Text(AppTranslations.tr(lang, 'choose_icon'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.grey500)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 10,
@@ -228,7 +228,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isSelected ? accentPurple.withValues(alpha: 0.4) : Colors.grey.shade100,
+                          color: isSelected ? accentPurple.withValues(alpha: 0.4) : AppColors.grey100,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected ? accentPurple : Colors.transparent,
@@ -250,7 +250,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppTranslations.tr(lang, 'cancel'), style: const TextStyle(color: Colors.grey)),
+          child: Text(AppTranslations.tr(lang, 'cancel'), style: TextStyle(color: AppColors.grey500)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -316,7 +316,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
               widget.onSaved();
             }
           },
-          child: Text(isEditing ? AppTranslations.tr(lang, 'save') : AppTranslations.tr(lang, 'create_goal_btn'), style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+          child: Text(isEditing ? AppTranslations.tr(lang, 'save') : AppTranslations.tr(lang, 'create_goal_btn'), style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         ),
       ],
     );

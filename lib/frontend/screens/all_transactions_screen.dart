@@ -56,7 +56,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.tealWhite,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -69,7 +69,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
+                  color: AppColors.grey400,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -82,7 +82,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                 CategoryIcon(
                   categoryOrIconKey: item.category,
                   size: 48,
-                  bgColor: isExpense ? const Color(0xFFFFEBEE) : const Color(0xFFE8F5E9),
+                  bgColor: isExpense ? AppColors.expenseBg : AppColors.incomeBg,
                   iconColor: isExpense ? AppColors.expenseStrong : AppColors.income,
                 ),
                 const SizedBox(width: 14),
@@ -92,12 +92,12 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     children: [
                       Text(
                         item.title.isNotEmpty ? item.title : item.category,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         context.tCategory(item.category),
-                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                        style: TextStyle(fontSize: 13, color: AppColors.grey500),
                       ),
                     ],
                   ),
@@ -110,7 +110,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.tealPale),
               ),
@@ -119,7 +119,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(context.t('Số tiền:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(context.t('Số tiền:'), style: TextStyle(fontSize: 14, color: AppColors.grey500)),
                       MoneyText(
                         amount: item.amount,
                         prefix: isExpense ? '-' : '+',
@@ -135,10 +135,10 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(context.t('Ngày giờ:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(context.t('Ngày giờ:'), style: TextStyle(fontSize: 14, color: AppColors.grey500)),
                       Text(
                         formattedDateTime,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
                       ),
                     ],
                   ),
@@ -146,7 +146,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(context.t('Loại giao dịch:'), style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(context.t('Loại giao dịch:'), style: TextStyle(fontSize: 14, color: AppColors.grey500)),
                       Text(
                         isExpense ? context.t('Chi tiêu (-)') : context.t('Thu nhập (+)'),
                         style: TextStyle(
@@ -192,8 +192,8 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const accentBeige = AppColors.tealPale;
-    const darkBeige = AppColors.tealDark;
+    final accentBeige = AppColors.tealPale;
+    final darkBeige = AppColors.tealDark;
     final lang = context.lang;
     final transactionsList = _filteredTransactions;
 
@@ -202,25 +202,25 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
       appBar: AppBar(
         title: Text(
           AppTranslations.tr(lang, 'recent_transactions'),
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.black87),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: IconThemeData(color: AppColors.black87),
       ),
       body: Column(
         children: [
           // Search & Filter Bar
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.white,
+            color: AppColors.surface,
             child: Column(
               children: [
                 TextField(
                   onChanged: (val) => setState(() => _searchQuery = val.trim()),
                   decoration: InputDecoration(
                     hintText: context.t('Tìm kiếm giao dịch...'),
-                    prefixIcon: const Icon(Icons.search, color: darkBeige),
+                    prefixIcon: Icon(Icons.search, color: darkBeige),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear),
@@ -232,11 +232,11 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.tealPale),
+                      borderSide: BorderSide(color: AppColors.tealPale),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColors.tealPale),
+                      borderSide: BorderSide(color: AppColors.tealPale),
                     ),
                   ),
                 ),
@@ -249,7 +249,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         selected: _filterType == 'all',
                         selectedColor: accentBeige,
                         labelStyle: TextStyle(
-                          color: _filterType == 'all' ? darkBeige : Colors.black87,
+                          color: _filterType == 'all' ? darkBeige : AppColors.black87,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (val) => setState(() => _filterType = 'all'),
@@ -262,7 +262,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         selected: _filterType == 'expense',
                         selectedColor: const Color(0xFFE57373),
                         labelStyle: TextStyle(
-                          color: _filterType == 'expense' ? Colors.white : Colors.black87,
+                          color: _filterType == 'expense' ? Colors.white : AppColors.black87,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (val) => setState(() => _filterType = 'expense'),
@@ -275,7 +275,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         selected: _filterType == 'income',
                         selectedColor: accentBeige,
                         labelStyle: TextStyle(
-                          color: _filterType == 'income' ? darkBeige : Colors.black87,
+                          color: _filterType == 'income' ? darkBeige : AppColors.black87,
                           fontWeight: FontWeight.bold,
                         ),
                         onSelected: (val) => setState(() => _filterType = 'income'),
@@ -296,11 +296,11 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey[400]),
+                        Icon(Icons.receipt_long_outlined, size: 64, color: AppColors.grey400),
                         const SizedBox(height: 12),
                         Text(
                           AppTranslations.tr(lang, 'no_transactions'),
-                          style: TextStyle(color: Colors.grey[600], fontSize: 15),
+                          style: TextStyle(color: AppColors.grey600, fontSize: 15),
                         ),
                       ],
                     ),
@@ -317,7 +317,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surface,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: AppColors.tealPale),
                           ),
@@ -336,17 +336,17 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                                   children: [
                                     Text(
                                       item.title.isNotEmpty ? item.title : item.category,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF212121),
+                                        color: AppColors.pick(const Color(0xFF212121), const Color(0xFFEDEDED)),
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       '${AppTranslations.trCategory(lang, item.category)} · ${_formatDateTime(item.date)}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         color: AppColors.unselectedTab,
                                       ),
