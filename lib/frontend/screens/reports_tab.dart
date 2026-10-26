@@ -5,6 +5,7 @@ import '../../core/widgets/category_icon.dart';
 import '../../core/widgets/money_text.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
+import '../utils/report_utils.dart';
 import '../widgets/mousey_avatar.dart';
 import '../utils/app_language.dart';
 
@@ -79,7 +80,8 @@ class _ReportsTabState extends State<ReportsTab> {
   }
 
   // Dynamic Filtering based on selected type (Chi tiêu / Thu nhập) and Category Filter
-  List<TransactionItem> get _filteredTransactions {
+  /// Giao dịch đúng loại (chi/thu) và danh mục đang lọc, chưa lọc theo thời gian.
+  List<TransactionItem> get _typeFilteredTransactions {
     return widget.transactions.where((t) {
       if (t.isDeleted) return false;
       if (_reportTypeIndex == 0) {
@@ -92,6 +94,13 @@ class _ReportsTabState extends State<ReportsTab> {
       }
       return true;
     }).toList();
+  }
+
+  List<TransactionItem> get _filteredTransactions {
+    final now = DateTime.now();
+    return _typeFilteredTransactions
+        .where((t) => ReportUtils.inTimeRange(_timeRange, t.date, now))
+        .toList();
   }
 
   double get _totalReportAmount {
@@ -628,104 +637,98 @@ class _ReportsTabState extends State<ReportsTab> {
         const SizedBox(height: 10),
 
         // Trend Chart Container
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.tealLight),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MoneyText(
-                          amount: _totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0,
-                          prefix: 'đ',
-                          suffix: '',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${AppTranslations.tr(lang, 'avg_per_month')} · $_trendMonthRange ${AppTranslations.tr(lang, 'recent_months')}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.pick(const Color(0xFF888480), const Color(0xFFA8A39C)),
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [3, 6, 12, 24].map((range) {
-                      final isSel = _trendMonthRange == range;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() => _trendMonthRange = range);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 3),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSel ? AppColors.ink : AppColors.tealLight,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            context.t('{range}t', {'range': range}),
+        Builder(builder: (context) {
+          final trendMonths = ReportUtils.recentMonths(_trendMonthRange, DateTime.now());
+          final trendTotals = ReportUtils.monthlyTotals(_typeFilteredTransactions, trendMonths);
+          final trendAverage = trendTotals.fold(0.0, (a, b) => a + b) / _trendMonthRange;
+          return Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.tealLight),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          MoneyText(
+                            amount: trendAverage,
+                            prefix: 'đ',
+                            suffix: '',
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: isSel ? AppColors.surface : AppColors.pick(const Color(0xFF666666), const Color(0xFFA8A39C)),
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.ink,
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${AppTranslations.tr(lang, 'avg_per_month')} · ${AppTranslations.tr(lang, 'recent_months').replaceAll('{n}', '$_trendMonthRange')}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.pick(const Color(0xFF888480), const Color(0xFFA8A39C)),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [3, 6, 12, 24].map((range) {
+                        final isSel = _trendMonthRange == range;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() => _trendMonthRange = range);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isSel ? AppColors.ink : AppColors.tealLight,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              context.t('{range}t', {'range': range}),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: isSel ? AppColors.surface : AppColors.pick(const Color(0xFF666666), const Color(0xFFA8A39C)),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              SizedBox(
-                height: 180,
-                width: double.infinity,
-                child: CustomPaint(
-                  painter: StackedBarChartPainter(
-                    months: _getRecent6MonthsLabels(),
-                    transactions: _filteredTransactions,
+                SizedBox(
+                  height: 180,
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: StackedBarChartPainter(
+                      months: trendMonths.map((m) => AppTranslations.formatMonthShort(lang, m)).toList(),
+                      totals: trendTotals,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        }),
       ],
     );
-  }
-
-  List<String> _getRecent6MonthsLabels() {
-    final lang = context.lang;
-    final now = DateTime.now();
-    final List<String> labels = [];
-    for (int i = 5; i >= 0; i--) {
-      final m = DateTime(now.year, now.month - i, 1);
-      labels.add(AppTranslations.formatMonthShort(lang, m));
-    }
-    return labels;
   }
 
   Widget _buildSegmentTab(int index, String label) {
@@ -980,55 +983,47 @@ class DonutChartPainter extends CustomPainter {
 // --- STACKED BAR CHART PAINTER ---
 class StackedBarChartPainter extends CustomPainter {
   final List<String> months;
-  final List<TransactionItem> transactions;
+  final List<double> totals;
 
-  StackedBarChartPainter({required this.months, required this.transactions});
+  StackedBarChartPainter({required this.months, required this.totals});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double barWidth = 26.0;
-    final double spacing = (size.width - (months.length * barWidth)) / (months.length + 1);
+    final count = months.length;
+    if (count == 0) return;
+    // Cột co lại khi nhiều tháng (12t, 24t) để vẫn vừa khung
+    final double barWidth = math.min(26.0, size.width / count * 0.6);
+    final double spacing = (size.width - (count * barWidth)) / (count + 1);
+    // Chỉ ghi nhãn cách quãng để chữ không chồng lên nhau
+    final int labelStep = count <= 6 ? 1 : (count <= 12 ? 2 : 4);
 
-    final now = DateTime.now();
-    final List<double> monthlyTotals = List.filled(months.length, 0.0);
-
-    for (var t in transactions) {
-      for (int i = 0; i < months.length; i++) {
-        final targetMonth = DateTime(now.year, now.month - (5 - i), 1);
-        if (t.date.year == targetMonth.year && t.date.month == targetMonth.month) {
-          monthlyTotals[i] += t.amount;
-        }
-      }
-    }
-
-    double maxVal = monthlyTotals.fold(0.0, math.max);
+    double maxVal = totals.fold(0.0, math.max);
     if (maxVal == 0) maxVal = 100000.0;
 
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    final chartHeight = size.height - 28;
+    final radius = Radius.circular(math.min(6.0, barWidth / 2));
 
-    for (int i = 0; i < months.length; i++) {
+    for (int i = 0; i < count; i++) {
       final x = spacing + i * (barWidth + spacing);
-      final chartHeight = size.height - 28;
 
       // Draw light background column
       final bgPaint = Paint()..color = AppColors.tealWhite;
-      final RRect bgRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(x, 0, barWidth, chartHeight),
-        const Radius.circular(6),
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(Rect.fromLTWH(x, 0, barWidth, chartHeight), radius),
+        bgPaint,
       );
-      canvas.drawRRect(bgRect, bgPaint);
 
       // Draw filled bar
-      final val = monthlyTotals[i];
+      final val = totals[i];
       if (val > 0) {
         final segH = (val / maxVal) * chartHeight;
         final segPaint = Paint()..color = AppColors.tealLight;
-
-        final segRect = Rect.fromLTWH(x, chartHeight - segH, barWidth, segH);
-        canvas.drawRect(segRect, segPaint);
+        canvas.drawRect(Rect.fromLTWH(x, chartHeight - segH, barWidth, segH), segPaint);
       }
 
-      // Draw Month Label below bar
+      // Nhãn tháng dưới cột; luôn ghi tháng hiện tại (cột cuối)
+      if ((count - 1 - i) % labelStep != 0) continue;
       textPainter.text = TextSpan(
         text: months[i],
         style: TextStyle(
