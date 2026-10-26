@@ -358,6 +358,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
               Text(
                 context.t('Hạn mức (VNĐ)'),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -372,6 +373,8 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
+                  hintText: context.t('VD: {amount}', {'amount': '5.000.000'}),
+                  hintStyle: TextStyle(color: Colors.grey[400]),
                   suffixText: 'đ',
                 ),
                 validator: (value) {
