@@ -105,9 +105,9 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Color(0xFFFBF3E8),
+            backgroundColor: Color(0xFFF5FDFD),
             body: Center(
-              child: CircularProgressIndicator(color: Color(0xFF2F5233)),
+              child: CircularProgressIndicator(color: Color(0xFF00BFB5)),
             ),
           );
         }
@@ -120,9 +120,9 @@ class AuthGate extends StatelessWidget {
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
-                  backgroundColor: Color(0xFFFBF3E8),
+                  backgroundColor: Color(0xFFF5FDFD),
                   body: Center(
-                    child: CircularProgressIndicator(color: Color(0xFF2F5233)),
+                    child: CircularProgressIndicator(color: Color(0xFF00BFB5)),
                   ),
                 );
               }

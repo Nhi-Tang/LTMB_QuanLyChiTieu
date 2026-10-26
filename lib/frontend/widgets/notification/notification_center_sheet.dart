@@ -206,7 +206,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
     return Container(
       height: media.size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Color(0xFFFFF7EB),
+        color: Color(0xFFF5FDFD),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -374,11 +374,11 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       onDismissed: (_) => _deleteNotification(notif.id),
       child: Card(
         margin: const EdgeInsets.only(bottom: 10),
-        color: notif.isRead ? Colors.white : const Color(0xFFFFFDF9),
+        color: notif.isRead ? Colors.white : const Color(0xFFF5FDFD),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: notif.isRead ? const Color(0xFFECE7DB) : AppColors.primary.withValues(alpha: 0.4),
+            color: notif.isRead ? const Color(0xFFCCF7F7) : AppColors.primary.withValues(alpha: 0.4),
             width: notif.isRead ? 1 : 1.5,
           ),
         ),
