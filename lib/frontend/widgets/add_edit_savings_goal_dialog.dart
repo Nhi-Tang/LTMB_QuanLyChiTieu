@@ -86,7 +86,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
   Widget build(BuildContext context) {
     final lang = context.lang;
     final isEditing = widget.goalToEdit != null;
-    const accentPurple = Color(0xFFD4CCE2);
+    const accentPurple = Color(0xFF66EBE5);
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

@@ -25,7 +25,7 @@ class TransactionTypeSwitcher extends StatelessWidget {
         children: [
           _buildTab(0, context.t('Chi tiêu'), Icons.arrow_downward_rounded, MouseyColors.expenseRed),
           _buildTab(1, context.t('Thu nhập'), Icons.arrow_upward_rounded, MouseyColors.incomeGreen),
-          _buildTab(2, context.t('Ngân sách'), Icons.pie_chart_outline_rounded, const Color(0xFF5D4222)),
+          _buildTab(2, context.t('Ngân sách'), Icons.pie_chart_outline_rounded, const Color(0xFF00463E)),
         ],
       ),
     );

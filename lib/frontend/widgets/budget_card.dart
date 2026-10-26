@@ -54,7 +54,7 @@ class BudgetCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.brown.withValues(alpha: 0.08),
+              color: const Color(0xFF00463E).withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -80,7 +80,7 @@ class BudgetCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF5D4222),
+                          color: Color(0xFF00463E),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

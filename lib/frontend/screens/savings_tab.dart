@@ -101,7 +101,7 @@ class _SavingsTabState extends State<SavingsTab> {
               gradient: const LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [Color(0xFF9282FF), Color(0xFF5748AE)],
+                colors: [Color(0xFF00D1CC), Color(0xFF00BFB5)],
               ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
@@ -252,7 +252,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: const Color(0xFFEFE8F6)),
+                        border: Border.all(color: const Color(0xFFCCF7F7)),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -338,7 +338,7 @@ class _SavingsTabState extends State<SavingsTab> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFFCCC6E1)),
+                              border: Border.all(color: const Color(0xFF66EBE5)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,7 +349,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                       width: 44,
                                       height: 44,
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFFE6E8F2),
+                                        color: Color(0xFFCCF7F7),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
@@ -415,7 +415,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                   child: LinearProgressIndicator(
                                     value: progress.clamp(0.0, 1.0),
                                     minHeight: 10,
-                                    backgroundColor: const Color(0xFFCCC6E1),
+                                    backgroundColor: const Color(0xFF66EBE5),
                                     valueColor: const AlwaysStoppedAnimation<Color>(accentBeigy),
                                   ),
                                 ),
@@ -424,7 +424,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFEAEAF9),
+                                      color: const Color(0xFFCCF7F7),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(

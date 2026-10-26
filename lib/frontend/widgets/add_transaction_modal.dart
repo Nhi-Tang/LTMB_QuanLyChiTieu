@@ -27,7 +27,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
 
-  static const Color accentBeige = Color(0xFFE5D3AF);
+  static const Color accentBeige = Color(0xFF66EBE5);
 
   @override
   void initState() {

@@ -17,7 +17,7 @@ class TransactionTypeTabs extends StatelessWidget {
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFECE7DB),
+        color: const Color(0xFFCCF7F7),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
