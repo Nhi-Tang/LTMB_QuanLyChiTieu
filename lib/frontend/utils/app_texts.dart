@@ -456,4 +456,5 @@ const Map<String, List<String>> appTexts = {
   '(Bạn)': ['(You)', '（あなた）', '（你）', '(나)'],
   'Khóa TK': ['Lock account', 'アカウントをロック', '锁定账户', '계정 잠금'],
   'Mở khóa': ['Unlock', 'ロック解除', '解锁', '잠금 해제'],
+  'VD: {amount}': ['e.g. {amount}', '例：{amount}', '例如：{amount}', '예: {amount}'],
 };

@@ -121,6 +121,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                   decoration: InputDecoration(
                     labelText: AppTranslations.tr(lang, 'goal_name'),
                     hintText: context.t('VD: Mua laptop, Du lịch Đà Lạt...'),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập tên mục tiêu') : null,
@@ -132,7 +133,8 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                   inputFormatters: [MoneyInputFormatter()],
                   decoration: InputDecoration(
                     labelText: AppTranslations.tr(lang, 'target_amount'),
-                    hintText: 'VD: 20.000.000',
+                    hintText: context.t('VD: {amount}', {'amount': '20.000.000'}),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) {
@@ -150,7 +152,8 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                     inputFormatters: [MoneyInputFormatter()],
                     decoration: InputDecoration(
                       labelText: AppTranslations.tr(lang, 'initial_amount'),
-                      hintText: 'VD: 2.000.000',
+                      hintText: context.t('VD: {amount}', {'amount': '2.000.000'}),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     validator: (v) {
