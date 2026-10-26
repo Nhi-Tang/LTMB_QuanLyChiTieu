@@ -65,6 +65,7 @@ Lưu ý gói free:
 | GET | `/subscription/check-order/{orderId}` | `pending` / `paid` / `expired` / `underpaid` |
 | POST | `/subscription/mock-pay` | Chỉ khi `ENABLE_MOCK_PAY=true` (dev) |
 | POST | `/subscription/webhook/bank` | Cổng thanh toán báo có tiền vào |
+| POST | `/admin/users/{uid}/active` | Chỉ Admin: `{active}` khóa/mở tài khoản (vô hiệu hóa ở Firebase Auth, thu hồi phiên, ghi `isActive`) |
 
 Mọi endpoint (trừ `/subscription/plans` và webhook) cần header `Authorization: Bearer <Firebase ID token>`.
 

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
+import '../../backend/services/api_client.dart';
 import '../../backend/services/auth_service.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
@@ -146,6 +147,22 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     );
   }
 
+  /// Khóa/mở tài khoản qua backend: Firebase vô hiệu hóa user (chặn đăng nhập, thu hồi phiên)
+  /// và ghi isActive lên Firestore. Trước đây chỉ sửa SQLite của máy Admin nên lần tải
+  /// danh sách sau lấy lại isActive từ Firestore và khóa mất tác dụng.
+  Future<void> _setUserActive(UserModel user, bool active) async {
+    final uid = user.uid;
+    if (uid == null || uid.isEmpty) {
+      throw Exception(context.t('Tài khoản chưa đồng bộ lên máy chủ, không thể khóa.'));
+    }
+    try {
+      await ApiClient.instance.post('/admin/users/$uid/active', {'active': active});
+    } on ApiException catch (e) {
+      throw Exception(e.message);
+    }
+    await _dbHelper.insertOrUpdateUser(user.copyWith(isActive: active));
+  }
+
   Future<void> _toggleUserStatus(UserModel user) async {
     if (user.id == widget.currentAdmin.id) {
       if (!mounted) return;
@@ -157,7 +174,17 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       return;
     }
 
-    await _dbHelper.toggleUserActiveStatus(user.id!, user.isActive);
+    try {
+      await _setUserActive(user, !user.isActive);
+    } catch (e) {
+      if (!mounted) return;
+      _showAlertDialog(
+        title: context.t('Lỗi'),
+        message: e.toString().replaceAll('Exception: ', ''),
+        isSuccess: false,
+      );
+      return;
+    }
     if (!mounted) return;
     await _loadUsers();
     if (!mounted) return;
@@ -382,6 +409,9 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                           );
                         }
 
+                        if (isActive != userToEdit.isActive) {
+                          await _setUserActive(userToEdit, isActive);
+                        }
                         final updatedUser = userToEdit.copyWith(
                           name: newName,
                           email: newEmail,

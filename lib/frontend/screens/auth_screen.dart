@@ -36,6 +36,19 @@ class _AuthScreenState extends State<AuthScreen> {
   static final RegExp _asciiRegex = RegExp(r'^[\x20-\x7E]+$');
 
   @override
+  void initState() {
+    super.initState();
+    // App vừa tự đăng xuất (vd. tài khoản bị Admin khóa): báo cho người dùng biết lý do
+    final notice = AuthService.pendingNotice;
+    if (notice != null) {
+      AuthService.pendingNotice = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showAlertDialog(title: context.t('Tài khoản bị khóa'), message: notice, isSuccess: false);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -276,6 +289,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } catch (e) {
       if (mounted) {
+        AuthService.pendingNotice = null; // đã báo ngay tại đây
         _showAlertDialog(
           title: context.t('Thông báo'),
           message: e.toString().replaceAll('Exception: ', ''),
@@ -296,6 +310,7 @@ class _AuthScreenState extends State<AuthScreen> {
       // AuthGate will automatically handle navigation via authStateChanges()
     } catch (e) {
       if (mounted) {
+        AuthService.pendingNotice = null; // đã báo ngay tại đây
         _showAlertDialog(
           title: context.t('Đăng nhập Google thất bại'),
           message: e.toString().replaceAll('Exception: ', ''),
