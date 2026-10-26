@@ -180,7 +180,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.tealWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -191,7 +191,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.shade400,
+              color: AppColors.grey400,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -265,7 +265,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.surface,
                     ),
                     items: [
                       DropdownMenuItem(value: 'current', child: Text(context.t('Sổ đang dùng'))),
@@ -285,7 +285,7 @@ class _ExportOptionsBottomSheetState extends State<ExportOptionsBottomSheet> {
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: AppColors.surface,
                       ),
                       items: _ledgers.map((l) => DropdownMenuItem(
                         value: l['id'].toString(),

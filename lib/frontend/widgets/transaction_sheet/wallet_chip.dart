@@ -26,18 +26,18 @@ class WalletChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppColors.tealDark),
+            Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppColors.tealDark),
             const SizedBox(width: 6),
             Text(
               selectedWallet,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: AppColors.tealDark,
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.tealDark),
+            Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.tealDark),
           ],
         ),
       ),

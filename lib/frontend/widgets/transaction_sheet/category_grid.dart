@@ -64,7 +64,7 @@ class _CategoryGridState extends State<CategoryGrid> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Expanded(
+      return Expanded(
         child: Center(
           child: SizedBox(
             width: 24,
@@ -112,7 +112,7 @@ class _CategoryGridState extends State<CategoryGrid> {
               children: [
                 Text(
                   context.t('DANH MỤC'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
@@ -121,7 +121,7 @@ class _CategoryGridState extends State<CategoryGrid> {
                 ),
                 Text(
                   context.tCategory(widget.selectedCategory),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: MouseyColors.selectedBorder,

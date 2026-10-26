@@ -38,7 +38,7 @@ class TransactionTypeTabs extends StatelessWidget {
         onTap: () => onTabChanged(index),
         child: Container(
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? AppColors.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
             boxShadow: isSelected
                 ? [
@@ -54,14 +54,14 @@ class TransactionTypeTabs extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: isSelected ? color : Colors.grey[700]),
+              Icon(icon, size: 16, color: isSelected ? color : AppColors.grey700),
               const SizedBox(width: 4),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  color: isSelected ? Colors.black87 : Colors.grey[700],
+                  color: isSelected ? AppColors.black87 : AppColors.grey700,
                 ),
               ),
             ],

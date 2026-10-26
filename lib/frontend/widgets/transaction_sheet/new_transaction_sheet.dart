@@ -11,6 +11,7 @@ import 'mousey_colors.dart';
 import 'show_note_sheet.dart';
 import 'transaction_type_switcher.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
 class NewTransactionSheet extends StatefulWidget {
   final TransactionItem? editingTransaction;
@@ -148,7 +149,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: MouseyColors.backgroundCream,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -161,7 +162,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[400],
+                color: AppColors.grey400,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -177,7 +178,7 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                 ),
                 Text(
                   widget.editingTransaction != null ? context.t('Sửa giao dịch') : context.t('Giao dịch mới'),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MouseyColors.textMain),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MouseyColors.textMain),
                 ),
                 const SizedBox(width: 48),
               ],

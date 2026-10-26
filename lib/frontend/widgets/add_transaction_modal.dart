@@ -26,7 +26,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
   final titleController = TextEditingController();
   final amountController = TextEditingController();
 
-  static const Color accentBeige = AppColors.tealLight;
+  static Color get accentBeige => AppColors.tealLight;
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
               width: 44,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.grey300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -90,7 +90,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                   selected: isExpense,
                   selectedColor: const Color(0xFFE57373),
                   labelStyle: TextStyle(
-                    color: isExpense ? Colors.white : Colors.black87,
+                    color: isExpense ? Colors.white : AppColors.black87,
                     fontWeight: FontWeight.bold,
                   ),
                   onSelected: (val) {
@@ -108,7 +108,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
                   selected: !isExpense,
                   selectedColor: accentBeige,
                   labelStyle: TextStyle(
-                    color: !isExpense ? Colors.white : Colors.black87,
+                    color: !isExpense ? Colors.white : AppColors.black87,
                     fontWeight: FontWeight.bold,
                   ),
                   onSelected: (val) {
@@ -129,7 +129,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             decoration: InputDecoration(
               labelText: AppTranslations.tr(lang, 'transaction_title'),
               hintText: category,
-              prefixIcon: const Icon(Icons.edit_note, color: accentBeige),
+              prefixIcon: Icon(Icons.edit_note, color: accentBeige),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
           ),
@@ -143,7 +143,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
             decoration: InputDecoration(
               labelText: AppTranslations.tr(lang, 'amount'),
               hintText: 'VD: 500000',
-              prefixIcon: const Icon(Icons.attach_money, color: accentBeige),
+              prefixIcon: Icon(Icons.attach_money, color: accentBeige),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
           ),

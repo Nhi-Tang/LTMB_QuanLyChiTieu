@@ -82,7 +82,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -136,7 +136,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                                 _isNotificationPermissionGranted
                                     ? context.t('Mousey đã sẵn sàng tự động ghi nhận giao dịch ngân hàng.')
                                     : context.t('Vui lòng hoàn thành Hướng dẫn bên dưới để bật tính năng.'),
-                                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                                style: TextStyle(fontSize: 12, color: AppColors.black87),
                               ),
                             ],
                           ),
@@ -164,7 +164,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF3E0),
+                      color: AppColors.warningBg,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.orange.shade300),
                     ),
@@ -220,7 +220,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.tealPale),
                       boxShadow: [
@@ -266,7 +266,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -279,7 +279,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.shield_rounded, color: AppColors.primary, size: 24),
+                        Icon(Icons.shield_rounded, color: AppColors.primary, size: 24),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -296,7 +296,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
                               const SizedBox(height: 6),
                               Text(
                                 context.t('Mousey chỉ đọc thông báo từ danh sách các ứng dụng ngân hàng được hỗ trợ. Dữ liệu số dư và giao dịch được xử lý hoàn toàn trên thiết bị và lưu trữ trong cơ sở dữ liệu SQLite của bạn.'),
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.4),
+                                style: TextStyle(fontSize: 12, color: AppColors.grey700, height: 1.4),
                               ),
                             ],
                           ),
@@ -316,9 +316,9 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(brand, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
+          Text(brand, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
           const SizedBox(height: 2),
-          Text(text, style: TextStyle(fontSize: 12, color: Colors.grey.shade800, height: 1.3)),
+          Text(text, style: TextStyle(fontSize: 12, color: AppColors.grey800, height: 1.3)),
         ],
       ),
     );
@@ -336,7 +336,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -369,7 +369,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppColors.darkBeige,
@@ -381,7 +381,7 @@ class _PermissionGuideScreenState extends State<PermissionGuideScreen> with Widg
           const SizedBox(height: 10),
           Text(
             description,
-            style: const TextStyle(fontSize: 13, color: Colors.black87, height: 1.4),
+            style: TextStyle(fontSize: 13, color: AppColors.black87, height: 1.4),
           ),
           const SizedBox(height: 14),
           SizedBox(

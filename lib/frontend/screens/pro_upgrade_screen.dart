@@ -93,7 +93,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [AppColors.cardGradientStart, AppColors.cardGradientEnd],
                       begin: Alignment.topLeft,
@@ -107,7 +107,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
+                            icon: Icon(Icons.close_rounded, color: AppColors.textPrimary),
                             onPressed: () => Navigator.pop(context),
                           ),
                         ],
@@ -121,7 +121,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                       const SizedBox(height: 16),
                       Text(
                         AppTranslations.tr(lang, 'pro_upgrade_title'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -131,7 +131,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                       const SizedBox(height: 6),
                       Text(
                         AppTranslations.tr(lang, 'pro_upgrade_subtitle'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textSecondary,
                         ),
@@ -144,7 +144,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
 
                 Text(
                   AppTranslations.tr(lang, 'pro_benefits'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -175,7 +175,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
 
                 Text(
                   AppTranslations.tr(lang, 'choose_plan'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -239,7 +239,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                           child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary, width: 1.5),
+                              side: BorderSide(color: AppColors.primary, width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -287,7 +287,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -296,7 +296,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),

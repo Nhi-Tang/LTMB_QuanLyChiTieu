@@ -12,8 +12,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  static const Color primaryBeige = AppColors.teal;
-  static const Color themeColor = AppColors.tealPale;
+  static Color get primaryBeige => AppColors.teal;
+  static Color get themeColor => AppColors.tealPale;
 
   bool _isLogin = true;
 
@@ -74,7 +74,7 @@ class _AuthScreenState extends State<AuthScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
               children: [
-                const Icon(Icons.lock_reset_rounded, color: primaryBeige, size: 28),
+                Icon(Icons.lock_reset_rounded, color: primaryBeige, size: 28),
                 const SizedBox(width: 8),
                 Text(
                   step == 1 ? context.t('Khôi phục mật khẩu') : context.t('Đặt lại mật khẩu mới'),
@@ -91,7 +91,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   if (step == 1) ...[
                     Text(
                       context.t('Nhập email hoặc số điện thoại đã đăng ký tài khoản của bạn:'),
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                      style: TextStyle(fontSize: 13, color: AppColors.grey500),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -107,7 +107,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ] else ...[
                     Text(
                       context.t('Tài khoản: {verifiedEmail}', {'verifiedEmail': verifiedEmail}),
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.black87),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -146,12 +146,12 @@ class _AuthScreenState extends State<AuthScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogCtx),
-                child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
+                child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryBeige,
-                  foregroundColor: AppColors.tealDark,
+                  foregroundColor: AppColors.onTeal,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: isLoading
@@ -206,14 +206,14 @@ class _AuthScreenState extends State<AuthScreen> {
                         }
                       },
                 child: isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.tealDark),
                       )
                     : Text(
                         step == 1 ? context.t('TIẾP TỤC') : context.t('CẬP NHẬT MẬT KHẨU'),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.tealDark),
                       ),
               ),
             ],
@@ -338,7 +338,7 @@ class _AuthScreenState extends State<AuthScreen> {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: selected ? Colors.grey[700] : Colors.black,
+                color: selected ? AppColors.grey700 : AppColors.black,
               ),
             ),
           ),
@@ -349,7 +349,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: Colors.grey[500],
+        color: AppColors.grey500,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -364,7 +364,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.pageBg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -402,7 +402,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[500],
+                    color: AppColors.grey500,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -411,7 +411,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   context.t('Quản lý chi tiêu thông minh & hiệu quả'),
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[500],
+                    color: AppColors.grey500,
                   ),
                 ),
 
@@ -421,7 +421,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 Container(
                   padding: const EdgeInsets.all(20.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -589,7 +589,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             elevation: 2,
                           ),
                           child: _isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
@@ -599,7 +599,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           )
                               : Text(
                             _isLogin ? context.t('Đăng nhập') : context.t('Đăng ký tài khoản'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.tealDark,
@@ -613,7 +613,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(color: Colors.grey[300], thickness: 1),
+                              child: Divider(color: AppColors.grey300, thickness: 1),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -621,13 +621,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                 context.t('Hoặc tiếp tục với'),
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey[600],
+                                  color: AppColors.grey600,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
                             Expanded(
-                              child: Divider(color: Colors.grey[300], thickness: 1),
+                              child: Divider(color: AppColors.grey300, thickness: 1),
                             ),
                           ],
                         ),
@@ -639,7 +639,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           onPressed: _isLoading ? null : _handleGoogleLogin,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: Colors.grey[300]!),
+                            side: BorderSide(color: AppColors.grey300),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -664,10 +664,10 @@ class _AuthScreenState extends State<AuthScreen> {
                               const SizedBox(width: 12),
                               Text(
                                 _isLogin ? context.t('Đăng nhập bằng Google') : context.t('Đăng ký bằng Google'),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
+                                  color: AppColors.black87,
                                 ),
                               ),
                             ],
@@ -685,7 +685,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[500],
+                    color: AppColors.grey500,
                   ),
                 ),
               ],

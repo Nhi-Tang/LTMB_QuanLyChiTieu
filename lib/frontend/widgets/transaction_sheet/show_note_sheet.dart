@@ -102,7 +102,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
       ),
       child: Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.tealWhite,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(top: BorderSide(color: AppColors.tealPale, width: 1.5)),
@@ -118,7 +118,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
+                    color: AppColors.grey400,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -128,12 +128,12 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
               // Title Header
               Row(
                 children: [
-                  const Icon(Icons.edit_note_rounded, color: AppColors.darkBeige, size: 24),
+                  Icon(Icons.edit_note_rounded, color: AppColors.darkBeige, size: 24),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       AppTranslations.tr(lang, 'enter_note_title'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.darkBeige,
@@ -151,23 +151,23 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                 autofocus: true,
                 maxLength: 120,
                 maxLines: 3,
-                style: const TextStyle(fontSize: 14, color: AppColors.darkBeige, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 14, color: AppColors.darkBeige, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
                   hintText: AppTranslations.tr(lang, 'note_hint'),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.surface,
                   contentPadding: const EdgeInsets.all(14),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.tealPale),
+                    borderSide: BorderSide(color: AppColors.tealPale),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.tealPale),
+                    borderSide: BorderSide(color: AppColors.tealPale),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
                   ),
                 ),
               ),
@@ -177,7 +177,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
               if (!_isLoadingRecent && _recentNotes.isNotEmpty) ...[
                 Text(
                   AppTranslations.tr(lang, 'recent_suggestions'),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.grey500),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -185,12 +185,12 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                   runSpacing: 6,
                   children: _recentNotes.map((note) {
                     return ActionChip(
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: AppColors.tealPale),
+                      backgroundColor: AppColors.surface,
+                      side: BorderSide(color: AppColors.tealPale),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       label: Text(
                         note,
-                        style: const TextStyle(fontSize: 12, color: AppColors.darkBeige, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 12, color: AppColors.darkBeige, fontWeight: FontWeight.w500),
                       ),
                       onPressed: () {
                         setState(() {
@@ -210,7 +210,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: AppColors.tealPale),
+                        side: BorderSide(color: AppColors.tealPale),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {
@@ -220,7 +220,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                       },
                       child: Text(
                         AppTranslations.tr(lang, 'clear'),
-                        style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: AppColors.grey500, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -229,7 +229,7 @@ class _NoteSheetWidgetState extends State<_NoteSheetWidget> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.darkBeige,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.surface,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),

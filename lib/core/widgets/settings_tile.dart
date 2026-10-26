@@ -5,16 +5,16 @@ import '../../frontend/theme/app_colors.dart';
 class SettingsTileGroup extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsetsGeometry? margin;
-  final Color backgroundColor;
-  final Color borderColor;
+  final Color? backgroundColor;
+  final Color? borderColor;
   final double borderRadius;
 
   const SettingsTileGroup({
     super.key,
     required this.children,
     this.margin,
-    this.backgroundColor = Colors.white,
-    this.borderColor = AppColors.borderBeige,
+    this.backgroundColor,
+    this.borderColor,
     this.borderRadius = 20.0,
   });
 
@@ -23,9 +23,9 @@ class SettingsTileGroup extends StatelessWidget {
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: backgroundColor ?? AppColors.surface,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: borderColor ?? AppColors.borderBeige),
       ),
       child: Material(
         color: Colors.transparent,

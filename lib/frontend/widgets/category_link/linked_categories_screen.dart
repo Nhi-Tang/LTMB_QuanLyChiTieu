@@ -230,7 +230,7 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
           ),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))
+                ? Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))
                 : _categories.isEmpty
                     ? Center(
                         child: Text(

@@ -56,7 +56,7 @@ class _ReportsTabState extends State<ReportsTab> {
       case 'Bảo hiểm':
         return const Color(0xFF3949AB);
       case 'Thuế':
-        return const Color(0xFF5D4037);
+        return AppColors.pick(const Color(0xFF5D4037), const Color(0xFFC8C8D0));
       case 'Công việc':
         return const Color(0xFF455A64);
       case 'Nhà ở':
@@ -228,18 +228,18 @@ class _ReportsTabState extends State<ReportsTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.tealLight),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_month_outlined, size: 18, color: Color(0xFF4A463D)),
+                        Icon(Icons.calendar_month_outlined, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             AppTranslations.tr(lang, _timeRange),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: AppColors.ink,
@@ -248,7 +248,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.keyboard_arrow_down, size: 18, color: Color(0xFF4A463D)),
+                        Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
                       ],
                     ),
                   ),
@@ -262,7 +262,7 @@ class _ReportsTabState extends State<ReportsTab> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : Colors.white,
+                      color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : AppColors.background,
@@ -270,14 +270,14 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF4A463D)),
+                        Icon(Icons.tune_rounded, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             _selectedCategoryFilter != 'Tất cả'
                                 ? AppTranslations.trCategory(lang, _selectedCategoryFilter)
                                 : AppTranslations.tr(lang, 'filter'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: AppColors.ink,
@@ -317,7 +317,7 @@ class _ReportsTabState extends State<ReportsTab> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [AppColors.tealBright, AppColors.mint],
@@ -370,7 +370,7 @@ class _ReportsTabState extends State<ReportsTab> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: AppColors.surface.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
                 ),
@@ -407,7 +407,7 @@ class _ReportsTabState extends State<ReportsTab> {
         // Section: CHI TIẾT / NGUỒN THU
         Text(
           _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'income_sources') : AppTranslations.tr(lang, 'details'),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.0,
@@ -422,7 +422,7 @@ class _ReportsTabState extends State<ReportsTab> {
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: AppColors.tealLight),
           ),
@@ -443,7 +443,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       const SizedBox(height: 12),
                       Text(
                         _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'no_income_data') : AppTranslations.tr(lang, 'no_report_data'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.ink,
@@ -456,7 +456,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             ? AppTranslations.tr(lang, 'add_income_for_analysis')
                             : AppTranslations.tr(lang, 'add_transaction_for_analysis'),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: TextStyle(fontSize: 12, color: AppColors.grey500),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -506,7 +506,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                           Expanded(
                                             child: Text(
                                               AppTranslations.trCategory(lang, cat['name'] as String),
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w600,
                                                 color: AppColors.ink,
@@ -521,7 +521,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     Flexible(
                                       child: Text(
                                         '${(cat['percentage'] as double).toStringAsFixed(1)}%',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.ink,
@@ -539,7 +539,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
 
                     const SizedBox(height: 20),
-                    const Divider(color: AppColors.tealLight, height: 1),
+                    Divider(color: AppColors.tealLight, height: 1),
                     const SizedBox(height: 12),
 
                     // Category List with Progress Bars
@@ -565,7 +565,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                       Container(
                                         width: 38,
                                         height: 38,
-                                        decoration: const BoxDecoration(
+                                        decoration: BoxDecoration(
                                           color: AppColors.tealLight,
                                           shape: BoxShape.circle,
                                         ),
@@ -580,7 +580,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                       Expanded(
                                         child: Text(
                                           AppTranslations.trCategory(lang, cat['name'] as String),
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
                                             color: AppColors.ink,
@@ -598,7 +598,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                     prefix: 'đ',
                                     suffix: '',
                                     alignment: Alignment.centerRight,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.ink,
@@ -627,7 +627,7 @@ class _ReportsTabState extends State<ReportsTab> {
                                   child: Text(
                                     '${pct.toStringAsFixed(1)}%',
                                     textAlign: TextAlign.right,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textMuted,
@@ -656,10 +656,10 @@ class _ReportsTabState extends State<ReportsTab> {
                             _showAllCategories
                                 ? context.t('Thu gọn ^')
                                 : context.t('Hiện tất cả ({count}) v', {'count': categories.length}),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF555048),
+                              color: AppColors.pick(const Color(0xFF555048), const Color(0xFFC8C8D0)),
                             ),
                           ),
                         ),
@@ -672,40 +672,15 @@ class _ReportsTabState extends State<ReportsTab> {
         const SizedBox(height: 24),
 
         // Section: XU HƯỚNG
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                AppTranslations.tr(lang, 'trend'),
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                  color: AppColors.textMuted,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.tealLight,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: const [
-                  _SmallPillText('N'),
-                  SizedBox(width: 8),
-                  _SmallPillText('T'),
-                  SizedBox(width: 8),
-                  _SmallPillText('T', isActive: true),
-                  SizedBox(width: 8),
-                  _SmallPillText('N'),
-                ],
-              ),
-            ),
-          ],
+        Text(
+          AppTranslations.tr(lang, 'trend'),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
+            color: AppColors.textMuted,
+          ),
+          overflow: TextOverflow.ellipsis,
         ),
 
         const SizedBox(height: 10),
@@ -714,7 +689,7 @@ class _ReportsTabState extends State<ReportsTab> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: AppColors.tealLight),
           ),
@@ -732,7 +707,7 @@ class _ReportsTabState extends State<ReportsTab> {
                           amount: _totalReportAmount > 0 ? _totalReportAmount / _trendMonthRange : 0,
                           prefix: 'đ',
                           suffix: '',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w900,
                             color: AppColors.ink,
@@ -741,9 +716,9 @@ class _ReportsTabState extends State<ReportsTab> {
                         const SizedBox(height: 2),
                         Text(
                           '${AppTranslations.tr(lang, 'avg_per_month')} · $_trendMonthRange ${AppTranslations.tr(lang, 'recent_months')}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF888480),
+                            color: AppColors.pick(const Color(0xFF888480), const Color(0xFFA8A39C)),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -771,7 +746,7 @@ class _ReportsTabState extends State<ReportsTab> {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: isSel ? Colors.white : const Color(0xFF666666),
+                              color: isSel ? AppColors.surface : AppColors.pick(const Color(0xFF666666), const Color(0xFFA8A39C)),
                             ),
                           ),
                         ),
@@ -806,7 +781,7 @@ class _ReportsTabState extends State<ReportsTab> {
     final List<String> labels = [];
     for (int i = 5; i >= 0; i--) {
       final m = DateTime(now.year, now.month - i, 1);
-      labels.add(AppTranslations.formatMonthYear(lang, m).split(' ')[0]);
+      labels.add(AppTranslations.formatMonthShort(lang, m));
     }
     return labels;
   }
@@ -824,7 +799,7 @@ class _ReportsTabState extends State<ReportsTab> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSel ? Colors.white : Colors.transparent,
+            color: isSel ? AppColors.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
             boxShadow: isSel
                 ? [
@@ -867,7 +842,7 @@ class _ReportsTabState extends State<ReportsTab> {
       ),
       builder: (ctx) {
         return Material(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           clipBehavior: Clip.antiAlias,
           child: Container(
@@ -880,7 +855,7 @@ class _ReportsTabState extends State<ReportsTab> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: AppColors.grey300,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -897,7 +872,7 @@ class _ReportsTabState extends State<ReportsTab> {
                         AppTranslations.tr(lang, key),
                         style: TextStyle(fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
                       ),
-                      trailing: isSel ? const Icon(Icons.check_circle, color: AppColors.teal) : null,
+                      trailing: isSel ? Icon(Icons.check_circle, color: AppColors.teal) : null,
                       onTap: () {
                         setState(() => _timeRange = key);
                         Navigator.pop(ctx);
@@ -956,7 +931,7 @@ class _ReportsTabState extends State<ReportsTab> {
       ),
       builder: (ctx) {
         return Material(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           clipBehavior: Clip.antiAlias,
           child: Container(
@@ -971,7 +946,7 @@ class _ReportsTabState extends State<ReportsTab> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.grey300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -997,10 +972,10 @@ class _ReportsTabState extends State<ReportsTab> {
                           AppTranslations.trCategory(lang, cat),
                           style: TextStyle(
                             fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                            color: isSel ? AppColors.tealBright : Colors.black87,
+                            color: isSel ? AppColors.tealBright : AppColors.black87,
                           ),
                         ),
-                        trailing: isSel ? const Icon(Icons.check_circle, color: AppColors.teal) : null,
+                        trailing: isSel ? Icon(Icons.check_circle, color: AppColors.teal) : null,
                         onTap: () {
                           setState(() {
                             _selectedCategoryFilter = cat;
@@ -1117,7 +1092,7 @@ class StackedBarChartPainter extends CustomPainter {
       // Draw Month Label below bar
       textPainter.text = TextSpan(
         text: months[i],
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
           color: AppColors.textMuted,
@@ -1133,32 +1108,4 @@ class StackedBarChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-class _SmallPillText extends StatelessWidget {
-  final String text;
-  final bool isActive;
-
-  const _SmallPillText(this.text, {this.isActive = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: isActive
-          ? BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-            )
-          : null,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-          color: isActive ? AppColors.ink : const Color(0xFF888480),
-        ),
-      ),
-    );
-  }
 }
