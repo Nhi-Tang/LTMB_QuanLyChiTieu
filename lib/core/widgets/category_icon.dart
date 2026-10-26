@@ -5,6 +5,8 @@ import '../../frontend/theme/app_colors.dart';
 /// Widget dùng chung hiển thị icon danh mục trong vòng tròn nền chuẩn AppColors
 class CategoryIcon extends StatelessWidget {
   final String categoryOrIconKey;
+  /// iconKey của danh mục, dùng khi tên là danh mục tự tạo không có icon riêng
+  final String? iconKey;
   final Color? bgColor;
   final double size;
   final Color? iconColor;
@@ -12,6 +14,7 @@ class CategoryIcon extends StatelessWidget {
   const CategoryIcon({
     super.key,
     required this.categoryOrIconKey,
+    this.iconKey,
     this.bgColor,
     this.size = 44,
     this.iconColor,
@@ -19,8 +22,8 @@ class CategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetPath = CategoryModel.getCategoryAssetPath(categoryOrIconKey);
-    final fallbackIcon = CategoryModel.getIconData(categoryOrIconKey);
+    final assetPath = CategoryModel.getCategoryAssetPath(categoryOrIconKey, iconKey: iconKey);
+    final fallbackIcon = CategoryModel.getIconData(iconKey ?? categoryOrIconKey);
 
     // Lấy tối đa 98% - 100% đường kính để hình ảnh lấp đầy hoàn toàn ô tròn
     final imageSize = size * 0.98;

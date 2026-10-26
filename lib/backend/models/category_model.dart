@@ -89,135 +89,170 @@ class CategoryModel {
 
   static Widget getCategoryIconWidget(
     String categoryOrIconKey, {
+    String? iconKey,
     double size = 44,
     Color? bgColor,
     Color? fallbackColor,
   }) {
     return CategoryIcon(
       categoryOrIconKey: categoryOrIconKey,
+      iconKey: iconKey,
       size: size,
       bgColor: bgColor,
       iconColor: fallbackColor,
     );
   }
 
-  static String getCategoryAssetPath(String categoryOrIconKey) {
-    final key = categoryOrIconKey.trim().toLowerCase();
-    switch (key) {
-      case 'ăn uống':
+  static const String _defaultAsset = 'assets/icon/cat_khac.png';
+
+  // Tên danh mục người dùng tự tạo -> iconKey đã chọn, để giao dịch (chỉ lưu tên)
+  // vẫn hiện đúng icon. CategoryRepository nạp lại mỗi khi đọc danh mục.
+  static final Map<String, String> _customIconKeys = {};
+
+  static void rememberIconKeys(Iterable<CategoryModel> categories) {
+    for (final c in categories) {
+      if (c.name.trim().isNotEmpty) _customIconKeys[normalizeKey(c.name)] = c.iconKey;
+    }
+  }
+
+  static const String _vnFrom =
+      'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
+  static const String _vnTo =
+      'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
+
+  /// Chữ thường, bỏ dấu tiếng Việt (cả dạng dựng sẵn lẫn dấu tổ hợp) để
+  /// "Sức khoẻ", "Sức khỏe", "suc khoe" đều so khớp như nhau.
+  static String normalizeKey(String value) {
+    final buffer = StringBuffer();
+    for (final rune in value.trim().toLowerCase().runes) {
+      if (rune >= 0x0300 && rune <= 0x036F) continue;
+      final ch = String.fromCharCode(rune);
+      final i = _vnFrom.indexOf(ch);
+      buffer.write(i >= 0 ? _vnTo[i] : ch);
+    }
+    return buffer.toString().replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  /// Trả về ảnh icon cho tên danh mục hoặc iconKey; null nếu không nhận ra.
+  static String? findCategoryAssetPath(String categoryOrIconKey) {
+    switch (normalizeKey(categoryOrIconKey)) {
+      case 'tat ca':
+      case 'all':
+      case 'total':
+        return 'assets/icon/cat_tat_ca.png';
       case 'an uong':
       case 'fastfood_rounded':
       case 'food_icon':
         return 'assets/icon/cat_an_uong.png';
-      case 'hóa đơn':
       case 'hoa don':
       case 'receipt_rounded':
       case 'bill_icon':
         return 'assets/icon/cat_hoa_don.png';
-      case 'di chuyển':
       case 'di chuyen':
       case 'directions_bus_rounded':
       case 'move_icon':
         return 'assets/icon/cat_di_chuyen.png';
-      case 'mua sắm':
       case 'mua sam':
       case 'shopping_bag_rounded':
       case 'shopping_icon':
         return 'assets/icon/cat_mua_sam.png';
-      case 'giải trí':
       case 'giai tri':
       case 'sports_esports_rounded':
       case 'game_icon':
         return 'assets/icon/cat_giai_tri.png';
-      case 'sức khoẻ':
       case 'suc khoe':
       case 'medical_services_rounded':
       case 'health_icon':
         return 'assets/icon/cat_suc_khoe.png';
-      case 'làm đẹp':
       case 'lam dep':
       case 'content_cut_rounded':
       case 'beauty_icon':
       case 'beautify_icon':
         return 'assets/icon/cat_lam_dep.png';
-      case 'quần áo':
       case 'quan ao':
       case 'checkroom_rounded':
       case 'clothes_icon':
         return 'assets/icon/cat_quan_ao.png';
-      case 'học tập':
       case 'hoc tap':
       case 'school_rounded':
       case 'study_icon':
         return 'assets/icon/cat_hoc_tap.png';
-      case 'thú cưng':
       case 'thu cung':
       case 'pets_rounded':
       case 'pets_icon':
         return 'assets/icon/cat_thu_cung.png';
-      case 'con cái':
       case 'con cai':
       case 'child_care_rounded':
       case 'chil_icon':
       case 'concai_icon':
         return 'assets/icon/cat_con_cai.png';
-      case 'hỗ trợ gia đình':
       case 'ho tro gia dinh':
+      case 'gia dinh':
       case 'family_restroom_rounded':
       case 'hotrogiadinh_icon':
         return 'assets/icon/cat_ho_tro_gia_dinh.png';
-      case 'bảo hiểm':
+      case 'ket hon':
+      case 'favorite_rounded':
+      case 'kethon_icon':
+        return 'assets/icon/cat_ket_hon.png';
       case 'bao hiem':
       case 'security_rounded':
       case 'baohiem_tk_icon':
         return 'assets/icon/cat_bao_hiem.png';
-      case 'thuế':
       case 'thue':
+      case 'thue/ngan hang':
       case 'account_balance_rounded':
       case 'thue_icon':
         return 'assets/icon/cat_thue.png';
-      case 'công việc':
       case 'cong viec':
       case 'work_rounded':
       case 'congviec_icon':
         return 'assets/icon/cat_cong_viec.png';
-      case 'nhà ở':
       case 'nha o':
       case 'home_rounded':
       case 'nha_icon':
         return 'assets/icon/cat_nha_o.png';
-      case 'tiền nợ':
       case 'tien no':
       case 'money_off_rounded':
       case 'tienno_icon':
         return 'assets/icon/cat_tien_no.png';
-      case 'lương':
       case 'luong':
+      case 'vi tien':
       case 'account_balance_wallet_rounded':
       case 'luong_icon':
         return 'assets/icon/cat_luong.png';
-      case 'thưởng':
       case 'thuong':
+      case 'qua tang':
       case 'card_giftcard_rounded':
       case 'qua_icon':
         return 'assets/icon/cat_thuong.png';
-      case 'đầu tư':
       case 'dau tu':
       case 'trending_up_rounded':
       case 'dautu_icon':
         return 'assets/icon/cat_dau_tu.png';
-      case 'bán hàng':
       case 'ban hang':
       case 'storefront_rounded':
       case 'banhang_icon':
         return 'assets/icon/cat_ban_hang.png';
-      case 'khác':
       case 'khac':
       case 'category_rounded':
       case 'khac_icon':
+        return _defaultAsset;
       default:
-        return 'assets/icon/cat_khac.png';
+        return null;
     }
+  }
+
+  /// Ảnh icon của danh mục. Ưu tiên icon người dùng đã chọn ([iconKey] truyền vào,
+  /// hoặc iconKey đã lưu của danh mục cùng tên), rồi đến tên danh mục, cuối cùng là "Khác".
+  /// iconKey 'category_rounded' (mặc định khi chưa chọn) không ghi đè icon theo tên.
+  static String getCategoryAssetPath(String categoryOrIconKey, {String? iconKey}) {
+    final key = iconKey ?? _customIconKeys[normalizeKey(categoryOrIconKey)];
+    if (key != null && key != 'category_rounded') {
+      final byKey = findCategoryAssetPath(key);
+      if (byKey != null) return byKey;
+    }
+    return findCategoryAssetPath(categoryOrIconKey) ?? _defaultAsset;
   }
 
   static IconData getIconData(String iconKey) {

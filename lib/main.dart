@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'backend/database/db_helper.dart';
 import 'backend/models/user_model.dart';
 import 'backend/services/auth_service.dart';
+import 'backend/services/category_repository.dart';
 import 'backend/services/pro_service.dart';
 import 'backend/services/sync_service.dart';
 import 'frontend/screens/auth_screen.dart';
@@ -136,6 +137,7 @@ class _AuthGateState extends State<AuthGate> {
         AuthService().syncSessionInBackground(firebaseUser);
         SyncService.instance.syncAll();
         ProService.instance.init();
+        CategoryRepository.instance.loadIconKeys();
         return user;
       });
     }

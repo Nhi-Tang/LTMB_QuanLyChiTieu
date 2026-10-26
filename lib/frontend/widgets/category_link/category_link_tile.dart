@@ -52,7 +52,8 @@ class CategoryLinkTile extends StatelessWidget {
                 ),
               ),
               CategoryIcon(
-                categoryOrIconKey: category.name.isNotEmpty ? category.name : category.iconKey,
+                categoryOrIconKey: category.name,
+                iconKey: category.iconKey,
                 size: 38,
                 bgColor: category.isLinked ? AppColors.selectedCream : AppColors.backgroundCream,
               ),

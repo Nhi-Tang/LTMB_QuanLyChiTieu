@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
+import '../../core/widgets/category_icon.dart';
 import '../../core/widgets/money_text.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
@@ -77,56 +78,6 @@ class _ReportsTabState extends State<ReportsTab> {
     }
   }
 
-  String _getCategoryIcon(String category) {
-    switch (category) {
-      case 'Ăn uống':
-        return '🍜';
-      case 'Hóa đơn':
-        return '🧾';
-      case 'Di chuyển':
-        return '🚌';
-      case 'Mua sắm':
-        return '🛍️';
-      case 'Giải trí':
-        return '🎮';
-      case 'Sức khoẻ':
-        return '🏥';
-      case 'Làm đẹp':
-        return '💅';
-      case 'Quần áo':
-        return '👕';
-      case 'Học tập':
-        return '🎓';
-      case 'Thú cưng':
-        return '🐾';
-      case 'Con cái':
-        return '👶';
-      case 'Hỗ trợ gia đình':
-        return '👨‍👩‍👧';
-      case 'Bảo hiểm':
-        return '🛡️';
-      case 'Thuế':
-        return '🏛️';
-      case 'Công việc':
-        return '💼';
-      case 'Nhà ở':
-        return '🏠';
-      case 'Tiền nợ':
-      case 'Tiền Nợ':
-        return '💸';
-      case 'Lương':
-        return '💰';
-      case 'Thưởng':
-        return '🎁';
-      case 'Đầu tư':
-        return '📈';
-      case 'Bán hàng':
-        return '🏪';
-      default:
-        return '📦';
-    }
-  }
-
   // Dynamic Filtering based on selected type (Chi tiêu / Thu nhập) and Category Filter
   List<TransactionItem> get _filteredTransactions {
     return widget.transactions.where((t) {
@@ -169,7 +120,6 @@ class _ReportsTabState extends State<ReportsTab> {
         'amount': sumAmount,
         'percentage': pct,
         'color': _getCategoryColor(catName),
-        'icon': _getCategoryIcon(catName),
       });
     });
 
@@ -270,7 +220,9 @@ class _ReportsTabState extends State<ReportsTab> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.tune_rounded, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
+                        _selectedCategoryFilter != 'Tất cả'
+                            ? CategoryIcon(categoryOrIconKey: _selectedCategoryFilter, size: 22)
+                            : Icon(Icons.tune_rounded, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -562,19 +514,9 @@ class _ReportsTabState extends State<ReportsTab> {
                                 Expanded(
                                   child: Row(
                                     children: [
-                                      Container(
-                                        width: 38,
-                                        height: 38,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.tealLight,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            cat['icon'] as String,
-                                            style: const TextStyle(fontSize: 18),
-                                          ),
-                                        ),
+                                      CategoryIcon(
+                                        categoryOrIconKey: cat['name'] as String,
+                                        size: 38,
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
@@ -964,10 +906,7 @@ class _ReportsTabState extends State<ReportsTab> {
                       final cat = categories[index];
                       final isSel = _selectedCategoryFilter == cat;
                       return ListTile(
-                        leading: Text(
-                          cat == 'Tất cả' ? '📌' : _getCategoryIcon(cat),
-                          style: const TextStyle(fontSize: 20),
-                        ),
+                        leading: CategoryIcon(categoryOrIconKey: cat, size: 36),
                         title: Text(
                           AppTranslations.trCategory(lang, cat),
                           style: TextStyle(
