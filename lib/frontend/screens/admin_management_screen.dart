@@ -8,6 +8,7 @@ import '../../backend/services/api_client.dart';
 import '../../backend/services/auth_service.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
+import '../../core/widgets/asset_icon.dart';
 
 class AdminManagementScreen extends StatefulWidget {
   final UserModel currentAdmin;
@@ -280,7 +281,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       textCapitalization: TextCapitalization.none,
                       decoration: InputDecoration(
                         labelText: context.t('Họ và tên'),
-                        prefixIcon: Icon(Icons.person_outline),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('tab_ca_nhan', size: 26)),
                       ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ tên') : null,
@@ -297,7 +298,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       ],
                       decoration: InputDecoration(
                         labelText: context.t('Email / Số điện thoại'),
-                        prefixIcon: Icon(Icons.email_outlined),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
                       ),
                       validator: (v) =>
                           (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập email') : null,
@@ -313,7 +314,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       ],
                       decoration: InputDecoration(
                         labelText: context.t('Mật khẩu'),
-                        prefixIcon: Icon(Icons.lock_outline),
+                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_khoa', size: 26)),
                       ),
                       validator: (v) =>
                           (v == null || v.isEmpty) ? context.t('Vui lòng nhập mật khẩu') : null,
@@ -508,7 +509,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: context.t('Họ và tên'),
-                    prefixIcon: Icon(Icons.person, color: AppColors.teal),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('tab_ca_nhan', size: 26)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
@@ -523,7 +524,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
                     labelText: context.t('Email / Số điện thoại'),
-                    prefixIcon: Icon(Icons.email, color: AppColors.teal),
+                    prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
