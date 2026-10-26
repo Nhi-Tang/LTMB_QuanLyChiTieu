@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
@@ -14,6 +13,7 @@ import 'home_tab.dart';
 import 'profile_tab.dart';
 import 'reports_tab.dart';
 import 'savings_tab.dart';
+import '../utils/app_language.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserModel currentUser;
@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late DateTime _selectedMonth;
   late UserModel _currentUser;
   String _selectedAvatarKey = 'mousey';
-  String _selectedLanguage = 'Tiếng Việt';
+  String get _selectedLanguage => AppLanguage.instance.value;
 
   // Transactions list
   final List<TransactionItem> _transactions = [];
@@ -51,19 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lang = prefs.getString('mousey_language_${_currentUser.uid}') ?? prefs.getString('mousey_language') ?? 'Tiếng Việt';
-    if (mounted) {
-      setState(() {
-        _selectedLanguage = lang;
-      });
-    }
-  }
-
-  Future<void> _saveLanguage(String lang) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('mousey_language_${_currentUser.uid}', lang);
-    await prefs.setString('mousey_language', lang);
+    await AppLanguage.instance.load(uid: _currentUser.uid);
   }
 
   @override
@@ -87,12 +75,12 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Xác nhận đăng xuất'),
-        content: const Text('Bạn có chắc chắn muốn đăng xuất khỏi Mousey?'),
+        title: Text(context.t('Xác nhận đăng xuất')),
+        content: Text(context.t('Bạn có chắc chắn muốn đăng xuất khỏi Mousey?')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: const TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -104,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pop(ctx);
               await AuthService().signOut();
             },
-            child: const Text('Đăng xuất', style: TextStyle(color: AppColors.darkBeige, fontWeight: FontWeight.bold)),
+            child: Text(context.t('Đăng xuất'), style: const TextStyle(color: AppColors.darkBeige, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -210,10 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
                   onLanguageChanged: (newLanguage) {
-                    setState(() {
-                      _selectedLanguage = newLanguage;
-                    });
-                    _saveLanguage(newLanguage);
+                    AppLanguage.instance.change(newLanguage, uid: _currentUser.uid);
                   },
                   onLogout: () => _logout(context),
                 ),

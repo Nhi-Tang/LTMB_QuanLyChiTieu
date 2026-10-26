@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_language.dart';
 
 class InfoBanner extends StatefulWidget {
   const InfoBanner({super.key});
@@ -64,8 +65,8 @@ class _InfoBannerState extends State<InfoBanner> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Quản lý & Liên kết danh mục',
+                Text(
+                  context.t('Quản lý & Liên kết danh mục'),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -73,8 +74,8 @@ class _InfoBannerState extends State<InfoBanner> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Bạn có thể liên kết hoặc hủy liên kết danh mục cho từng Sổ sách. Kéo thả để sắp xếp thứ tự hiển thị danh mục.',
+                Text(
+                  context.t('Bạn có thể liên kết hoặc hủy liên kết danh mục cho từng Sổ sách. Kéo thả để sắp xếp thứ tự hiển thị danh mục.'),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSub,

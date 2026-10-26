@@ -8,6 +8,7 @@ import '../../utils/app_translations.dart';
 import '../../screens/budgets_screen.dart';
 import '../../screens/pro_upgrade_screen.dart';
 import 'pending_inbox.dart';
+import '../../utils/app_language.dart';
 
 class NotificationCenterSheet extends StatefulWidget {
   final String selectedLanguage;
@@ -94,7 +95,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       case 'pending_tx':
         PendingInboxSheet.show(
           context,
-          selectedLanguage: widget.selectedLanguage,
+          selectedLanguage: context.lang,
           onTransactionsUpdated: widget.onTransactionsUpdated,
         );
         break;
@@ -107,7 +108,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
           MaterialPageRoute(
             builder: (context) => BudgetsScreen(
               ledgerId: widget.ledgerId,
-              selectedLanguage: widget.selectedLanguage,
+              selectedLanguage: context.lang,
             ),
           ),
         );
@@ -132,13 +133,13 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
     final diff = DateTime.now().difference(dt);
 
     if (diff.inMinutes < 1) {
-      return 'Vừa xong';
+      return context.t('Vừa xong');
     } else if (diff.inMinutes < 60) {
-      return '${diff.inMinutes} phút trước';
+      return context.t('{inMinutes} phút trước', {'inMinutes': diff.inMinutes});
     } else if (diff.inHours < 24) {
-      return '${diff.inHours} giờ trước';
+      return context.t('{inHours} giờ trước', {'inHours': diff.inHours});
     } else if (diff.inDays < 7) {
-      return '${diff.inDays} ngày trước';
+      return context.t('{inDays} ngày trước', {'inDays': diff.inDays});
     } else {
       return '${dt.day}/${dt.month}/${dt.year}';
     }
@@ -197,7 +198,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
 
     final todayNotifs = _notifications.where((n) => _isToday(n.createdAt)).toList();
     final earlierNotifs = _notifications.where((n) => !_isToday(n.createdAt)).toList();
@@ -230,7 +231,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                     const Icon(Icons.notifications_active_rounded, color: AppColors.darkBeige, size: 22),
                     const SizedBox(width: 8),
                     Text(
-                      AppTranslations.tr(lang, 'Thông báo'),
+                      AppTranslations.tr(lang, context.t('Thông báo')),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -273,11 +274,11 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                               child: Icon(Icons.mark_email_unread_rounded, color: Colors.orange.shade900),
                             ),
                             title: Text(
-                              'Giao dịch chờ xác nhận ($_pendingDraftCount)',
+                              context.t('Giao dịch chờ xác nhận ({pendingDraftCount})', {'pendingDraftCount': _pendingDraftCount}),
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.orange.shade900),
                             ),
-                            subtitle: const Text(
-                              'Nhấn để xem và xác nhận các khoản nháp từ thông báo ngân hàng',
+                            subtitle: Text(
+                              context.t('Nhấn để xem và xác nhận các khoản nháp từ thông báo ngân hàng'),
                               style: TextStyle(fontSize: 12, color: Colors.black87),
                             ),
                             trailing: const Icon(Icons.chevron_right_rounded, color: Colors.orange),
@@ -409,7 +410,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                                 if (notif.type.startsWith('budget_')) {
                                   try {
                                     final params = jsonDecode(notif.body) as Map<String, dynamic>;
-                                    return AppTranslations.formatBudgetAlertTitle(widget.selectedLanguage, notif.type, params);
+                                    return AppTranslations.formatBudgetAlertTitle(context.lang, notif.type, params);
                                   } catch (_) {}
                                 }
                                 return notif.title;
@@ -441,7 +442,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                           if (notif.type.startsWith('budget_')) {
                             try {
                               final params = jsonDecode(notif.body) as Map<String, dynamic>;
-                              return AppTranslations.formatBudgetAlertMessage(widget.selectedLanguage, notif.type, params, notif.dedupeKey ?? '');
+                              return AppTranslations.formatBudgetAlertMessage(context.lang, notif.type, params, notif.dedupeKey ?? '');
                             } catch (_) {}
                           }
                           return notif.body;

@@ -6,6 +6,7 @@ import '../../backend/services/pro_service.dart';
 import '../../core/utils/money_input_formatter.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_alert_dialog.dart';
+import '../utils/app_language.dart';
 
 class VietQRPaymentScreen extends StatefulWidget {
   final Map<String, dynamic> orderData;
@@ -102,18 +103,18 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
         });
         showAppAlertDialog(
           context: context,
-          title: status == 'expired' ? 'Đơn hàng đã hết hạn' : 'Thanh toán không thành công',
+          title: status == 'expired' ? context.t('Đơn hàng đã hết hạn') : context.t('Thanh toán không thành công'),
           message: status == 'expired'
-              ? 'Đơn hàng đã quá thời gian thanh toán. Vui lòng tạo đơn mới. Nếu bạn đã chuyển tiền, gói PRO vẫn được kích hoạt khi hệ thống nhận được giao dịch.'
-              : 'Số dư tài khoản không đủ để thực hiện thanh toán.',
+              ? context.t('Đơn hàng đã quá thời gian thanh toán. Vui lòng tạo đơn mới. Nếu bạn đã chuyển tiền, gói PRO vẫn được kích hoạt khi hệ thống nhận được giao dịch.')
+              : context.t('Số dư tài khoản không đủ để thực hiện thanh toán.'),
           isSuccess: false,
         );
       } else {
         if (!silent && mounted) {
           setState(() => _isChecking = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đơn hàng đang chờ thanh toán. Vui lòng hoàn tất chuyển khoản.'),
+            SnackBar(
+              content: Text(context.t('Đơn hàng đang chờ thanh toán. Vui lòng hoàn tất chuyển khoản.')),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 2),
             ),
@@ -125,7 +126,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
         setState(() => _isChecking = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi kiểm tra thanh toán: ${e.toString().replaceAll('Exception: ', '')}'),
+            content: Text(context.t('Lỗi kiểm tra thanh toán: {value}', {'value': e.toString().replaceAll('Exception: ', '')})),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 3),
           ),
@@ -157,8 +158,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
   void _showSuccessDialog() {
     showAppAlertDialog(
       context: context,
-      title: 'Thanh toán thành công! 👑',
-      message: 'Chúc mừng bạn đã nâng cấp thành công gói Mousey PRO. Mọi tính năng cao cấp đã được mở khóa!',
+      title: context.t('Thanh toán thành công! 👑'),
+      message: context.t('Chúc mừng bạn đã nâng cấp thành công gói Mousey PRO. Mọi tính năng cao cấp đã được mở khóa!'),
       isSuccess: true,
     );
     // Tự động quay về sau 2 giây
@@ -173,7 +174,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã sao chép $label!'),
+        content: Text(context.t('Đã sao chép {label}!', {'label': label})),
         duration: const Duration(seconds: 2),
         backgroundColor: AppColors.primary,
       ),
@@ -200,8 +201,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Thanh toán VietQR',
+        title: Text(
+          context.t('Thanh toán VietQR'),
           style: TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -227,8 +228,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                 children: [
                   const Icon(Icons.timer_outlined, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Đơn hàng hết hạn sau: ',
+                  Text(
+                    context.t('Đơn hàng hết hạn sau: '),
                     style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                   ),
                   Text(
@@ -262,7 +263,7 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
               child: Column(
                 children: [
                   Text(
-                    planType == 'yearly' ? 'Gói PRO 1 Năm' : 'Gói PRO 1 Tháng',
+                    planType == 'yearly' ? context.t('Gói PRO 1 Năm') : context.t('Gói PRO 1 Tháng'),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -309,13 +310,13 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                           height: 240,
                           width: 240,
                           color: AppColors.backgroundCream,
-                          child: const Column(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.qr_code_2_rounded, size: 64, color: AppColors.textSecondary),
                               SizedBox(height: 8),
                               Text(
-                                'Không thể tải mã QR.\nVui lòng chuyển khoản thủ công bên dưới.',
+                                context.t('Không thể tải mã QR.\nVui lòng chuyển khoản thủ công bên dưới.'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
@@ -326,8 +327,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Sử dụng App Ngân hàng bất kỳ để quét mã QR',
+                  Text(
+                    context.t('Sử dụng App Ngân hàng bất kỳ để quét mã QR'),
                     style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     textAlign: TextAlign.center,
                   ),
@@ -347,8 +348,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Thông tin chuyển khoản thủ công',
+                  Text(
+                    context.t('Thông tin chuyển khoản thủ công'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -356,11 +357,11 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                     ),
                   ),
                   const Divider(height: 20),
-                  _buildDetailRow('Ngân hàng', bank, copyable: false),
-                  _buildDetailRow('Số tài khoản', accountNo, copyable: true, labelName: 'số tài khoản'),
-                  _buildDetailRow('Chủ tài khoản', accountName, copyable: false),
-                  _buildDetailRow('Số tiền', '${formatMoney(amount)}đ', copyable: true, rawText: amount.toString(), labelName: 'số tiền'),
-                  _buildDetailRow('Nội dung chuyển khoản', content, copyable: true, rawText: content, labelName: 'nội dung chuyển khoản', isHighlight: true),
+                  _buildDetailRow(context.t('Ngân hàng'), bank, copyable: false),
+                  _buildDetailRow(context.t('Số tài khoản'), accountNo, copyable: true, labelName: context.t('số tài khoản')),
+                  _buildDetailRow(context.t('Chủ tài khoản'), accountName, copyable: false),
+                  _buildDetailRow(context.t('Số tiền'), '${formatMoney(amount)}đ', copyable: true, rawText: amount.toString(), labelName: context.t('số tiền')),
+                  _buildDetailRow(context.t('Nội dung chuyển khoản'), content, copyable: true, rawText: content, labelName: context.t('nội dung chuyển khoản'), isHighlight: true),
                 ],
               ),
             ),
@@ -386,8 +387,8 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                         width: 24,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text(
-                        'Hoàn tất chuyển khoản',
+                    : Text(
+                        context.t('Hoàn tất chuyển khoản'),
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                       ),
               ),
@@ -397,12 +398,12 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
               TextButton.icon(
                 onPressed: _isChecking ? null : _mockPay,
                 icon: const Icon(Icons.bug_report_outlined, size: 18),
-                label: const Text('Giả lập thanh toán (chỉ bản debug)'),
+                label: Text(context.t('Giả lập thanh toán (chỉ bản debug)')),
               ),
             ],
             const SizedBox(height: 12),
-            const Text(
-              'Hệ thống tự động kiểm tra giao dịch mỗi 5 giây.',
+            Text(
+              context.t('Hệ thống tự động kiểm tra giao dịch mỗi 5 giây.'),
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),

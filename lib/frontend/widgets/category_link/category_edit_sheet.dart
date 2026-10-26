@@ -3,6 +3,7 @@ import '../../../backend/models/category_model.dart';
 import '../../../core/widgets/category_icon.dart';
 import '../../theme/app_colors.dart';
 import 'icon_picker_grid.dart';
+import '../../utils/app_language.dart';
 
 class CategoryEditSheet extends StatefulWidget {
   final CategoryModel? categoryToEdit;
@@ -74,7 +75,7 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEditing ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới',
+                    isEditing ? context.t('Chỉnh sửa danh mục') : context.t('Thêm danh mục mới'),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -91,8 +92,8 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Tên danh mục',
-                  hintText: 'Nhập tên danh mục...',
+                  labelText: context.t('Tên danh mục'),
+                  hintText: context.t('Nhập tên danh mục...'),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: CategoryIcon(
@@ -115,11 +116,11 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                     borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
                   ),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên danh mục' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập tên danh mục') : null,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Chọn biểu tượng (Icon):',
+              Text(
+                context.t('Chọn biểu tượng (Icon):'),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -133,12 +134,12 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
               ),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: const Text(
-                  'Tự động liên kết với sổ hiện tại',
+                title: Text(
+                  context.t('Tự động liên kết với sổ hiện tại'),
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textMain),
                 ),
-                subtitle: const Text(
-                  'Danh mục này sẽ xuất hiện trong sổ hiện tại.',
+                subtitle: Text(
+                  context.t('Danh mục này sẽ xuất hiện trong sổ hiện tại.'),
                   style: TextStyle(fontSize: 12, color: AppColors.textSub),
                 ),
                 value: _isLinked,
@@ -168,7 +169,7 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                     }
                   },
                   child: Text(
-                    isEditing ? 'Lưu thay đổi' : 'Thêm danh mục',
+                    isEditing ? context.t('Lưu thay đổi') : context.t('Thêm danh mục'),
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),

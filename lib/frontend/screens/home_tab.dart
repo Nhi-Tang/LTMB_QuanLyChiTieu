@@ -15,6 +15,7 @@ import '../widgets/budget_form_sheet.dart';
 import '../widgets/notification/notification_center_sheet.dart';
 import 'all_transactions_screen.dart';
 import 'budgets_screen.dart';
+import '../utils/app_language.dart';
 
 class HomeTab extends StatefulWidget {
   final UserModel currentUser;
@@ -175,12 +176,12 @@ class _HomeTabState extends State<HomeTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.category,
+                                context.tCategory(item.category),
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const Text(
-                                'Danh mục cố định',
+                              Text(
+                                context.t('Danh mục cố định'),
                                 style: TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
@@ -202,12 +203,12 @@ class _HomeTabState extends State<HomeTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 1. Tên ghi chú (Editable)
-                          const Text('Ghi chú / Tên giao dịch:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text(context.t('Ghi chú / Tên giao dịch:'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                           const SizedBox(height: 6),
                           TextField(
                             controller: titleController,
                             decoration: InputDecoration(
-                              hintText: 'Nhập tên ghi chú...',
+                              hintText: context.t('Nhập tên ghi chú...'),
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -216,7 +217,7 @@ class _HomeTabState extends State<HomeTab> {
                           const SizedBox(height: 14),
 
                           // 2. Số tiền (Editable)
-                          const Text('Số tiền (đ):', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text(context.t('Số tiền (đ):'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                           const SizedBox(height: 6),
                           TextField(
                             controller: amountController,
@@ -245,7 +246,7 @@ class _HomeTabState extends State<HomeTab> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Thời gian:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text(context.t('Thời gian:'), style: TextStyle(fontSize: 12, color: Colors.grey)),
                               Text(
                                 formattedDateTime,
                                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
@@ -275,11 +276,11 @@ class _HomeTabState extends State<HomeTab> {
                                     await TransactionService.instance.removeTransaction(item.id, uid: item.uid, date: item.date);
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Đã xóa giao dịch thành công!'), backgroundColor: Colors.red),
+                                      SnackBar(content: Text(context.t('Đã xóa giao dịch thành công!')), backgroundColor: Colors.red),
                                     );
                                   },
                             icon: const Icon(Icons.delete_outline_rounded),
-                            label: const Text('Xóa', style: TextStyle(fontWeight: FontWeight.bold)),
+                            label: Text(context.t('Xóa'), style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -298,7 +299,7 @@ class _HomeTabState extends State<HomeTab> {
                                     final newAmount = parseMoney(amountController.text).toDouble();
                                     if (newAmount <= 0) {
                                       ScaffoldMessenger.of(sheetCtx).showSnackBar(
-                                        const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ!'), backgroundColor: Colors.orange),
+                                        SnackBar(content: Text(context.t('Vui lòng nhập số tiền hợp lệ!')), backgroundColor: Colors.orange),
                                       );
                                       return;
                                     }
@@ -315,13 +316,13 @@ class _HomeTabState extends State<HomeTab> {
                                     Navigator.pop(sheetCtx);
                                     if (!mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Đã lưu thay đổi giao dịch!'), backgroundColor: Colors.green),
+                                      SnackBar(content: Text(context.t('Đã lưu thay đổi giao dịch!')), backgroundColor: Colors.green),
                                     );
                                   },
                             icon: isSaving
                                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                                 : const Icon(Icons.save_rounded),
-                            label: const Text('Lưu thay đổi', style: TextStyle(fontWeight: FontWeight.bold)),
+                            label: Text(context.t('Lưu thay đổi'), style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],
@@ -339,7 +340,7 @@ class _HomeTabState extends State<HomeTab> {
   void _openNotificationCenter() {
     NotificationCenterSheet.show(
       context,
-      selectedLanguage: widget.selectedLanguage,
+      selectedLanguage: context.lang,
       ledgerId: TransactionService.instance.currentLedgerId,
       onTransactionsUpdated: () {
         _loadBudgets();
@@ -350,7 +351,7 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final totalBadge = _unreadNotifCount + _pendingDraftCount;
 
     return SingleChildScrollView(
@@ -664,7 +665,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     child: Column(
                       children: budgetStatuses.take(2).map((s) {
-                        final name = s.budget.categoryId ?? 'Tổng ngân sách tháng';
+                        final name = s.budget.categoryId != null ? context.tCategory(s.budget.categoryId!) : context.t('Tổng ngân sách tháng');
                         final pct = s.percent.clamp(0.0, 100.0);
                         Color barColor = const Color(0xFF4CAF50);
                         if (s.level == 'exceeded') {
@@ -693,7 +694,7 @@ class _HomeTabState extends State<HomeTab> {
                                   }
                                   if (!mounted) return;
                                   scaffold.showSnackBar(
-                                    const SnackBar(content: Text('Đã cập nhật ngân sách!'), backgroundColor: Colors.green),
+                                    SnackBar(content: Text(AppLanguage.instance.t('Đã cập nhật ngân sách!')), backgroundColor: Colors.green),
                                   );
                                 } catch (e) {
                                   debugPrint('Error updating budget: $e');
@@ -776,7 +777,7 @@ class _HomeTabState extends State<HomeTab> {
                     MaterialPageRoute(
                       builder: (context) => AllTransactionsScreen(
                         transactions: widget.transactions,
-                        selectedLanguage: widget.selectedLanguage,
+                        selectedLanguage: context.lang,
                       ),
                     ),
                   );
@@ -847,7 +848,7 @@ class _HomeTabState extends State<HomeTab> {
                           iconColor: item.isExpense ? const Color(0xFFE53935) : const Color(0xFF4CAF50),
                         ),
                         title: Text(
-                          item.title.isNotEmpty ? item.title : item.category,
+                          item.title.isNotEmpty ? item.title : context.tCategory(item.category),
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,

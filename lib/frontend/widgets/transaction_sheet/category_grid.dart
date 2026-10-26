@@ -3,6 +3,7 @@ import '../../../backend/database/db_helper.dart';
 import '../../../backend/models/category_model.dart';
 import '../../../backend/services/category_repository.dart';
 import 'mousey_colors.dart';
+import '../../utils/app_language.dart';
 
 class CategoryGrid extends StatefulWidget {
   final bool isExpense;
@@ -109,9 +110,9 @@ class _CategoryGridState extends State<CategoryGrid> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'DANH MỤC',
-                  style: TextStyle(
+                Text(
+                  context.t('DANH MỤC'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
@@ -119,7 +120,7 @@ class _CategoryGridState extends State<CategoryGrid> {
                   ),
                 ),
                 Text(
-                  widget.selectedCategory,
+                  context.tCategory(widget.selectedCategory),
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -167,7 +168,7 @@ class _CategoryGridState extends State<CategoryGrid> {
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            name,
+                            context.tCategory(name),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,

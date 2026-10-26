@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../backend/database/db_helper.dart';
 import '../../backend/models/user_model.dart';
 import 'auth_screen.dart';
+import '../utils/app_language.dart';
 
 class AdminManagementScreen extends StatefulWidget {
   final UserModel currentAdmin;
@@ -148,8 +149,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     if (user.id == widget.currentAdmin.id) {
       if (!mounted) return;
       _showAlertDialog(
-        title: 'Cảnh báo',
-        message: 'Không thể khóa tài khoản Admin đang đăng nhập!',
+        title: context.t('Cảnh báo'),
+        message: context.t('Không thể khóa tài khoản Admin đang đăng nhập!'),
         isSuccess: false,
       );
       return;
@@ -160,10 +161,10 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     await _loadUsers();
     if (!mounted) return;
     _showAlertDialog(
-      title: 'Cập nhật trạng thái',
+      title: context.t('Cập nhật trạng thái'),
       message: user.isActive
-          ? 'Đã khóa tài khoản ${user.email}'
-          : 'Đã mở khóa tài khoản ${user.email}',
+          ? context.t('Đã khóa tài khoản {email}', {'email': user.email})
+          : context.t('Đã mở khóa tài khoản {email}', {'email': user.email}),
       isSuccess: true,
     );
   }
@@ -172,8 +173,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
     if (user.id == widget.currentAdmin.id) {
       if (!mounted) return;
       _showAlertDialog(
-        title: 'Cảnh báo',
-        message: 'Không thể xóa tài khoản Admin đang đăng nhập!',
+        title: context.t('Cảnh báo'),
+        message: context.t('Không thể xóa tài khoản Admin đang đăng nhập!'),
         isSuccess: false,
       );
       return;
@@ -183,12 +184,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Xác nhận xóa tài khoản'),
-        content: Text('Bạn có chắc chắn muốn xóa tài khoản "${user.name}" (${user.email})?'),
+        title: Text(context.t('Xác nhận xóa tài khoản')),
+        content: Text(context.t('Bạn có chắc chắn muốn xóa tài khoản "{name}" ({email})?', {'name': user.name, 'email': user.email})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -196,7 +197,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xóa', style: TextStyle(color: Colors.white)),
+            child: Text(context.t('Xóa'), style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -208,8 +209,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       await _loadUsers();
       if (!mounted) return;
       _showAlertDialog(
-        title: 'Xóa tài khoản thành công',
-        message: 'Đã xóa tài khoản ${user.email} khỏi hệ thống!',
+        title: context.t('Xóa tài khoản thành công'),
+        message: context.t('Đã xóa tài khoản {email} khỏi hệ thống!', {'email': user.email}),
         isSuccess: true,
       );
     }
@@ -232,7 +233,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Text(
-              isEditing ? 'Chỉnh sửa tài khoản' : 'Thêm tài khoản mới',
+              isEditing ? context.t('Chỉnh sửa tài khoản') : context.t('Thêm tài khoản mới'),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             content: ConstrainedBox(
@@ -249,12 +250,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       autocorrect: false,
                       enableSuggestions: false,
                       textCapitalization: TextCapitalization.none,
-                      decoration: const InputDecoration(
-                        labelText: 'Họ và tên',
+                      decoration: InputDecoration(
+                        labelText: context.t('Họ và tên'),
                         prefixIcon: Icon(Icons.person_outline),
                       ),
                       validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ tên' : null,
+                          (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ tên') : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -266,12 +267,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._\-+]')),
                       ],
-                      decoration: const InputDecoration(
-                        labelText: 'Email / Số điện thoại',
+                      decoration: InputDecoration(
+                        labelText: context.t('Email / Số điện thoại'),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Vui lòng nhập email' : null,
+                          (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập email') : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -282,28 +283,28 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[\x20-\x7E]')),
                       ],
-                      decoration: const InputDecoration(
-                        labelText: 'Mật khẩu',
+                      decoration: InputDecoration(
+                        labelText: context.t('Mật khẩu'),
                         prefixIcon: Icon(Icons.lock_outline),
                       ),
                       validator: (v) =>
-                          (v == null || v.isEmpty) ? 'Vui lòng nhập mật khẩu' : null,
+                          (v == null || v.isEmpty) ? context.t('Vui lòng nhập mật khẩu') : null,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Quyền hạn (Role)',
+                      decoration: InputDecoration(
+                        labelText: context.t('Quyền hạn (Role)'),
                         prefixIcon: Icon(Icons.admin_panel_settings_outlined),
                       ),
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: 'user',
-                          child: Text('Người dùng (User)'),
+                          child: Text(context.t('Người dùng (User)')),
                         ),
                         DropdownMenuItem(
                           value: 'admin',
-                          child: Text('Quản trị viên (Admin)'),
+                          child: Text(context.t('Quản trị viên (Admin)')),
                         ),
                       ],
                       onChanged: (val) {
@@ -314,9 +315,9 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                     ),
                     const SizedBox(height: 12),
                     SwitchListTile(
-                      title: const Text('Kích hoạt tài khoản'),
+                      title: Text(context.t('Kích hoạt tài khoản')),
                       subtitle: Text(
-                        isActive ? 'Tài khoản đang hoạt động' : 'Tài khoản bị khóa',
+                        isActive ? context.t('Tài khoản đang hoạt động') : context.t('Tài khoản bị khóa'),
                       ),
                       value: isActive,
                       activeThumbColor: const Color(0xFF6FCF97),
@@ -332,7 +333,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
           actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Hủy'),
+                child: Text(context.t('Hủy')),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -391,8 +392,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         if (!dialogContext.mounted) return;
                         Navigator.pop(dialogContext);
                         _showAlertDialog(
-                          title: 'Cập nhật thành công',
-                          message: 'Đã cập nhật thông tin tài khoản!',
+                          title: AppLanguage.instance.t('Cập nhật thành công'),
+                          message: AppLanguage.instance.t('Đã cập nhật thông tin tài khoản!'),
                           isSuccess: true,
                         );
                       } else {
@@ -408,8 +409,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                         if (!dialogContext.mounted) return;
                         Navigator.pop(dialogContext);
                         _showAlertDialog(
-                          title: 'Tạo tài khoản thành công',
-                          message: 'Đã tạo tài khoản mới thành công!',
+                          title: AppLanguage.instance.t('Tạo tài khoản thành công'),
+                          message: AppLanguage.instance.t('Đã tạo tài khoản mới thành công!'),
                           isSuccess: true,
                         );
                       }
@@ -417,14 +418,14 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                     } catch (e) {
                       if (!dialogContext.mounted) return;
                       _showAlertDialog(
-                        title: 'Lỗi',
+                        title: AppLanguage.instance.t('Lỗi'),
                         message: e.toString().replaceAll('Exception: ', ''),
                         isSuccess: false,
                       );
                     }
                   }
                 },
-                child: Text(isEditing ? 'Lưu' : 'Tạo tài khoản'),
+                child: Text(isEditing ? context.t('Lưu') : context.t('Tạo tài khoản')),
               ),
             ],
           );
@@ -442,12 +443,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.admin_panel_settings_outlined, color: Color(0xFFE5D3AF), size: 28),
             SizedBox(width: 8),
             Text(
-              'Thông tin cá nhân Admin',
+              context.t('Thông tin cá nhân Admin'),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
@@ -461,8 +462,8 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Xem và chỉnh sửa thông tin tài khoản Quản trị viên:',
+                Text(
+                  context.t('Xem và chỉnh sửa thông tin tài khoản Quản trị viên:'),
                   style: TextStyle(fontSize: 13, color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
@@ -473,12 +474,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   enableSuggestions: false,
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
-                    labelText: 'Họ và tên',
+                    labelText: context.t('Họ và tên'),
                     prefixIcon: const Icon(Icons.person, color: Color(0xFFE5D3AF)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Vui lòng nhập họ và tên' : null,
+                      (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ và tên') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -488,12 +489,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                   enableSuggestions: false,
                   textCapitalization: TextCapitalization.none,
                   decoration: InputDecoration(
-                    labelText: 'Email / Số điện thoại',
+                    labelText: context.t('Email / Số điện thoại'),
                     prefixIcon: const Icon(Icons.email, color: Color(0xFFE5D3AF)),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Vui lòng nhập Email / SĐT' : null,
+                      (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email / SĐT') : null,
                 ),
               ],
             ),
@@ -503,7 +504,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: Text(context.t('Hủy'), style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -555,13 +556,13 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                 _loadUsers();
 
                 _showAlertDialog(
-                  title: 'Thành công',
-                  message: 'Đã cập nhật thông tin tài khoản Admin thành công!',
+                  title: AppLanguage.instance.t('Thành công'),
+                  message: AppLanguage.instance.t('Đã cập nhật thông tin tài khoản Admin thành công!'),
                   isSuccess: true,
                 );
               }
             },
-            child: const Text('LƯU THAY ĐỔI', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(context.t('LƯU THAY ĐỔI'), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -601,12 +602,12 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline, color: Colors.white),
-            tooltip: 'Thông tin cá nhân Admin',
+            tooltip: context.t('Thông tin cá nhân Admin'),
             onPressed: _showAdminProfileDialog,
           ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Đăng xuất',
+            tooltip: context.t('Đăng xuất'),
             onPressed: _logout,
           ),
         ],
@@ -620,14 +621,14 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
             child: Row(
               children: [
                 _buildStatCard(
-                  title: 'Tổng số TK',
+                  title: context.t('Tổng số TK'),
                   value: '${_stats['total']}',
                   icon: Icons.people_alt,
                   color: Colors.blue,
                 ),
                 const SizedBox(width: 10),
                 _buildStatCard(
-                  title: 'Hoạt động',
+                  title: context.t('Hoạt động'),
                   value: '${_stats['active']}',
                   icon: Icons.check_circle_outline,
                   color: Colors.green,
@@ -650,7 +651,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Tìm kiếm tài khoản theo tên, email...',
+                hintText: context.t('Tìm kiếm tài khoản theo tên, email...'),
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -683,7 +684,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Danh sách tài khoản (${_users.length})',
+                  context.t('Danh sách tài khoản ({count})', {'count': _users.length}),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -693,7 +694,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                 IconButton(
                   icon: const Icon(Icons.refresh, size: 20),
                   onPressed: _loadUsers,
-                  tooltip: 'Tải lại',
+                  tooltip: context.t('Tải lại'),
                 ),
               ],
             ),
@@ -711,7 +712,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                             Icon(Icons.person_off_outlined, size: 64, color: Colors.grey[400]),
                             const SizedBox(height: 12),
                             Text(
-                              'Không tìm thấy tài khoản nào',
+                              context.t('Không tìm thấy tài khoản nào'),
                               style: TextStyle(color: Colors.grey[600], fontSize: 15),
                             ),
                           ],
@@ -815,7 +816,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             const SizedBox(width: 4),
                                             Flexible(
                                               child: Text(
-                                                user.isActive ? 'Đang hoạt động' : 'Đã khóa',
+                                                user.isActive ? context.t('Đang hoạt động') : context.t('Đã khóa'),
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   color: user.isActive ? Colors.green : Colors.red,
@@ -827,7 +828,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             if (isSelf) ...[
                                               const SizedBox(width: 6),
                                               Text(
-                                                '(Bạn)',
+                                                context.t('(Bạn)'),
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontStyle: FontStyle.italic,
@@ -852,7 +853,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             icon: const Icon(Icons.edit_outlined, size: 20),
                                             color: Colors.blue[700],
                                             onPressed: () => _showUserFormDialog(userToEdit: user),
-                                            tooltip: 'Sửa',
+                                            tooltip: context.t('Sửa'),
                                             constraints: const BoxConstraints(),
                                             padding: const EdgeInsets.all(6),
                                           ),
@@ -867,7 +868,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             ),
                                             color: user.isActive ? Colors.orange : Colors.green,
                                             onPressed: () => _toggleUserStatus(user),
-                                            tooltip: user.isActive ? 'Khóa TK' : 'Mở khóa',
+                                            tooltip: user.isActive ? context.t('Khóa TK') : context.t('Mở khóa'),
                                             constraints: const BoxConstraints(),
                                             padding: const EdgeInsets.all(6),
                                           ),
@@ -877,7 +878,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
                                             icon: const Icon(Icons.delete_outline, size: 20),
                                             color: Colors.red[700],
                                             onPressed: () => _deleteUser(user),
-                                            tooltip: 'Xóa',
+                                            tooltip: context.t('Xóa'),
                                             constraints: const BoxConstraints(),
                                             padding: const EdgeInsets.all(6),
                                           ),
@@ -899,7 +900,7 @@ class _AdminManagementScreenState extends State<AdminManagementScreen> {
         foregroundColor: Colors.white,
         onPressed: () => _showUserFormDialog(),
         icon: const Icon(Icons.person_add),
-        label: const Text('Thêm tài khoản', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: Text(context.t('Thêm tài khoản'), style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

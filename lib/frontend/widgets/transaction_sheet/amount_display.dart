@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'wallet_chip.dart';
+import '../../utils/app_language.dart';
 
 class AmountDisplay extends StatelessWidget {
   final String expression;
@@ -30,8 +31,8 @@ class AmountDisplay extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'SỐ TIỀN',
+              Text(
+                context.t('SỐ TIỀN'),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,

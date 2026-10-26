@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../core/constants/api_config.dart';
 
+import '../../frontend/utils/app_language.dart';
 /// Lỗi trả về từ backend (hoặc lỗi mạng) với thông điệp đã sẵn sàng hiển thị cho người dùng.
 class ApiException implements Exception {
   final int? statusCode;
@@ -48,7 +49,7 @@ class ApiClient {
       {Map<String, dynamic>? body, required bool forceRefreshToken}) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw ApiException('Bạn chưa đăng nhập.', statusCode: 401);
+      throw ApiException(AppLanguage.instance.t('Bạn chưa đăng nhập.'), statusCode: 401);
     }
     final token = await user.getIdToken(forceRefreshToken);
     final uri = Uri.parse('${ApiConfig.baseUrl}$path');
@@ -64,11 +65,11 @@ class ApiClient {
           : _http.post(uri, headers: headers, body: jsonEncode(body ?? {}));
       return await future.timeout(ApiConfig.timeout);
     } on TimeoutException {
-      throw ApiException('Máy chủ phản hồi quá lâu, vui lòng thử lại.');
+      throw ApiException(AppLanguage.instance.t('Máy chủ phản hồi quá lâu, vui lòng thử lại.'));
     } on SocketException {
-      throw ApiException('Không kết nối được máy chủ. Kiểm tra mạng và thử lại.');
+      throw ApiException(AppLanguage.instance.t('Không kết nối được máy chủ. Kiểm tra mạng và thử lại.'));
     } on http.ClientException {
-      throw ApiException('Không kết nối được máy chủ. Kiểm tra mạng và thử lại.');
+      throw ApiException(AppLanguage.instance.t('Không kết nối được máy chủ. Kiểm tra mạng và thử lại.'));
     }
   }
 
@@ -86,7 +87,7 @@ class ApiClient {
 
     final detail = data is Map ? data['detail'] : null;
     throw ApiException(
-      detail is String && detail.isNotEmpty ? detail : 'Lỗi máy chủ (${response.statusCode}).',
+      detail is String && detail.isNotEmpty ? detail : AppLanguage.instance.t('Lỗi máy chủ ({statusCode}).', {'statusCode': response.statusCode}),
       statusCode: response.statusCode,
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_language.dart';
 
 class DateChip extends StatelessWidget {
   final DateTime selectedDate;
@@ -13,7 +14,7 @@ class DateChip extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      return 'Hôm nay';
+      return AppLanguage.instance.t('Hôm nay');
     }
     return '${date.day}/${date.month}/${date.year}';
   }

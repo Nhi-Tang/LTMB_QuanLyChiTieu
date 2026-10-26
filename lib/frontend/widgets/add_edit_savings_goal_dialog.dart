@@ -6,6 +6,7 @@ import '../../core/utils/money_input_formatter.dart';
 import '../utils/app_translations.dart';
 import 'package:quanlychitieu/frontend/theme/app_colors.dart';
 import 'app_alert_dialog.dart';
+import '../utils/app_language.dart';
 
 class AddEditSavingsGoalDialog extends StatefulWidget {
   final SavingsGoalModel? goalToEdit;
@@ -83,7 +84,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.selectedLanguage;
+    final lang = context.lang;
     final isEditing = widget.goalToEdit != null;
     const accentPurple = Color(0xFFD4CCE2);
 
@@ -121,10 +122,10 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                   controller: _nameController,
                   decoration: InputDecoration(
                     labelText: AppTranslations.tr(lang, 'goal_name'),
-                    hintText: 'VD: Mua laptop, Du lịch Đà Lạt...',
+                    hintText: context.t('VD: Mua laptop, Du lịch Đà Lạt...'),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên mục tiêu' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập tên mục tiêu') : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -137,8 +138,8 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Vui lòng nhập số tiền cần đạt';
-                    if (parseMoney(v) <= 0) return 'Số tiền phải lớn hơn 0';
+                    if (v == null || v.trim().isEmpty) return context.t('Vui lòng nhập số tiền cần đạt');
+                    if (parseMoney(v) <= 0) return context.t('Số tiền phải lớn hơn 0');
                     return null;
                   },
                 ),
@@ -158,8 +159,8 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                       if (v != null && v.trim().isNotEmpty) {
                         final val = parseMoney(v);
                         final targetVal = parseMoney(_targetController.text);
-                        if (val < 0) return 'Số tiền không được âm';
-                        if (targetVal > 0 && val > targetVal) return 'Số tiền ban đầu không được vượt quá số tiền cần đạt';
+                        if (val < 0) return context.t('Số tiền không được âm');
+                        if (targetVal > 0 && val > targetVal) return context.t('Số tiền ban đầu không được vượt quá số tiền cần đạt');
                       }
                       return null;
                     },
@@ -198,7 +199,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                                 child: Text(
                                   _selectedDeadline == null
                                       ? AppTranslations.tr(lang, 'deadline_optional')
-                                      : 'Hạn: ${_selectedDeadline!.day}/${_selectedDeadline!.month}/${_selectedDeadline!.year}',
+                                      : context.t('Hạn: {day}/{month}/{year}', {'day': _selectedDeadline!.day, 'month': _selectedDeadline!.month, 'year': _selectedDeadline!.year}),
                                   style: TextStyle(
                                     color: _selectedDeadline == null ? Colors.grey[600] : Colors.black87,
                                     fontWeight: _selectedDeadline != null ? FontWeight.bold : FontWeight.normal,
@@ -263,15 +264,15 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
               final initial = parseMoney(_initialController.text).toDouble();
 
               if (name.isEmpty) {
-                showAppAlertDialog(context: context, title: 'Lỗi', message: 'Vui lòng nhập tên mục tiêu!', isSuccess: false);
+                showAppAlertDialog(context: context, title: context.t('Lỗi'), message: context.t('Vui lòng nhập tên mục tiêu!'), isSuccess: false);
                 return;
               }
               if (target <= 0) {
-                showAppAlertDialog(context: context, title: 'Lỗi', message: 'Số tiền cần đạt phải lớn hơn 0!', isSuccess: false);
+                showAppAlertDialog(context: context, title: context.t('Lỗi'), message: context.t('Số tiền cần đạt phải lớn hơn 0!'), isSuccess: false);
                 return;
               }
               if (initial < 0 || initial > target) {
-                showAppAlertDialog(context: context, title: 'Lỗi', message: 'Số tiền ban đầu phải từ 0 và không vượt quá số tiền cần đạt!', isSuccess: false);
+                showAppAlertDialog(context: context, title: context.t('Lỗi'), message: context.t('Số tiền ban đầu phải từ 0 và không vượt quá số tiền cần đạt!'), isSuccess: false);
                 return;
               }
 
@@ -302,7 +303,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
                       goalId: goalId,
                       amount: initial,
                       isDeposit: true,
-                      note: 'Số tiền ban đầu',
+                      note: AppLanguage.instance.t('Số tiền ban đầu'),
                       date: DateTime.now().toIso8601String(),
                     ),
                   );

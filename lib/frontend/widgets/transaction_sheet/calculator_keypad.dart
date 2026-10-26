@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'mousey_colors.dart';
+import '../../utils/app_language.dart';
 
 class CalculatorKeypad extends StatelessWidget {
   final ValueChanged<String> onKeyPressed;
@@ -27,7 +28,7 @@ class CalculatorKeypad extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      return 'Hôm nay';
+      return AppLanguage.instance.t('Hôm nay');
     }
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -74,7 +75,7 @@ class CalculatorKeypad extends StatelessWidget {
               const SizedBox(width: 6),
               _buildFunctionButton(
                 icon: Icons.edit_note,
-                label: hasNote ? 'Sửa ghi chú' : 'Ghi chú',
+                label: hasNote ? context.t('Sửa ghi chú') : context.t('Ghi chú'),
                 isHighlight: hasNote,
                 onTap: onNotePressed,
               ),
@@ -242,8 +243,8 @@ class CalculatorKeypad extends StatelessWidget {
             HapticFeedback.heavyImpact();
             onSavePressed();
           },
-          child: const Text(
-            'LƯU',
+          child: Text(
+            AppLanguage.instance.t('LƯU'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
