@@ -13,12 +13,20 @@ class CategoryGrid extends StatefulWidget {
   final ValueChanged<String> onCategorySelected;
   final String ledgerId;
 
+  /// Số ô danh mục hiện ra trước ô "Xem thêm" (màn quét hoá đơn chỉ hiện 1 ô đang chọn)
+  final int visibleCount;
+
+  /// Nhãn ô mở toàn bộ danh mục; mặc định "Xem thêm"
+  final String? moreLabel;
+
   const CategoryGrid({
     super.key,
     required this.isExpense,
     required this.selectedCategory,
     required this.onCategorySelected,
     this.ledgerId = 'default_ledger',
+    this.visibleCount = 5,
+    this.moreLabel,
   });
 
   @override
@@ -26,8 +34,6 @@ class CategoryGrid extends StatefulWidget {
 }
 
 class _CategoryGridState extends State<CategoryGrid> {
-  static const int _visibleCount = 5;
-
   List<CategoryModel> _categories = [];
   bool _isLoading = true;
 
@@ -84,7 +90,7 @@ class _CategoryGridState extends State<CategoryGrid> {
 
   /// 5 danh mục hiện ra; nếu danh mục đang chọn nằm sau thì đưa nó vào ô cuối
   List<CategoryModel> _visibleCategories(List<CategoryModel> all) {
-    final visible = all.take(_visibleCount).toList();
+    final visible = all.take(widget.visibleCount).toList();
     if (visible.any((c) => c.name == widget.selectedCategory)) return visible;
     final selected = all.where((c) => c.name == widget.selectedCategory);
     if (selected.isNotEmpty && visible.isNotEmpty) visible[visible.length - 1] = selected.first;
@@ -176,7 +182,7 @@ class _CategoryGridState extends State<CategoryGrid> {
         ),
       if (all.length > visible.length)
         _CategoryCircle(
-          label: context.t('Xem thêm'),
+          label: widget.moreLabel ?? context.t('Xem thêm'),
           icon: Icons.more_horiz_rounded,
           selected: false,
           onTap: () => _showAllCategories(all),

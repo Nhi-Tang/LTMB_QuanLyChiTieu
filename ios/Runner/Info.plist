@@ -6,6 +6,10 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Mousey cần camera để chụp hoá đơn và ghi chi tiêu.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mousey cần thư viện ảnh để chọn ảnh hoá đơn.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Quanlychitieu</string>
 	<key>CFBundleExecutable</key>
