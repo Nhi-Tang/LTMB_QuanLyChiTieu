@@ -2,6 +2,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:quanlychitieu/backend/services/receipt_quota_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Server giả: đếm theo uid/tháng như Firestore
+class _FakeRemote implements ReceiptQuotaRemote {
+  final counts = <String, int>{};
+  bool offline = false;
+
+  @override
+  Future<int?> fetch(String uid, String monthId) async => offline ? null : (counts['$uid/$monthId'] ?? 0);
+
+  @override
+  Future<void> increment(String uid, String monthId) async {
+    if (offline) return;
+    counts['$uid/$monthId'] = (counts['$uid/$monthId'] ?? 0) + 1;
+  }
+}
+
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
@@ -44,6 +59,29 @@ void main() {
     expect(await q.remaining(), isNull);
     expect(await q.canScan(), isTrue);
     expect(await q.usedThisMonth(), 0);
+  });
+
+  test('cài lại app (mất bộ đếm trên máy) vẫn lấy số đã dùng trên server', () async {
+    final server = _FakeRemote();
+    final now = DateTime(2026, 10, 27);
+    final q = ReceiptQuotaService(isPro: () => false, uid: () => 'u1', remote: server, now: () => now);
+    for (var i = 0; i < 7; i++) {
+      await q.recordScan();
+    }
+    expect(server.counts['u1/2026_10'], 7);
+
+    // Xoá dữ liệu app: máy về 0 nhưng server còn 7
+    SharedPreferences.setMockInitialValues({});
+    expect(await q.remaining(), 3);
+  });
+
+  test('mất mạng (server không trả lời) thì dùng bộ đếm trên máy', () async {
+    final server = _FakeRemote()..offline = true;
+    final q = ReceiptQuotaService(
+        isPro: () => false, uid: () => 'u1', remote: server, now: () => DateTime(2026, 10, 27));
+    await q.recordScan();
+    await q.recordScan();
+    expect(await q.remaining(), 8);
   });
 
   test('mỗi tài khoản có bộ đếm riêng', () async {

@@ -1286,7 +1286,7 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, color: AppColors.rule),
               SettingsTile(
-                leading: const AssetIcon('ui_micro'),
+                leading: const AssetIcon('cat_phone'),
                 title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showSupportDialog,

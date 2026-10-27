@@ -38,8 +38,6 @@ class BankNotificationParser {
     'nhắc nợ',
     'mat khau',
     'mật khẩu',
-    'canh bao',
-    'cảnh báo',
     'dieu khoan',
     'điều khoản',
     'quang cao',
@@ -48,6 +46,18 @@ class BankNotificationParser {
     'ad:',
   ];
 
+  // Ngân hàng hay dùng tiêu đề "Cảnh báo biến động số dư" cho giao dịch thật,
+  // nên các từ này chỉ chặn khi thông báo không có dấu hiệu biến động số dư
+  static const List<String> _softNonTransactionKeywords = [
+    'canh bao',
+    'cảnh báo',
+  ];
+
+  static final RegExp _balanceChangeSignal = RegExp(
+    r'số dư|so du|biến động|bien dong|\bsd\b|[+-]\s*\d{1,3}(?:[.,]\d{3})+',
+    caseSensitive: false,
+  );
+
   static bool isNonTransaction(String title, String text) {
     final combined = '${title.toLowerCase()} ${text.toLowerCase()}';
     for (var keyword in _nonTransactionKeywords) {
@@ -55,8 +65,14 @@ class BankNotificationParser {
         return true;
       }
     }
+    if (_softNonTransactionKeywords.any(combined.contains)) {
+      return !_balanceChangeSignal.hasMatch(combined);
+    }
     return false;
   }
+
+  /// Khớp nguyên từ, tránh "acb" trong chữ khác (VD: "acbd", mã giao dịch)
+  static bool _hasWord(String text, String word) => RegExp('\\b$word\\b').hasMatch(text);
 
   static BankParser _getParser(String packageName, String title, String text) {
     final pkg = packageName.toLowerCase();
@@ -78,7 +94,7 @@ class BankNotificationParser {
       return GenericBankParser('VietinBank');
     } else if (pkg.contains('tpb') || pkg.contains('tpbank') || txt.contains('tpbank')) {
       return GenericBankParser('TPBank');
-    } else if (pkg.contains('acb') || txt.contains('acb')) {
+    } else if (_hasWord(pkg, 'acb') || _hasWord(txt, 'acb')) {
       return GenericBankParser('ACB');
     } else if (pkg.contains('vpbank') || txt.contains('vpbank')) {
       return GenericBankParser('VPBank');
