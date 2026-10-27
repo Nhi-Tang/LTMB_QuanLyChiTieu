@@ -14,6 +14,8 @@ class IconPickerGrid extends StatelessWidget {
 
   static const List<Map<String, String>> availableIcons = [
     {'key': 'fastfood_rounded', 'label': 'Ăn uống'},
+    {'key': 'local_cafe_rounded', 'label': 'Cà phê'},
+    {'key': 'emoji_food_beverage_rounded', 'label': 'Trà sữa'},
     {'key': 'receipt_rounded', 'label': 'Hóa đơn'},
     {'key': 'directions_bus_rounded', 'label': 'Di chuyển'},
     {'key': 'shopping_bag_rounded', 'label': 'Mua sắm'},
