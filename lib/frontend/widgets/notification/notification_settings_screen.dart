@@ -19,6 +19,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   bool _dailyReminderEnabled = true;
   int _reminderHour = 20;
   int _reminderMinute = 30;
+  bool _remindOnTime = true;
   bool _isLoading = true;
 
   @override
@@ -29,8 +30,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final remindOnTime = await DailyReminderService.instance.canRemindOnTime();
     if (mounted) {
       setState(() {
+        _remindOnTime = remindOnTime;
         _bankNotificationsEnabled = prefs.getBool('bank_notifications_enabled') ?? true;
         _autoConfirmHighConfidence = prefs.getBool('auto_confirm_high_confidence') ?? false;
         _dailyReminderEnabled = prefs.getBool('daily_reminder_enabled') ?? true;
@@ -173,6 +176,23 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                             ],
                           ),
                         ),
+                        // Android 14+ mặc định không cho báo thức chính xác: nhắc có thể trễ tới 1 tiếng
+                        if (_dailyReminderEnabled && !_remindOnTime) ...[
+                          const Divider(height: 1),
+                          ListTile(
+                            leading: Icon(Icons.schedule_rounded, color: AppColors.darkBeige),
+                            title: Text(context.t('Nhắc đúng giờ'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            subtitle: Text(
+                              context.t('Máy có thể nhắc trễ đến 1 tiếng. Bấm để cho phép Mousey đặt "Báo thức và lời nhắc".'),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
+                            onTap: () async {
+                              final ok = await DailyReminderService.instance.requestRemindOnTime();
+                              if (mounted) setState(() => _remindOnTime = ok);
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),

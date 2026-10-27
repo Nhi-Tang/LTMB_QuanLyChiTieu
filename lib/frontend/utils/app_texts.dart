@@ -375,6 +375,8 @@ const Map<String, List<String>> appTexts = {
   'Khi phát hiện danh mục khớp 3+ lần trong lịch sử, tự động ghi nhận giao dịch': ['When a category has matched 3+ times in your history, record the transaction automatically', '履歴で3回以上一致したカテゴリが見つかると、取引を自動で記録します', '当历史中某类别匹配3次以上时，自动记录交易', '기록에서 카테고리가 3번 이상 일치하면 거래를 자동으로 기록합니다'],
   'Nhắc nhở tổng hợp lúc {formattedTime}': ['Daily summary reminder at {formattedTime}', '{formattedTime}にまとめてリマインド', '{formattedTime} 汇总提醒', '{formattedTime}에 요약 알림'],
   'Thông báo nhắc bạn kiểm tra các giao dịch chờ xác nhận mỗi ngày': ['A daily reminder to review pending transactions', '確認待ちの取引をチェックするよう毎日お知らせします', '每天提醒你检查待确认的交易', '확인 대기 거래를 매일 확인하도록 알려드립니다'],
+  'Nhắc đúng giờ': ['Remind on time', '時間通りに通知', '准时提醒', '정시에 알림'],
+  'Máy có thể nhắc trễ đến 1 tiếng. Bấm để cho phép Mousey đặt "Báo thức và lời nhắc".': ['Reminders may arrive up to 1 hour late. Tap to allow Mousey to set "Alarms & reminders".', 'リマインダーが最大1時間遅れることがあります。タップしてMouseyに「アラームとリマインダー」を許可してください。', '提醒可能延迟最多1小时。点按以允许 Mousey 设置“闹钟和提醒”。', '알림이 최대 1시간 늦을 수 있습니다. 탭하여 Mousey에 "알람 및 리마인더"를 허용하세요.'],
   'Nhắc nhở thu chi ngân hàng': ['Bank income & expense reminders', '銀行の収支リマインダー', '银行收支提醒', '은행 수입·지출 알림'],
   'Nhắc nhở tổng hợp giao dịch chờ xác nhận lúc {formattedTime}': ['Summary reminder of pending transactions at {formattedTime}', '{formattedTime}に確認待ちの取引をまとめてお知らせ', '{formattedTime} 汇总提醒待确认交易', '{formattedTime}에 확인 대기 거래 요약 알림'],
   'Bạn có {pendingCount} giao dịch ngân hàng chờ xác nhận trong ngày. Hãy kiểm tra ngay!': ['You have {pendingCount} bank transactions waiting for confirmation today. Check them now!', '今日、確認待ちの銀行取引が{pendingCount}件あります。今すぐ確認しましょう！', '今天有{pendingCount}笔银行交易待确认，快去看看吧！', '오늘 확인 대기 중인 은행 거래가 {pendingCount}건 있습니다. 지금 확인하세요!'],
