@@ -3,6 +3,7 @@ import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
 import '../../backend/services/bank_notification_listener_manager.dart';
+import '../../backend/services/daily_reminder_service.dart';
 import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../backend/services/totals_calculator.dart';
@@ -28,7 +29,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentTabIndex = 0;
   late DateTime _selectedMonth;
   late UserModel _currentUser;
@@ -48,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadPreferences();
     _loadTransactions();
     _transactionService.addListener(_loadTransactions);
+    WidgetsBinding.instance.addObserver(this);
     BankNotificationListenerManager.instance.startListening(uid: _currentUser.uid);
     // Tài khoản PRO lần đầu vào app (hoặc vừa lên PRO): hỏi quyền thông báo
     ProService.instance.addListener(_askNotificationPermission);
@@ -67,9 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _transactionService.removeListener(_loadTransactions);
+    WidgetsBinding.instance.removeObserver(this);
     ProService.instance.removeListener(_askNotificationPermission);
     BankNotificationListenerManager.instance.stopListening();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Rời app: đặt lại lịch nhắc tối để nội dung có số giao dịch chờ xác nhận mới nhất
+    if (state == AppLifecycleState.paused) {
+      DailyReminderService.instance.scheduleDailyEveningReminder(uid: _currentUser.uid);
+    }
   }
 
   Future<void> _loadTransactions() async {
