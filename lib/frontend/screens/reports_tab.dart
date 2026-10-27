@@ -39,6 +39,8 @@ class _ReportsTabState extends State<ReportsTab> {
         return const Color(0xFFA1887F);
       case 'Hóa đơn':
         return const Color(0xFF78909C);
+      case 'Điện thoại':
+        return const Color(0xFF26C6DA);
       case 'Di chuyển':
         return const Color(0xFFFB8C00);
       case 'Mua sắm':
@@ -845,6 +847,7 @@ class _ReportsTabState extends State<ReportsTab> {
       'Cà phê',
       'Trà sữa',
       'Hóa đơn',
+      'Điện thoại',
       'Di chuyển',
       'Mua sắm',
       'Giải trí',
