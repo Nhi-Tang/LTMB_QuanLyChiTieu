@@ -115,6 +115,54 @@ void main() {
       expect(result, isNull);
     });
 
+    test('"Cảnh báo biến động số dư" là giao dịch thật, không bị lọc', () {
+      final result = BankNotificationParser.parseNotification(
+        packageName: 'com.vietinbank.ipay',
+        title: 'Cảnh báo biến động số dư',
+        text: 'TK 1012345678 -150,000VND luc 27-10-2026 08:15. So du 2,350,000VND. ND: THANH TOAN GRAB',
+      );
+      expect(result, isNotNull);
+      expect(result!.amount, 150000);
+      expect(result.type, 'expense');
+    });
+
+    test('Cảnh báo bảo mật không có biến động số dư thì vẫn bị lọc', () {
+      expect(
+        BankNotificationParser.isNonTransaction(
+            'Cảnh báo', 'Tài khoản của bạn vừa đăng nhập trên thiết bị mới. Nếu không phải bạn, hãy liên hệ ngân hàng.'),
+        isTrue,
+      );
+      expect(
+        BankNotificationParser.parseNotification(
+          packageName: 'com.VCB',
+          title: 'Canh bao lua dao',
+          text: 'Khong cung cap thong tin the cho bat ky ai.',
+        ),
+        isNull,
+      );
+    });
+
+    test('Chỉ nhận ACB khi "acb" đứng thành từ riêng', () {
+      final acb = BankNotificationParser.parseNotification(
+        packageName: 'mobile.acb.com.vn',
+        title: 'ACB',
+        text: 'ACB: TK 12345678 +2,000,000 VND luc 27/10. So du 5,000,000 VND. ND: LUONG T10',
+      );
+      expect(acb, isNotNull);
+      expect(acb!.bankName, 'ACB');
+      expect(acb.type, 'income');
+      expect(acb.amount, 2000000);
+
+      final other = BankNotificationParser.parseNotification(
+        packageName: 'com.example.wallet',
+        title: 'Biến động số dư',
+        text: 'TK 98765432 -45,000 VND. ND: Thanh toan don ACBD9X21',
+      );
+      expect(other, isNotNull);
+      expect(other!.bankName, isNot('ACB'));
+      expect(other.amount, 45000);
+    });
+
     test('Fingerprint generation consistency within 10-minute window', () {
       final now = DateTime(2023, 5, 12, 10, 5, 0);
       final sameWindow = DateTime(2023, 5, 12, 10, 8, 0);

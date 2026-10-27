@@ -7,8 +7,10 @@ import '../../../backend/services/pro_service.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_language.dart';
 
-/// Lần đầu dùng app bằng tài khoản PRO: xin quyền gửi thông báo (hộp hỏi của hệ thống, như quyền camera),
-/// rồi mời bật quyền đọc thông báo ngân hàng (Android chỉ cho bật trong Cài đặt). Mỗi tài khoản hỏi một lần.
+/// Lần đầu dùng app: xin quyền gửi thông báo (hộp hỏi của hệ thống, như quyền camera) cho mọi tài khoản,
+/// để nhắc ghi chi tiêu hằng ngày và cảnh báo ngân sách hiện được trên Android 13+.
+/// Tài khoản PRO được mời thêm quyền đọc thông báo ngân hàng (Android chỉ cho bật trong Cài đặt).
+/// Mỗi tài khoản hỏi mỗi loại một lần.
 class NotificationPermissionPrompt {
   NotificationPermissionPrompt._();
 
@@ -16,17 +18,26 @@ class NotificationPermissionPrompt {
   static bool _running = false;
 
   static Future<void> maybeAsk(BuildContext context, {required String uid}) async {
-    if (_running || !ProService.instance.isPro) return;
+    if (_running) return;
     final prefs = await SharedPreferences.getInstance();
-    final key = 'notification_permission_asked_$uid';
-    if (prefs.getBool(key) ?? false) return;
+    final postKey = 'notification_post_asked_$uid';
+    // Khoá cũ, trước đây chỉ PRO được hỏi và hỏi cả hai quyền cùng lúc
+    final listenerKey = 'notification_permission_asked_$uid';
+    final listenerAsked = prefs.getBool(listenerKey) ?? false;
+    final askPost = !(prefs.getBool(postKey) ?? false) && !listenerAsked;
+    final askListener = ProService.instance.isPro && !listenerAsked;
+    if (!askPost && !askListener) return;
 
     _running = true;
     try {
-      await prefs.setBool(key, true);
-      // Android 13+ / iOS: hiện hộp hỏi của hệ thống; máy cũ hơn coi như đã có quyền
-      await Permission.notification.request();
+      if (askPost) {
+        await prefs.setBool(postKey, true);
+        // Android 13+ / iOS: hiện hộp hỏi của hệ thống; máy cũ hơn coi như đã có quyền
+        await Permission.notification.request();
+      }
 
+      if (!askListener) return;
+      await prefs.setBool(listenerKey, true);
       if (defaultTargetPlatform != TargetPlatform.android || !context.mounted) return;
       final bool granted = await _channel.invokeMethod('isNotificationPermissionGranted') ?? false;
       if (granted || !context.mounted) return;

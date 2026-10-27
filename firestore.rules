@@ -43,6 +43,20 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Lượt chụp hoá đơn theo tháng (yyyy_MM) của tài khoản FREE: chỉ được tăng đúng 1 mỗi lần,
+      // không giảm, không xoá, để gỡ app cài lại cũng không lấy lại được lượt
+      match /receipt_quota/{monthId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && monthId.matches('^[0-9]{4}_[0-9]{2}$')
+          && request.resource.data.keys().hasOnly(['count', 'updatedAt'])
+          && request.resource.data.count == 1;
+        allow update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['count', 'updatedAt'])
+          && request.resource.data.count == resource.data.count + 1;
+        allow delete: if false;
+      }
+
       match /ledgers/{ledgerId} {
         allow read, delete: if isOwner(userId);
         allow create, update: if isOwner(userId) && hasValidUpdatedAt();

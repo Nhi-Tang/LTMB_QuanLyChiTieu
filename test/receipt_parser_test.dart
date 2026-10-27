@@ -77,8 +77,8 @@ Hoậc sú dụng QR ben dud
     final r = ReceiptParser.parse(mauTest);
     expect(r.amount, 60000);
     expect(r.merchant, isNull);
-    expect(r.items, ['Trà Olong Sua (tM)']);
-    expect(r.note, 'Trà Olong Sua (tM)');
+    expect(r.items, ['Trà Olong Sữa (M)']);
+    expect(r.note, 'Trà Olong Sữa (M)');
     expect(r.date, DateTime(2026, 10, 3));
     expect(r.category, 'Trà sữa');
   });
@@ -102,7 +102,7 @@ TIen thưa  40 000 d
 ''');
     expect(r.amount, 60000);
     expect(r.merchant, isNull);
-    expect(r.note, 'Trà Olong Sua (h)');
+    expect(r.note, 'Trà Olong Sữa (h)');
     expect(r.date, DateTime(2026, 10, 3));
   });
 
@@ -132,6 +132,21 @@ Tổng thanh toán: 78.000
     expect(r.items, ['Bạc xỉu', 'Bánh mì']);
     expect(r.note, 'Bạc xỉu, Bánh mì');
     expect(ReceiptParser.parse('Quán cà phê Ba Miền\nTotal 38.000').note, 'Quán cà phê Ba Miền');
+  });
+
+  test('khôi phục dấu tên món bị OCR đọc mất dấu, giữ kiểu viết hoa', () {
+    expect(ReceiptParser.restoreMenuAccents('Tra sua tran chau'), 'Trà sữa trân châu');
+    expect(ReceiptParser.restoreMenuAccents('CA PHE DEN DA'), 'CÀ PHÊ ĐEN ĐÁ');
+    expect(ReceiptParser.restoreMenuAccents('Bac xiu nong'), 'Bạc xỉu nóng');
+    // Từ đã có dấu hoặc không có trong từ điển thì giữ nguyên
+    expect(ReceiptParser.restoreMenuAccents('Trà Olong Sữa'), 'Trà Olong Sữa');
+    expect(ReceiptParser.restoreMenuAccents('Topping Pudding'), 'Topping Pudding');
+    expect(ReceiptParser.restoreMenuAccents('Matcha Latte (tL)'), 'Matcha Latte (L)');
+  });
+
+  test('ưu tiên ngày trên dòng có chữ "Ngày"', () {
+    final r = ReceiptParser.parse('Cửa hàng ABC\nHSD: 01/01/2027\nNgày: 15/10/2026\nTổng tiền: 50.000');
+    expect(r.date, DateTime(2026, 10, 15));
   });
 
   test('chữ không phải hoá đơn: các trường để trống', () {
