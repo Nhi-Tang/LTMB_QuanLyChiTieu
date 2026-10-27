@@ -41,6 +41,51 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252576636037:android:9b408d5655cdf3da099dec",
+        "android_client_info": {
+          "package_name": "com.mousey.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "252576636037-1t0o8eublqntuog0s45cq6ks97b43000.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mousey.app",
+            "certificate_hash": "e3dd29895eb0814d668a2a935ce4f783228fcc07"
+          }
+        },
+        {
+          "client_id": "252576636037-kd6b2gt367qtrlku35dp4s29t10q5jv2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mousey.app",
+            "certificate_hash": "271e8d995277cec6ee19aa3ec3af4ef9d0577a3f"
+          }
+        },
+        {
+          "client_id": "252576636037-b0ron8cb2g4u6fo6rqja33om5cop4tl9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7bH2kGhjdcgHLmENUrjL8dEQaVk2OwWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252576636037-b0ron8cb2g4u6fo6rqja33om5cop4tl9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

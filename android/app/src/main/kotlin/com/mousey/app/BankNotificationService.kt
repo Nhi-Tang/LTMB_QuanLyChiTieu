@@ -1,4 +1,4 @@
-package com.example.quanlychitieu
+package com.mousey.app
 
 import android.app.Notification
 import android.content.ComponentName
