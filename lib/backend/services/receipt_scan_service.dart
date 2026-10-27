@@ -11,32 +11,33 @@ class ReceiptScanResult {
   const ReceiptScanResult({required this.data, required this.imagePath});
 }
 
-/// Chụp / chọn ảnh hoá đơn rồi đọc chữ bằng ML Kit ngay trên máy (ảnh không gửi lên server).
+/// Chọn ảnh hoá đơn rồi đọc chữ bằng ML Kit ngay trên máy (ảnh không gửi lên server).
 class ReceiptScanService {
   ReceiptScanService._();
   static final ReceiptScanService instance = ReceiptScanService._();
 
   final ImagePicker _picker = ImagePicker();
 
-  /// Trả về null nếu người dùng huỷ chụp / chọn ảnh.
-  /// [onImagePicked] gọi khi đã có ảnh, trước lúc đọc chữ (để hiện vòng tải).
-  Future<ReceiptScanResult?> scan({required bool fromCamera, void Function()? onImagePicked}) async {
+  /// Chọn ảnh hoá đơn có sẵn; null nếu người dùng huỷ.
+  Future<String?> pickFromGallery() async {
     final photo = await _picker.pickImage(
-      source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+      source: ImageSource.gallery,
       // Giảm kích thước để đọc nhanh, vẫn đủ nét cho chữ hoá đơn
       maxWidth: 2000,
       maxHeight: 2000,
       imageQuality: 90,
     );
-    if (photo == null) return null;
-    onImagePicked?.call();
+    return photo?.path;
+  }
 
+  /// Đọc chữ trên ảnh rồi tách thông tin hoá đơn.
+  Future<ReceiptScanResult> recognize(String imagePath) async {
     final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
     try {
-      final recognized = await recognizer.processImage(InputImage.fromFilePath(photo.path));
+      final recognized = await recognizer.processImage(InputImage.fromFilePath(imagePath));
       return ReceiptScanResult(
         data: ReceiptParser.parse(_rowsText(recognized)),
-        imagePath: photo.path,
+        imagePath: imagePath,
       );
     } finally {
       await recognizer.close();
