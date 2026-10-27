@@ -215,11 +215,12 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                               SizedBox(
                                 width: double.infinity,
                                 height: 52,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: AppColors.onTeal,
-                                    elevation: 0,
+                                // Dùng thử: nút nhạt; nút đậm dành cho đăng ký gói bên dưới
+                                child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: AppColors.tealPale,
+                                    foregroundColor: AppColors.primary,
+                                    side: BorderSide(color: AppColors.primary, width: 1.5),
                                     shape: const StadiumBorder(),
                                   ),
                                   onPressed: _isLoading ? null : _handleStartTrial,
@@ -237,10 +238,11 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                             SizedBox(
                               width: double.infinity,
                               height: 52,
-                              child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.primary,
-                                  side: BorderSide(color: AppColors.primary, width: 1.5),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: AppColors.onTeal,
+                                  elevation: 0,
                                   shape: const StadiumBorder(),
                                 ),
                                 onPressed: _isLoading ? null : _handleUpgrade,
