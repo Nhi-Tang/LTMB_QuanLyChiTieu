@@ -24,8 +24,6 @@ services:
         value: "false"
       - key: ENABLE_MOCK_PAY
         value: "false"
-      - key: ADMIN_EMAILS
-        value: admin@mousey.com
       - key: PRICE_MONTHLY
         value: "20000"
       - key: PRICE_YEARLY

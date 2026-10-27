@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import logging
-from routes import admin, auth, subscription
+from routes import auth, subscription
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("uvicorn.error")
@@ -23,7 +23,6 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(subscription.router)
-app.include_router(admin.router)
 
 @app.get("/")
 async def root():

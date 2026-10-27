@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from services.firebase_service import db
 from middleware.auth import verify_firebase_token
 from pydantic import BaseModel
-import config
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -39,7 +38,6 @@ async def create_or_update_session(request: Request, user_data: dict = Depends(v
             "displayName": display_name,
             "photoUrl": photo_url,
             "provider": provider,
-            "role": "admin" if (email or "").lower() in config.ADMIN_EMAILS else "user",
             "plan": "free",
             "proExpiredAt": None,
             "createdAt": now,
@@ -55,8 +53,6 @@ async def create_or_update_session(request: Request, user_data: dict = Depends(v
         # Doc do client tạo trước đó có thể thiếu các trường do server quản lý
         if "plan" not in existing:
             update_data["plan"] = "free"
-        if "role" not in existing:
-            update_data["role"] = "admin" if (email or "").lower() in config.ADMIN_EMAILS else "user"
         if "createdAt" not in existing:
             update_data["createdAt"] = now
         if display_name:

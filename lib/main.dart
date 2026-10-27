@@ -10,7 +10,6 @@ import 'backend/services/pro_service.dart';
 import 'backend/services/sync_service.dart';
 import 'frontend/screens/auth_screen.dart';
 import 'frontend/screens/home_screen.dart';
-import 'frontend/screens/admin_management_screen.dart';
 import 'frontend/utils/app_language.dart';
 import 'frontend/theme/app_colors.dart';
 import 'frontend/theme/app_theme.dart';
@@ -181,22 +180,14 @@ class _AuthGateState extends State<AuthGate> {
                 password: '',
                 photoUrl: firebaseUser.photoURL,
                 provider: firebaseUser.providerData.isNotEmpty ? firebaseUser.providerData.first.providerId : 'password',
-                role: firebaseUser.email == 'admin@mousey.com' ? 'admin' : 'user',
                 plan: 'free',
                 createdAt: DateTime.now().toIso8601String(),
               );
 
-              if (localUser.isAdmin) {
-                return AdminManagementScreen(
-                  key: ValueKey('admin_${firebaseUser.uid}'),
-                  currentAdmin: localUser,
-                );
-              } else {
-                return HomeScreen(
-                  key: ValueKey('user_${firebaseUser.uid}'),
-                  currentUser: localUser,
-                );
-              }
+              return HomeScreen(
+                key: ValueKey('user_${firebaseUser.uid}'),
+                currentUser: localUser,
+              );
             },
           );
         }
