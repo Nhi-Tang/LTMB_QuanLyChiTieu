@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'mousey_colors.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
+/// Bàn phím nhập tiền kiểu sổ: 3 cột số, cột phải là Ngày, Ghi chú và nút Lưu cao gấp đôi
 class CalculatorKeypad extends StatelessWidget {
   final ValueChanged<String> onKeyPressed;
   final VoidCallback onDeletePressed;
@@ -25,6 +26,9 @@ class CalculatorKeypad extends StatelessWidget {
     required this.hasNote,
   });
 
+  static const double _keyHeight = 52;
+  static const double _gap = 8;
+
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
@@ -40,155 +44,117 @@ class CalculatorKeypad extends StatelessWidget {
       onKeyPressed(key);
     }
 
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: MouseyColors.keypadBackground,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: MouseyColors.borderBeige),
-      ),
-      child: Column(
-        children: [
-          // Row 1
-          Row(
-            children: [
-              _buildKey('1', onTap: () => handlePress('1')),
-              _buildKey('2', onTap: () => handlePress('2')),
-              _buildKey('3', onTap: () => handlePress('3')),
-              _buildKey('+', onTap: () => handlePress('+'), isOperator: true),
-              const SizedBox(width: 6),
-              _buildFunctionButton(
-                icon: Icons.calendar_today_rounded,
-                label: _formatDate(selectedDate),
-                onTap: onDatePressed,
-              ),
+    Widget digitRow(List<String> keys) => Row(
+          children: [
+            for (var i = 0; i < keys.length; i++) ...[
+              if (i > 0) const SizedBox(width: _gap),
+              Expanded(child: _buildKey(keys[i], onTap: () => handlePress(keys[i]))),
             ],
-          ),
-          const SizedBox(height: 6),
-          // Row 2
-          Row(
-            children: [
-              _buildKey('4', onTap: () => handlePress('4')),
-              _buildKey('5', onTap: () => handlePress('5')),
-              _buildKey('6', onTap: () => handlePress('6')),
-              _buildKey('-', onTap: () => handlePress('-'), isOperator: true),
-              const SizedBox(width: 6),
-              _buildFunctionButton(
-                icon: Icons.edit_note,
-                label: hasNote ? context.t('Sửa ghi chú') : context.t('Ghi chú'),
-                isHighlight: hasNote,
-                onTap: onNotePressed,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // Row 3
-          Row(
-            children: [
-              _buildKey('7', onTap: () => handlePress('7')),
-              _buildKey('8', onTap: () => handlePress('8')),
-              _buildKey('9', onTap: () => handlePress('9')),
-              _buildKey('×', onTap: () => handlePress('×'), isOperator: true),
-              const SizedBox(width: 6),
-              _buildIconFunctionButton(
-                icon: Icons.backspace_outlined,
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  onDeletePressed();
-                },
-                onLongPress: () {
-                  HapticFeedback.heavyImpact();
-                  onDeleteLongPress();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // Row 4
-          Row(
-            children: [
-              _buildKey('.', onTap: () => handlePress('.')),
-              _buildKey('0', onTap: () => handlePress('0')),
-              _buildKey('000', onTap: () => handlePress('000')),
-              _buildKey('÷', onTap: () => handlePress('÷'), isOperator: true),
-              const SizedBox(width: 6),
-              _buildSaveButton(),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        );
 
-  Widget _buildKey(String label, {required VoidCallback onTap, bool isOperator = false}) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3),
-        child: Material(
-          color: isOperator ? MouseyColors.keypadOperator : MouseyColors.keypadKey,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              height: 44,
-              alignment: Alignment.center,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: isOperator ? MouseyColors.textMain : MouseyColors.textMain,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFunctionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    bool isHighlight = false,
-  }) {
-    return Expanded(
-      flex: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3),
-        child: Material(
-          color: isHighlight ? MouseyColors.selectedCream : MouseyColors.keypadOperator,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onTap();
-            },
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 3 cột số
+        Expanded(
+          flex: 3,
+          child: Column(
+            children: [
+              digitRow(['1', '2', '3']),
+              const SizedBox(height: _gap),
+              digitRow(['4', '5', '6']),
+              const SizedBox(height: _gap),
+              digitRow(['7', '8', '9']),
+              const SizedBox(height: _gap),
+              Row(
                 children: [
-                  Icon(icon, size: 15, color: MouseyColors.textMain),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: MouseyColors.textMain,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                  Expanded(child: _buildKey('000', onTap: () => handlePress('000'))),
+                  const SizedBox(width: _gap),
+                  Expanded(child: _buildKey('0', onTap: () => handlePress('0'))),
+                  const SizedBox(width: _gap),
+                  Expanded(
+                    child: _buildKey(
+                      '',
+                      icon: Icons.backspace_outlined,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        onDeletePressed();
+                      },
+                      onLongPress: () {
+                        HapticFeedback.mediumImpact();
+                        onDeleteLongPress();
+                      },
                     ),
                   ),
                 ],
               ),
+            ],
+          ),
+        ),
+        const SizedBox(width: _gap),
+        // Cột chức năng
+        Expanded(
+          flex: 1,
+          child: Column(
+            children: [
+              _buildSideButton(label: _formatDate(selectedDate), onTap: onDatePressed),
+              const SizedBox(height: _gap),
+              _buildSideButton(
+                label: hasNote ? context.t('Sửa ghi chú') : context.t('Ghi chú'),
+                onTap: onNotePressed,
+              ),
+              const SizedBox(height: _gap),
+              _buildSaveButton(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKey(String label, {required VoidCallback onTap, VoidCallback? onLongPress, IconData? icon}) {
+    return Material(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: AppColors.rule),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: SizedBox(
+          height: _keyHeight,
+          child: Center(
+            child: icon != null
+                ? Icon(icon, size: 22, color: AppColors.ink)
+                : Text(label, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500, color: AppColors.ink)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSideButton({required String label, required VoidCallback onTap}) {
+    return Material(
+      color: AppColors.tealMist,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: AppColors.border),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: SizedBox(
+          height: _keyHeight,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(label, style: TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+              ),
             ),
           ),
         ),
@@ -196,59 +162,22 @@ class CalculatorKeypad extends StatelessWidget {
     );
   }
 
-  Widget _buildIconFunctionButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required VoidCallback onLongPress,
-  }) {
-    return Expanded(
-      flex: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3),
-        child: Material(
-          color: MouseyColors.keypadOperator,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            onTap: onTap,
-            onLongPress: onLongPress,
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              height: 44,
-              alignment: Alignment.center,
-              child: Icon(icon, size: 18, color: MouseyColors.textMain),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSaveButton() {
-    return Expanded(
-      flex: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: MouseyColors.primaryGreen,
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.zero,
-            minimumSize: const Size(0, 44),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            elevation: 0,
-          ),
-          onPressed: () {
-            HapticFeedback.heavyImpact();
-            onSavePressed();
-          },
-          child: Text(
-            AppLanguage.instance.t('LƯU'),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
+  Widget _buildSaveButton(BuildContext context) {
+    return Material(
+      color: AppColors.teal,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          onSavePressed();
+        },
+        child: SizedBox(
+          height: _keyHeight * 2 + _gap,
+          child: Center(
+            child: Text(
+              context.t('Lưu'),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.onTeal),
             ),
           ),
         ),

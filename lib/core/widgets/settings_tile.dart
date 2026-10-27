@@ -15,22 +15,21 @@ class SettingsTileGroup extends StatelessWidget {
     this.margin,
     this.backgroundColor,
     this.borderColor,
-    this.borderRadius = 20.0,
+    this.borderRadius = 0,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Kiểu trang sổ: không khung thẻ, chỉ một đường kẻ trên và dưới nhóm
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surface,
+        color: backgroundColor ?? Colors.transparent,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor ?? AppColors.borderBeige),
+        border: Border.symmetric(horizontal: BorderSide(color: borderColor ?? AppColors.rule)),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(borderRadius),
-        clipBehavior: Clip.antiAlias,
         child: Column(
           children: children,
         ),
@@ -69,7 +68,7 @@ class SettingsTile extends StatelessWidget {
       trailing: trailing,
       onTap: onTap,
       onLongPress: onLongPress,
-      contentPadding: contentPadding,
+      contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 }

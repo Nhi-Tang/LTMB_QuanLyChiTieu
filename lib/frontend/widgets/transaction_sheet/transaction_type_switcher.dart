@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'mousey_colors.dart';
 import '../../utils/app_language.dart';
 import '../../theme/app_colors.dart';
 
+/// Tab Chi tiêu | Thu nhập | Ngân sách kiểu sổ: chữ thường, tab đang chọn gạch chân bằng mực
 class TransactionTypeSwitcher extends StatelessWidget {
   final int selectedIndex; // 0: Chi tiêu, 1: Thu nhập, 2: Ngân sách
   final ValueChanged<int> onTabChanged;
@@ -16,60 +16,36 @@ class TransactionTypeSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: MouseyColors.borderBeige,
-        borderRadius: BorderRadius.circular(24),
-      ),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.rule))),
       child: Row(
         children: [
-          _buildTab(0, context.t('Chi tiêu'), Icons.arrow_downward_rounded, MouseyColors.expenseRed),
-          _buildTab(1, context.t('Thu nhập'), Icons.arrow_upward_rounded, MouseyColors.incomeGreen),
-          _buildTab(2, context.t('Ngân sách'), Icons.pie_chart_outline_rounded, AppColors.tealDark),
+          _buildTab(0, context.t('Chi tiêu')),
+          _buildTab(1, context.t('Thu nhập')),
+          _buildTab(2, context.t('Ngân sách')),
         ],
       ),
     );
   }
 
-  Widget _buildTab(int index, String label, IconData icon, Color color) {
+  Widget _buildTab(int index, String label) {
     final isSelected = selectedIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onTabChanged(index),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? MouseyColors.cardCream : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            border: isSelected ? Border.all(color: MouseyColors.selectedBorder, width: 1.5) : null,
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onTabChanged(index),
+      child: Container(
+        margin: const EdgeInsets.only(right: 24),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: isSelected ? AppColors.ink : Colors.transparent, width: 2),
           ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 15, color: isSelected ? color : MouseyColors.textSub),
-              const SizedBox(width: 4),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
-                  ),
-                ),
-              ),
-            ],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? AppColors.ink : AppColors.unselectedTab,
           ),
         ),
       ),

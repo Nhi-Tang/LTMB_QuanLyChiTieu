@@ -2,34 +2,52 @@ import 'package:flutter/material.dart';
 import 'app_theme.dart';
 
 /// Toàn bộ màu giao diện của app. Mỗi màu có một giá trị cho chế độ sáng và
-/// một cho chế độ tối; muốn đổi màu chủ đạo thì chỉ sửa bảng màu teal.
+/// một cho chế độ tối.
+///
+/// Phong cách "cuốn sổ": nền giấy kem, chữ và nút màu mực xanh, danh sách chỉ dùng
+/// đường kẻ mảnh, số tổng tô như bút dạ quang. Tên các màu teal* được giữ lại để
+/// code cũ không phải sửa, nhưng giờ là thang màu mực xanh / giấy.
 class AppColors {
   static bool get isDark => AppTheme.instance.isDark;
   static Color _c(Color light, Color dark) => isDark ? dark : light;
 
-  // Bảng màu teal (colorhub.app), từ đậm đến nhạt. Ở chế độ tối thang màu
-  // đảo lại: màu đậm dùng cho chữ thành màu sáng, màu nền nhạt thành màu tối.
-  static Color get tealDark => _c(const Color(0xFF00463E), const Color(0xFFB3F3F0));
-  static Color get teal => const Color(0xFF00BFB5);
-  static Color get tealBright => const Color(0xFF00D1CC);
-  static Color get mint => const Color(0xFF33DEBF);
-  static Color get tealLight => _c(const Color(0xFF66EBE5), const Color(0xFF1E6B65));
-  static Color get tealPale => _c(const Color(0xFFCCF7F7), const Color(0xFF0F3A37));
-  static Color get tealMist => _c(const Color(0xFFE6FBFB), const Color(0xFF16302E));
-  static Color get tealWhite => _c(const Color(0xFFF5FDFD), const Color(0xFF121A1A));
+  // Thang màu mực xanh (đậm) -> giấy (nhạt). Ở chế độ tối thang màu đảo lại:
+  // màu đậm dùng cho chữ thành màu sáng, màu nền nhạt thành màu tối.
+  static Color get tealDark => _c(const Color(0xFF1E2A5A), const Color(0xFFC9D0F2));
+  static Color get teal => _c(const Color(0xFF1E2A5A), const Color(0xFF4757A6));
+  static Color get tealBright => _c(const Color(0xFF1E2A5A), const Color(0xFF4757A6));
+  static Color get mint => _c(const Color(0xFFF6DE7E), const Color(0xFF8A7630));
+  static Color get tealLight => _c(const Color(0xFFC9CFEA), const Color(0xFF3A4170));
+  static Color get tealPale => _c(const Color(0xFFE9EBF6), const Color(0xFF262B45));
+  static Color get tealMist => _c(const Color(0xFFF2EFE4), const Color(0xFF1E2030));
+  static Color get tealWhite => _c(const Color(0xFFFAF8F1), const Color(0xFF15161D));
 
-  /// Chữ/icon đặt trên nền teal: luôn đậm ở cả hai chế độ.
-  static const Color onTeal = Color(0xFF00463E);
+  /// Chữ/icon đặt trên nền mực xanh (nút chính): luôn trắng ở cả hai chế độ.
+  static const Color onTeal = Colors.white;
+
+  // Màu riêng của phong cách sổ
+  /// Bút dạ quang tô số tổng
+  static Color get highlight => _c(const Color(0xFFFBEA9E), const Color(0xFF5E5220));
+  /// Tờ giấy nhớ (thẻ nâng cấp PRO) và viền của nó
+  static Color get note => _c(const Color(0xFFFCEFB4), const Color(0xFF3D3720));
+  static Color get noteBorder => _c(const Color(0xFFE6C95C), const Color(0xFF8A7630));
+  /// Đường kẻ dòng của sổ
+  static Color get rule => _c(const Color(0xFFDDDFEC), const Color(0xFF2E3247));
+  /// Đường kẻ lề đỏ của sổ
+  static Color get margin => _c(const Color(0xFFE3A3A3), const Color(0xFF7A3B3B));
+  /// Bìa sổ (thẻ thông tin cá nhân)
+  static Color get cover => _c(const Color(0xFF1E2A5A), const Color(0xFF2A3466));
+  static Color get coverSpine => _c(const Color(0xFF141D44), const Color(0xFF1D2550));
 
   // Màu trung tính
-  static Color get ink => _c(const Color(0xFF222222), const Color(0xFFEDEDED));
-  static Color get textPrimary => _c(const Color(0xFF171827), const Color(0xFFF2F2F5));
-  static Color get textSecondary => _c(const Color(0xFF373743), const Color(0xFFC8C8D0));
-  static Color get textMuted => _c(const Color(0xFF706C66), const Color(0xFFA8A39C));
-  static Color get background => _c(const Color(0xFFF2F2F2), const Color(0xFF121212));
-  static Color get surface => _c(const Color(0xFFFFFFFF), const Color(0xFF1E1E1E));
-  static Color get border => _c(const Color(0xFFE0E0E0), const Color(0xFF3A3A3A));
-  static Color get unselectedTab => _c(const Color(0xFF9E9E9E), const Color(0xFF8A8A8A));
+  static Color get ink => _c(const Color(0xFF1E2A5A), const Color(0xFFE9EBF5));
+  static Color get textPrimary => _c(const Color(0xFF1E2A5A), const Color(0xFFE9EBF5));
+  static Color get textSecondary => _c(const Color(0xFF4A5175), const Color(0xFFB8BCD3));
+  static Color get textMuted => _c(const Color(0xFF8A8678), const Color(0xFF9A9CAD));
+  static Color get background => _c(const Color(0xFFFAF8F1), const Color(0xFF15161D));
+  static Color get surface => _c(const Color(0xFFFFFDF8), const Color(0xFF1D1F29));
+  static Color get border => _c(const Color(0xFFE4E0D2), const Color(0xFF33364A));
+  static Color get unselectedTab => _c(const Color(0xFF9EA2B8), const Color(0xFF7D8197));
 
   // Thang xám (thay cho Colors.grey[...]); chế độ tối dùng bậc đối xứng
   static Color get grey50 => _c(Colors.grey.shade50, Colors.grey.shade900);
@@ -53,16 +71,16 @@ class AppColors {
   static Color get black12 => _c(Colors.black12, Colors.white.withValues(alpha: 0.12));
 
   // Màu mang ý nghĩa: thu, chi
-  static Color get income => _c(const Color(0xFF2E7D32), const Color(0xFF66BB6A));
-  static Color get incomeLight => _c(const Color(0xFF43A047), const Color(0xFF81C784));
-  static Color get expense => _c(const Color(0xFFE53935), const Color(0xFFEF5350));
-  static Color get expenseStrong => _c(const Color(0xFFC62828), const Color(0xFFE57373));
+  static Color get income => _c(const Color(0xFF2E7D4F), const Color(0xFF6CC08B));
+  static Color get incomeLight => _c(const Color(0xFF3F9463), const Color(0xFF8BD0A3));
+  static Color get expense => _c(const Color(0xFFC0392B), const Color(0xFFE57368));
+  static Color get expenseStrong => _c(const Color(0xFFA93226), const Color(0xFFEC8C82));
 
   // Nền nhạt cho icon/thẻ thu, chi, cảnh báo và nền trang đăng nhập
-  static Color get expenseBg => _c(const Color(0xFFFFEBEE), const Color(0x33EF5350));
-  static Color get incomeBg => _c(const Color(0xFFE8F5E9), const Color(0x3366BB6A));
-  static Color get warningBg => _c(const Color(0xFFFFF3E0), const Color(0x33FB8C00));
-  static Color get pageBg => _c(const Color(0xFFF8F9FA), const Color(0xFF121212));
+  static Color get expenseBg => _c(const Color(0xFFFBECEA), const Color(0x33E57368));
+  static Color get incomeBg => _c(const Color(0xFFE8F3EC), const Color(0x336CC08B));
+  static Color get warningBg => _c(const Color(0xFFFCF3D6), const Color(0x33E6C95C));
+  static Color get pageBg => background;
 
   /// Màu riêng cho từng chế độ, dùng cho các chỗ lẻ chưa có tên.
   static Color pick(Color light, Color dark) => _c(light, dark);
@@ -81,7 +99,7 @@ class AppColors {
   static Color get selectedCream => tealPale;
   static Color get selectedBorder => tealBright;
 
-  static Color get primaryGreen => income;
+  static Color get primaryGreen => teal;
   static Color get unlinkRed => expense;
   static Color get editYellow => mint;
   static Color get linkedBadge => tealPale;

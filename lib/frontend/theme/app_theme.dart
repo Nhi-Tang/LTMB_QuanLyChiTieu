@@ -44,17 +44,79 @@ class AppTheme extends ValueNotifier<ThemeMode> {
   static ThemeData light() => _build(Brightness.light);
   static ThemeData dark() => _build(Brightness.dark);
 
+  // Phong cách "cuốn sổ": giấy kem, mực xanh, đường kẻ mảnh (xem AppColors)
   static ThemeData _build(Brightness brightness) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF00BFB5),
-      brightness: brightness,
-    );
     final isDark = brightness == Brightness.dark;
+    final ink = isDark ? const Color(0xFFE9EBF5) : const Color(0xFF1E2A5A);
+    final primary = isDark ? const Color(0xFF4757A6) : const Color(0xFF1E2A5A);
+    final paper = isDark ? const Color(0xFF15161D) : const Color(0xFFFAF8F1);
+    final sheet = isDark ? const Color(0xFF1D1F29) : const Color(0xFFFFFDF8);
+    final rule = isDark ? const Color(0xFF2E3247) : const Color(0xFFDDDFEC);
+    final scheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF1E2A5A),
+      brightness: brightness,
+    ).copyWith(
+      primary: primary,
+      onPrimary: Colors.white,
+      surface: paper,
+      onSurface: ink,
+      outlineVariant: rule,
+    );
     return ThemeData(
       colorScheme: scheme,
-      scaffoldBackgroundColor: isDark ? const Color(0xFF121212) : null,
-      dialogTheme: DialogThemeData(backgroundColor: isDark ? const Color(0xFF1E1E1E) : null),
-      bottomSheetTheme: BottomSheetThemeData(backgroundColor: isDark ? const Color(0xFF1E1E1E) : null),
+      scaffoldBackgroundColor: paper,
+      dividerColor: rule,
+      dividerTheme: DividerThemeData(color: rule, thickness: 1, space: 1),
+      appBarTheme: AppBarTheme(
+        backgroundColor: paper,
+        foregroundColor: ink,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(color: ink, fontSize: 20, fontWeight: FontWeight.w600),
+      ),
+      cardTheme: CardThemeData(
+        color: sheet,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: rule)),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: ink)),
+      tabBarTheme: TabBarThemeData(
+        labelColor: ink,
+        unselectedLabelColor: isDark ? const Color(0xFF7D8197) : const Color(0xFF9EA2B8),
+        indicatorColor: ink,
+        dividerColor: rule,
+        indicatorSize: TabBarIndicatorSize.label,
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? Colors.white : null),
+        trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? primary : null),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: sheet,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(backgroundColor: sheet, surfaceTintColor: Colors.transparent),
+      inputDecorationTheme: InputDecorationTheme(
+        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: rule)),
+        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: ink, width: 1.5)),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: primary),
     );
   }
 }
