@@ -39,7 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    // App vừa tự đăng xuất (vd. tài khoản bị Admin khóa): báo cho người dùng biết lý do
+    // App vừa tự đăng xuất (vd. tài khoản bị khóa): báo cho người dùng biết lý do
     final notice = AuthService.pendingNotice;
     if (notice != null) {
       AuthService.pendingNotice = null;

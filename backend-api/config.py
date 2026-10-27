@@ -13,11 +13,6 @@ def _bool(name: str, default: bool = False) -> bool:
 ALLOW_UNVERIFIED_TOKEN = _bool("ALLOW_UNVERIFIED_TOKEN", False)
 # Bật endpoint /subscription/mock-pay để test luồng thanh toán khi chưa có cổng thanh toán thật.
 ENABLE_MOCK_PAY = _bool("ENABLE_MOCK_PAY", False)
-ADMIN_EMAILS = {
-    e.strip().lower()
-    for e in os.getenv("ADMIN_EMAILS", "admin@mousey.com").split(",")
-    if e.strip()
-}
 
 # ---- Giá gói PRO (VND) — phải khớp lib/core/constants/pricing.dart ----
 PLAN_PRICES = {

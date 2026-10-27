@@ -3,7 +3,6 @@ class UserModel {
   final String name;
   final String email;
   final String password;
-  final String role; // 'admin' or 'user'
   final bool isActive; // true = active, false = locked
   final String createdAt;
 
@@ -20,7 +19,6 @@ class UserModel {
     required this.name,
     required this.email,
     required this.password,
-    this.role = 'user',
     this.isActive = true,
     required this.createdAt,
     this.uid,
@@ -31,7 +29,6 @@ class UserModel {
     this.lastLoginAt,
   });
 
-  bool get isAdmin => role == 'admin';
   bool get isPro => plan == 'pro';
 
   Map<String, dynamic> toMap() {
@@ -40,7 +37,6 @@ class UserModel {
       'name': name,
       'email': email,
       'password': password,
-      'role': role,
       'isActive': isActive ? 1 : 0,
       'createdAt': createdAt,
       'uid': uid,
@@ -58,7 +54,6 @@ class UserModel {
       name: map['name'] as String? ?? map['displayName'] as String? ?? 'User',
       email: map['email'] as String? ?? '',
       password: map['password'] as String? ?? '',
-      role: map['role'] as String? ?? 'user',
       isActive: (map['isActive'] as int? ?? 1) == 1,
       createdAt: map['createdAt'] as String? ?? DateTime.now().toString(),
       uid: map['uid'] as String?,
@@ -75,7 +70,6 @@ class UserModel {
     String? name,
     String? email,
     String? password,
-    String? role,
     bool? isActive,
     String? createdAt,
     String? uid,
@@ -90,7 +84,6 @@ class UserModel {
       name: name ?? this.name,
       email: email ?? this.email,
       password: password ?? this.password,
-      role: role ?? this.role,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       uid: uid ?? this.uid,

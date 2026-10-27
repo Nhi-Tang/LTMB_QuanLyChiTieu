@@ -5,7 +5,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../database/db_helper.dart';
 import '../models/user_model.dart';
-import '../models/user_change_model.dart';
 import 'api_client.dart';
 import 'bank_notification_listener_manager.dart';
 import 'pro_service.dart';
@@ -157,7 +156,7 @@ class AuthService {
       final localUser = await _syncWithBackendOrLocal(firebaseUser, idToken, provider);
       if (!localUser.isActive) await _signOutLocked();
     } on FirebaseAuthException catch (e) {
-      // Admin khóa tài khoản thì Firebase vô hiệu hóa user và thu hồi token của phiên đang mở
+      // Tài khoản bị vô hiệu hóa trên Firebase Console thì token của phiên đang mở bị thu hồi
       if (e.code == 'user-disabled' || e.code == 'user-token-expired') await _signOutLocked();
     } catch (_) {}
   }
@@ -179,14 +178,13 @@ class AuthService {
       password: '',
       photoUrl: firebaseUser.photoURL,
       provider: provider,
-      role: firebaseUser.email == 'admin@mousey.com' ? 'admin' : 'user',
       plan: 'free',
       lastLoginAt: now,
       createdAt: now,
     );
 
     // Đăng ký/cập nhật phiên với backend: server tạo doc users/{uid} với các trường
-    // do server quản lý (role, plan, proExpiredAt) mà client không được phép ghi.
+    // do server quản lý (plan, proExpiredAt) mà client không được phép ghi.
     if (idToken != null) {
       try {
         final session = await ApiClient.instance.post('/auth/session');
@@ -204,7 +202,7 @@ class AuthService {
       if (doc.exists) {
         final data = doc.data()!;
         final cloudPlan = data['plan'] as String? ?? 'free';
-        // isActive do Admin đặt qua backend; chỉ đọc, không ghi đè từ máy người dùng
+        // isActive chỉ đọc, không ghi đè từ máy người dùng (firestore.rules chặn client ghi)
         final cloudActive = data['isActive'];
         if (cloudActive is bool) userModel = userModel.copyWith(isActive: cloudActive);
         final cloudExpiry = data['proExpiredAt'] as String?;
@@ -225,12 +223,12 @@ class AuthService {
       );
     }
 
-    // Save/update user document in Cloud Firestore so Admin can see all registered users
+    // Save/update user document in Cloud Firestore
     try {
       await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
         'name': userModel.name,
         'email': userModel.email,
-        // role / plan / proExpiredAt / trialUsed / isActive do backend quản lý (firestore.rules chặn client ghi)
+        // plan / proExpiredAt / trialUsed / isActive do backend quản lý (firestore.rules chặn client ghi)
         'createdAt': userModel.createdAt,
         'photoUrl': userModel.photoUrl,
         'provider': userModel.provider,
@@ -293,11 +291,6 @@ class AuthService {
     return error.replaceAll('Exception: ', '');
   }
 
-  // Existing methods for local DB auth
-  Future<int> registerUser(UserModel user) async {
-    return await _dbHelper.registerUser(user);
-  }
-
   Future<UserModel?> loginUser(String emailOrPhone, String password) async {
     return await signInWithEmail(emailOrPhone, password);
   }
@@ -308,53 +301,5 @@ class AuthService {
 
   Future<int> updatePasswordByEmail(String email, String newPassword) async {
     return await _dbHelper.updatePasswordByEmail(email, newPassword);
-  }
-
-  Future<List<UserModel>> getAllUsers() async {
-    return await _dbHelper.getAllUsers();
-  }
-
-  Future<List<UserModel>> searchUsers(String query) async {
-    return await _dbHelper.searchUsers(query);
-  }
-
-  Future<int> updateUser(UserModel user) async {
-    return await _dbHelper.updateUser(user);
-  }
-
-  Future<int> toggleUserActiveStatus(int id, bool currentStatus) async {
-    return await _dbHelper.toggleUserActiveStatus(id, currentStatus);
-  }
-
-  Future<int> deleteUser(int id) async {
-    return await _dbHelper.deleteUser(id);
-  }
-
-  Future<Map<String, int>> getUserStats() async {
-    return await _dbHelper.getUserStats();
-  }
-
-  Future<int> logUserChange({
-    required int userId,
-    required String userEmail,
-    required String changedField,
-    required String oldValue,
-    required String newValue,
-  }) async {
-    return await _dbHelper.logUserChange(
-      userId: userId,
-      userEmail: userEmail,
-      changedField: changedField,
-      oldValue: oldValue,
-      newValue: newValue,
-    );
-  }
-
-  Future<List<UserChangeModel>> getUserChanges(int userId) async {
-    return await _dbHelper.getUserChanges(userId);
-  }
-
-  Future<List<UserChangeModel>> getAllUserChanges() async {
-    return await _dbHelper.getAllUserChanges();
   }
 }

@@ -10,15 +10,9 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // role do backend ghi vào users/{uid} (xem backend-api/routes/auth.py)
-    function isAdmin() {
-      return isAuthenticated()
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'user') == 'admin';
-    }
-
     // Các trường chỉ backend (Admin SDK) được ghi
     function serverFields() {
-      // isActive: Admin khóa/mở qua backend (/admin/users/{uid}/active), người dùng không tự mở khóa
+      // role: trường cũ từ thời còn Admin; isActive: người dùng không tự mở khóa
       return ['role', 'plan', 'planType', 'planSource', 'proExpiredAt', 'trialUsed', 'isActive'];
     }
 
@@ -28,8 +22,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      // Admin cần đọc toàn bộ để hiển thị màn quản lý người dùng
-      allow read: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId);
 
       allow create: if isOwner(userId)
                     && !request.resource.data.keys().hasAny(serverFields());

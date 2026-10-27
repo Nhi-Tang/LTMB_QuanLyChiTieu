@@ -44,10 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadPreferences();
     _loadTransactions();
     _transactionService.addListener(_loadTransactions);
-    BankNotificationListenerManager.instance.startListening(
-      uid: _currentUser.uid,
-      isAdmin: _currentUser.isAdmin,
-    );
+    BankNotificationListenerManager.instance.startListening(uid: _currentUser.uid);
   }
 
   Future<void> _loadPreferences() async {
