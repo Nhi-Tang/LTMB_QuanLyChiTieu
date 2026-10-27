@@ -5,16 +5,16 @@ import 'package:quanlychitieu/frontend/utils/app_translations.dart';
 
 void main() {
   group('Category System Test Suite (6 Scenarios)', () {
-    test('Scenario 1: Default categories count (20 Expense, 5 Income)', () {
+    test('Scenario 1: Default categories count (21 Expense, 5 Income)', () {
       final expenseList = DatabaseHelper.defaultExpenseCategories;
       final incomeList = DatabaseHelper.defaultIncomeCategories;
 
-      expect(expenseList.length, equals(20));
+      expect(expenseList.length, equals(21));
       expect(incomeList.length, equals(5));
 
       final expenseNames = expenseList.map((e) => e['name']).toList();
       expect(expenseNames, containsAll([
-        'Ăn uống', 'Cà phê', 'Trà sữa', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí',
+        'Ăn uống', 'Cà phê', 'Trà sữa', 'Hóa đơn', 'Điện thoại', 'Di chuyển', 'Mua sắm', 'Giải trí',
         'Sức khoẻ', 'Làm đẹp', 'Quần áo', 'Học tập', 'Thú cưng',
         'Con cái', 'Hỗ trợ gia đình', 'Bảo hiểm', 'Thuế', 'Công việc',
         'Nhà ở', 'Tiền nợ', 'Khác'
@@ -32,7 +32,7 @@ void main() {
           .where((c) => !existingNames.contains(c['name']))
           .toList();
 
-      expect(missingExpense.length, equals(17)); // 20 - 3 = 17
+      expect(missingExpense.length, equals(18)); // 21 - 3 = 18
     });
 
     test('Scenario 3: Switching ledgers maintains all active default categories', () {

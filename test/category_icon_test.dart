@@ -37,6 +37,12 @@ void main() {
     expect(CategoryModel.getCategoryAssetPath('Đồ uống', iconKey: 'emoji_food_beverage_rounded'), 'assets/icon/cat_tra_sua.png');
   });
 
+  test('icon Điện thoại theo tên hoặc iconKey', () {
+    expect(CategoryModel.getCategoryAssetPath('Điện thoại'), 'assets/icon/cat_phone.png');
+    expect(CategoryModel.getCategoryAssetPath('dien thoai'), 'assets/icon/cat_phone.png');
+    expect(CategoryModel.getCategoryAssetPath('Sửa máy', iconKey: 'smartphone_rounded'), 'assets/icon/cat_phone.png');
+  });
+
   test('icon người dùng chọn được ưu tiên, category_rounded thì theo tên', () {
     expect(CategoryModel.getCategoryAssetPath('Cà phê', iconKey: 'fastfood_rounded'), 'assets/icon/cat_an_uong.png');
     expect(CategoryModel.getCategoryAssetPath('Kết hôn', iconKey: 'category_rounded'), 'assets/icon/cat_ket_hon.png');
