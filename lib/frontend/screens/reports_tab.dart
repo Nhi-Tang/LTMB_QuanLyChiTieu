@@ -33,6 +33,8 @@ class _ReportsTabState extends State<ReportsTab> {
     switch (category) {
       case 'Ăn uống':
         return AppColors.expense;
+      case 'Cà phê':
+        return const Color(0xFF6D4C41);
       case 'Trà sữa':
         return const Color(0xFFA1887F);
       case 'Hóa đơn':
@@ -840,6 +842,7 @@ class _ReportsTabState extends State<ReportsTab> {
     final expenseCategories = [
       'Tất cả',
       'Ăn uống',
+      'Cà phê',
       'Trà sữa',
       'Hóa đơn',
       'Di chuyển',
