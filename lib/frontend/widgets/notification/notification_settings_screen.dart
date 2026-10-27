@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../backend/services/daily_reminder_service.dart';
 import '../../theme/app_colors.dart';
-import 'permission_guide_screen.dart';
 import '../../utils/app_language.dart';
+import '../../utils/app_translations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
 
@@ -92,12 +92,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     final formattedTime = '${_reminderHour.toString().padLeft(2, '0')}:${_reminderMinute.toString().padLeft(2, '0')}';
 
     return Scaffold(
-      backgroundColor: AppColors.tealWhite,
+      backgroundColor: AppColors.background,
+      // Dùng AppBar theo theme sổ (nền giấy, chữ mực) như các màn con khác
       appBar: AppBar(
-        title: Text(context.t('Tự động đọc thông báo ngân hàng')),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: Text(
+          AppTranslations.tr(AppLanguage.instance.value, 'bank_notification_settings'),
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: AppColors.primary))
@@ -173,27 +174,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Permission Guide Link Card
-                  Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: AppColors.accentBeige,
-                        child: Icon(Icons.security_rounded, color: AppColors.onTeal),
-                      ),
-                      title: Text(context.t('Hướng dẫn cấp quyền & Tối ưu pin'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      subtitle: Text(context.t('Bật quyền truy cập thông báo và duy trì chạy ngầm'), style: TextStyle(fontSize: 12)),
-                      trailing: Icon(Icons.chevron_right_rounded, color: AppColors.darkBeige),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const PermissionGuideScreen()),
-                        );
-                      },
                     ),
                   ),
                 ],
