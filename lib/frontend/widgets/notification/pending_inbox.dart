@@ -355,7 +355,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
     final isExpense = typeOverride == 'expense';
     final isUnknown = typeOverride == 'unknown';
     final signText = isUnknown ? '' : (isExpense ? '-' : '+');
-    final amountColor = isUnknown ? Colors.blue.shade700 : (isExpense ? Colors.red.shade700 : Colors.green.shade700);
+    final amountColor = isUnknown ? AppColors.ink : (isExpense ? AppColors.expense : AppColors.income);
 
     final amountText = '$signText${item.amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')} đ';
     final currentCat = _categoryOverrides[item.id] ?? item.suggestedCategoryId ?? (isExpense ? 'Khác' : 'Khác');
@@ -385,8 +385,12 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: AppColors.rule),
+      ),
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -402,15 +406,15 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.highlight,
+                          borderRadius: BorderRadius.circular(3),
                         ),
                         child: Text(
                           item.bankName,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.darkBeige,
+                            color: AppColors.ink,
                           ),
                         ),
                       ),
@@ -447,7 +451,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.black87,
+                      color: AppColors.ink,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -482,7 +486,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               ListTile(
-                                leading: const Icon(Icons.arrow_upward, color: Colors.red),
+                                leading: Icon(Icons.arrow_upward, color: AppColors.expense),
                                 title: Text(context.t('Khoản Chi tiêu')),
                                 onTap: () {
                                   Navigator.pop(ctx);
@@ -499,7 +503,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.arrow_downward, color: Colors.green),
+                                leading: Icon(Icons.arrow_downward, color: AppColors.income),
                                 title: Text(context.t('Khoản Thu nhập')),
                                 onTap: () {
                                   Navigator.pop(ctx);
@@ -510,7 +514,7 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.swap_horiz, color: Colors.blue),
+                                leading: Icon(Icons.swap_horiz, color: AppColors.ink),
                                 title: Text(context.t('Chuyển khoản (Không tính vào tổng)')),
                                 onTap: () {
                                   Navigator.pop(ctx);
@@ -529,20 +533,19 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.blue),
+                        border: Border.all(color: AppColors.ink),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(isUnknown ? Icons.help_outline : (isExpense ? Icons.arrow_upward : Icons.arrow_downward), size: 14, color: Colors.blue),
+                          Icon(isUnknown ? Icons.help_outline : (isExpense ? Icons.arrow_upward : Icons.arrow_downward), size: 14, color: AppColors.ink),
                           const SizedBox(width: 4),
                           Text(
                             isUnknown ? context.t('Xác định loại') : context.t('Đổi loại'),
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.ink),
                           ),
-                          const Icon(Icons.arrow_drop_down, size: 16, color: Colors.blue),
+                          Icon(Icons.arrow_drop_down, size: 16, color: AppColors.ink),
                         ],
                       ),
                     ),
@@ -557,14 +560,14 @@ class _PendingInboxSheetState extends State<PendingInboxSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.accentDark.withValues(alpha: 0.2),
+                      color: AppColors.tealPale,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.accentDark),
+                      border: Border.all(color: AppColors.ink),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.category_rounded, size: 14, color: AppColors.darkBeige),
+                        Icon(Icons.category_rounded, size: 14, color: AppColors.ink),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(

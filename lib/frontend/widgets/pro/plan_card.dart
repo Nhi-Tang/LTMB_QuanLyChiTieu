@@ -30,21 +30,14 @@ class PlanCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
+        // Gói đang chọn: viền mực đậm; gói còn lại: viền kẻ mảnh
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.surface : AppColors.surface.withValues(alpha: 0.8),
-          borderRadius: BorderRadius.circular(20),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.ink : AppColors.rule,
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.15),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-          ],
         ),
         child: Row(
           children: [
@@ -88,14 +81,14 @@ class PlanCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(8),
+                            color: AppColors.highlight,
+                            borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(
                             bestValueLabel ?? context.t('TIẾT KIỆM NHẤT'),
-                            style: const TextStyle(
-                              color: AppColors.onTeal,
-                              fontSize: 8,
+                            style: TextStyle(
+                              color: AppColors.ink,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -107,10 +100,10 @@ class PlanCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       savings!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.green,
+                        color: AppColors.income,
                       ),
                     ),
                   ],

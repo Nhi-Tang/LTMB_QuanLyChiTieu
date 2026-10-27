@@ -68,14 +68,14 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           }
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.t('Đã lưu ngân sách thành công!')), backgroundColor: Colors.green),
+              SnackBar(content: Text(context.t('Đã lưu ngân sách thành công!')), backgroundColor: AppColors.income),
             );
           }
         } catch (e) {
           debugPrint('Error saving budget: $e');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.t('Lỗi lưu ngân sách: {e}', {'e': e})), backgroundColor: Colors.red),
+              SnackBar(content: Text(context.t('Lỗi lưu ngân sách: {e}', {'e': e})), backgroundColor: AppColors.expense),
             );
           }
         }
@@ -97,7 +97,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
+              backgroundColor: AppColors.expense,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -120,21 +120,11 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.tealWhite,
       appBar: AppBar(
-        backgroundColor: AppColors.tealPale,
-        elevation: 0,
-        centerTitle: true,
         title: Text(
           context.t('Quản Lý Ngân Sách'),
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.tealDark,
-          ),
           overflow: TextOverflow.ellipsis,
         ),
-        iconTheme: IconThemeData(color: AppColors.tealDark),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded, size: 28),
@@ -144,17 +134,18 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
       ),
       body: Column(
         children: [
-          // Month Selector Header
+          // Chọn tháng: nhãn mờ + nút viên thuốc viền mực như màn Báo cáo
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            color: AppColors.tealPale.withValues(alpha: 0.5),
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.rule))),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     context.t('Tháng chi tiêu'),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                    style: TextStyle(fontSize: 14, color: AppColors.textMuted),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -174,19 +165,12 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                         BudgetService.instance.loadBudgets(_monthStr);
                       }
                     },
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.tealDark.withValues(alpha: 0.08),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.ink, width: 1.5),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -230,18 +214,14 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.pie_chart_outline_rounded, size: 64, color: AppColors.teal),
-                        const SizedBox(height: 16),
                         Text(
                           context.t('Chưa có ngân sách nào trong tháng này'),
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.tealDark),
+                          style: TextStyle(fontSize: 15, color: AppColors.textMuted),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.tealDark,
-                            foregroundColor: AppColors.tealPale,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: const StadiumBorder(),
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           ),
                           onPressed: () => _showAddEditBudget(),

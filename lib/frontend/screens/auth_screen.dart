@@ -14,7 +14,6 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   static Color get primaryBeige => AppColors.teal;
-  static Color get themeColor => AppColors.tealPale;
 
   bool _isLogin = true;
 
@@ -337,8 +336,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ? Padding(padding: const EdgeInsets.all(10), child: AssetIcon(asset, size: 26))
           : Icon(icon),
       suffixIcon: suffixIcon,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(vertical: 14),
     );
   }
 
@@ -349,15 +347,17 @@ class _AuthScreenState extends State<AuthScreen> {
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              color: selected ? AppColors.surface : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
+              border: Border(
+                bottom: BorderSide(color: selected ? AppColors.ink : Colors.transparent, width: 2),
+              ),
             ),
             alignment: Alignment.center,
             child: Text(
               text,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: selected ? AppColors.ink : AppColors.textMuted,
+                fontSize: 16,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                color: selected ? AppColors.ink : AppColors.unselectedTab,
               ),
             ),
           ),
@@ -366,11 +366,9 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     return Container(
-      height: 48,
-      padding: const EdgeInsets.all(4),
+      height: 44,
       decoration: BoxDecoration(
-        color: AppColors.tealLight,
-        borderRadius: BorderRadius.circular(12),
+        border: Border(bottom: BorderSide(color: AppColors.rule)),
       ),
       child: Row(
         children: [
@@ -398,14 +396,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: primaryBeige, width: 3),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    border: Border.all(color: AppColors.ink, width: 2),
                   ),
                   child: ClipOval(
                     child: Image.asset(
@@ -422,7 +413,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.grey500,
+                    color: AppColors.ink,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -442,14 +433,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   padding: const EdgeInsets.all(20.0),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.rule),
                   ),
                   child: Form(
                     key: _formKey,
@@ -585,7 +570,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               child: Text(
                                 context.t('Quên mật khẩu?'),
                                 style: TextStyle(
-                                  color: primaryBeige,
+                                  color: AppColors.ink,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -600,20 +585,15 @@ class _AuthScreenState extends State<AuthScreen> {
                         ElevatedButton(
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: themeColor,
-                            foregroundColor: AppColors.tealDark,
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 2,
+                            shape: const StadiumBorder(),
                           ),
                           child: _isLoading
                               ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                              color: AppColors.tealDark,
+                              color: AppColors.onTeal,
                               strokeWidth: 2,
                             ),
                           )
@@ -622,7 +602,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.tealDark,
+                              color: AppColors.onTeal,
                             ),
                           ),
                         ),
@@ -633,7 +613,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Divider(color: AppColors.grey300, thickness: 1),
+                              child: Divider(color: AppColors.rule, thickness: 1),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -647,7 +627,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                             Expanded(
-                              child: Divider(color: AppColors.grey300, thickness: 1),
+                              child: Divider(color: AppColors.rule, thickness: 1),
                             ),
                           ],
                         ),
@@ -659,10 +639,8 @@ class _AuthScreenState extends State<AuthScreen> {
                           onPressed: _isLoading ? null : _handleGoogleLogin,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: AppColors.grey300),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            side: BorderSide(color: AppColors.ink, width: 1.2),
+                            shape: const StadiumBorder(),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -687,7 +665,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.black87,
+                                  color: AppColors.ink,
                                 ),
                               ),
                             ],
