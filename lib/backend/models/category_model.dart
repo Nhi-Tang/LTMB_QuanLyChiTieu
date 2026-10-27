@@ -144,6 +144,15 @@ class CategoryModel {
       case 'fastfood_rounded':
       case 'food_icon':
         return 'assets/icon/cat_an_uong.png';
+      case 'ca phe':
+      case 'cafe':
+      case 'coffee':
+      case 'local_cafe_rounded':
+        return 'assets/icon/cat_ca_phe.png';
+      case 'tra sua':
+      case 'milk tea':
+      case 'emoji_food_beverage_rounded':
+        return 'assets/icon/cat_tra_sua.png';
       case 'hoa don':
       case 'receipt_rounded':
       case 'bill_icon':
@@ -307,6 +316,8 @@ class CategoryModel {
         return Icons.flight_rounded;
       case 'local_cafe_rounded':
         return Icons.local_cafe_rounded;
+      case 'emoji_food_beverage_rounded':
+        return Icons.emoji_food_beverage_rounded;
       case 'local_grocery_store_rounded':
         return Icons.local_grocery_store_rounded;
       case 'fitness_center_rounded':

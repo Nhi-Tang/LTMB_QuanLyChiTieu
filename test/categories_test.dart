@@ -5,16 +5,16 @@ import 'package:quanlychitieu/frontend/utils/app_translations.dart';
 
 void main() {
   group('Category System Test Suite (6 Scenarios)', () {
-    test('Scenario 1: Default categories count (18 Expense, 5 Income)', () {
+    test('Scenario 1: Default categories count (19 Expense, 5 Income)', () {
       final expenseList = DatabaseHelper.defaultExpenseCategories;
       final incomeList = DatabaseHelper.defaultIncomeCategories;
 
-      expect(expenseList.length, equals(18));
+      expect(expenseList.length, equals(19));
       expect(incomeList.length, equals(5));
 
       final expenseNames = expenseList.map((e) => e['name']).toList();
       expect(expenseNames, containsAll([
-        'Ăn uống', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí',
+        'Ăn uống', 'Trà sữa', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí',
         'Sức khoẻ', 'Làm đẹp', 'Quần áo', 'Học tập', 'Thú cưng',
         'Con cái', 'Hỗ trợ gia đình', 'Bảo hiểm', 'Thuế', 'Công việc',
         'Nhà ở', 'Tiền nợ', 'Khác'
@@ -32,7 +32,7 @@ void main() {
           .where((c) => !existingNames.contains(c['name']))
           .toList();
 
-      expect(missingExpense.length, equals(15)); // 18 - 3 = 15
+      expect(missingExpense.length, equals(16)); // 19 - 3 = 16
     });
 
     test('Scenario 3: Switching ledgers maintains all active default categories', () {
