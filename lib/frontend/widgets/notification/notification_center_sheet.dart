@@ -256,26 +256,25 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                     children: [
                       // Pending Drafts Card
                       if (_pendingDraftCount > 0) ...[
+                        // Giấy nhớ vàng: có giao dịch nháp đang chờ
                         Card(
-                          color: AppColors.warningBg,
+                          color: AppColors.note,
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: Colors.orange.shade300),
+                            borderRadius: BorderRadius.circular(4),
+                            side: BorderSide(color: AppColors.noteBorder),
                           ),
                           child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.orange.shade100,
-                              child: Icon(Icons.mark_email_unread_rounded, color: Colors.orange.shade900),
-                            ),
+                            leading: Icon(Icons.mark_email_unread_rounded, color: AppColors.ink),
                             title: Text(
                               context.t('Giao dịch chờ xác nhận ({pendingDraftCount})', {'pendingDraftCount': _pendingDraftCount}),
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.orange.shade900),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.ink),
                             ),
                             subtitle: Text(
                               context.t('Nhấn để xem và xác nhận các khoản nháp từ thông báo ngân hàng'),
-                              style: TextStyle(fontSize: 12, color: AppColors.black87),
+                              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                             ),
-                            trailing: const Icon(Icons.chevron_right_rounded, color: Colors.orange),
+                            trailing: Icon(Icons.chevron_right_rounded, color: AppColors.ink),
                             onTap: () {
                               Navigator.pop(context);
                               PendingInboxSheet.show(
@@ -294,7 +293,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                         if (todayNotifs.isNotEmpty) ...[
                           Text(
                             AppTranslations.tr(lang, 'today_section'),
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.grey500),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                           ),
                           const SizedBox(height: 8),
                           ...todayNotifs.map((n) => _buildNotificationTile(n)),
@@ -303,7 +302,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
                         if (earlierNotifs.isNotEmpty) ...[
                           Text(
                             AppTranslations.tr(lang, 'earlier_section'),
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.grey500),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textMuted),
                           ),
                           const SizedBox(height: 8),
                           ...earlierNotifs.map((n) => _buildNotificationTile(n)),
@@ -336,7 +335,7 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
           const SizedBox(height: 16),
           Text(
             AppTranslations.tr(lang, 'no_notifications'),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.darkBeige),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.ink),
           ),
           const SizedBox(height: 6),
           Text(
@@ -359,27 +358,20 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: Colors.red.shade400,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        color: AppColors.expense,
         child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
       onDismissed: (_) => _deleteNotification(notif.id),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 10),
-        color: notif.isRead ? AppColors.surface : AppColors.tealWhite,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: notif.isRead ? AppColors.tealPale : AppColors.primary.withValues(alpha: 0.4),
-            width: notif.isRead ? 1 : 1.5,
+      // Dòng kẻ; thông báo chưa đọc có vạch mực bên trái
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.rule),
+            left: BorderSide(color: notif.isRead ? Colors.transparent : AppColors.ink, width: 3),
           ),
         ),
-        elevation: notif.isRead ? 0 : 2,
         child: InkWell(
           onTap: () => _handleItemTap(notif),
-          borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
