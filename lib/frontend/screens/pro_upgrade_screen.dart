@@ -94,13 +94,10 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
+                  // Tờ giấy nhớ vàng như thẻ PRO ở màn Cá nhân
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.cardGradientStart, AppColors.cardGradientEnd],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+                    color: AppColors.note,
+                    border: Border(bottom: BorderSide(color: AppColors.noteBorder, width: 3)),
                   ),
                   child: Column(
                     children: [
@@ -223,9 +220,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: AppColors.onTeal,
                                     elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
+                                    shape: const StadiumBorder(),
                                   ),
                                   onPressed: _isLoading ? null : _handleStartTrial,
                                   child: Text(
@@ -246,9 +241,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.primary,
                                   side: BorderSide(color: AppColors.primary, width: 1.5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
+                                  shape: const StadiumBorder(),
                                 ),
                                 onPressed: _isLoading ? null : _handleUpgrade,
                                 child: Text(

@@ -29,7 +29,7 @@ class BudgetCard extends StatelessWidget {
         return const Color(0xFFF57C00); // Vàng/Cam
       case 'ok':
       default:
-        return AppColors.incomeLight; // Xanh lá
+        return AppColors.ink; // Mực xanh như các thanh ở trang chủ
     }
   }
 
@@ -42,22 +42,14 @@ class BudgetCard extends StatelessWidget {
     final progressColor = _getProgressColor(status.level);
     final progressVal = (status.percent / 100.0).clamp(0.0, 1.0);
 
+    // Kiểu trang sổ: mỗi ngân sách là một dòng, ngăn cách bằng đường kẻ
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.tealDark.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border(bottom: BorderSide(color: AppColors.rule)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +59,8 @@ class BudgetCard extends StatelessWidget {
               children: [
                 CategoryIcon(
                   categoryOrIconKey: budget.categoryId ?? 'total',
-                  size: 42,
+                  size: 40,
+                  bgColor: Colors.transparent,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -78,8 +71,8 @@ class BudgetCard extends StatelessWidget {
                         categoryName,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.tealDark,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ink,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -89,14 +82,14 @@ class BudgetCard extends StatelessWidget {
                           if (budget.isRecurring)
                             Container(
                               margin: const EdgeInsets.only(right: 6),
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: AppColors.textMuted),
                               ),
                               child: Text(
                                 context.t('Định kỳ'),
-                                style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
                               ),
                             ),
                           Expanded(
@@ -120,7 +113,7 @@ class BudgetCard extends StatelessWidget {
                   ),
                 if (onDelete != null)
                   IconButton(
-                    icon: const Icon(Icons.delete_rounded, size: 18, color: Colors.redAccent),
+                    icon: Icon(Icons.delete_rounded, size: 18, color: AppColors.expense),
                     onPressed: onDelete,
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(8),
@@ -162,11 +155,11 @@ class BudgetCard extends StatelessWidget {
 
             // Progress Bar
             ClipRRect(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: progressVal,
-                minHeight: 10,
-                backgroundColor: AppColors.grey200,
+                minHeight: 5,
+                backgroundColor: AppColors.rule,
                 valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               ),
             ),
@@ -183,7 +176,7 @@ class BudgetCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: status.remaining >= 0 ? AppColors.grey600 : Colors.red,
+                      color: status.remaining >= 0 ? AppColors.textMuted : AppColors.expense,
                     ),
                   ),
                 ),
@@ -200,10 +193,10 @@ class BudgetCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                   decoration: BoxDecoration(
-                    color: progressColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
+                    color: status.level == 'ok' ? Colors.transparent : AppColors.highlight,
+                    borderRadius: BorderRadius.circular(3),
                   ),
                   child: Text(
                     '${status.percent.toStringAsFixed(1)}%',

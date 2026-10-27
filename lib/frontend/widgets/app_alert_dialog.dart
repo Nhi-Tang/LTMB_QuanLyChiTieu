@@ -15,7 +15,7 @@ Future<void> showAppAlertDialog({
         children: [
           Icon(
             isSuccess ? Icons.check_circle_rounded : Icons.error_rounded,
-            color: isSuccess ? AppColors.teal : Colors.red,
+            color: isSuccess ? AppColors.teal : AppColors.expense,
             size: 28,
           ),
           const SizedBox(width: 10),
@@ -34,7 +34,7 @@ Future<void> showAppAlertDialog({
       actions: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSuccess ? AppColors.teal : Colors.red,
+            backgroundColor: isSuccess ? AppColors.teal : AppColors.expense,
             foregroundColor: isSuccess ? AppColors.onTeal : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),

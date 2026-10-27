@@ -27,7 +27,6 @@ class _SavingsTabState extends State<SavingsTab> {
   List<SavingsGoalModel> _goals = [];
   bool _isLoading = true;
 
-  static Color get darkBeigy => AppColors.textPrimary;
   static Color get accentBeigy => AppColors.accent;
 
 
@@ -209,11 +208,9 @@ class _SavingsTabState extends State<SavingsTab> {
               : _goals.isEmpty
                   ? Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.tealPale),
+                        border: Border.symmetric(horizontal: BorderSide(color: AppColors.rule)),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -248,7 +245,7 @@ class _SavingsTabState extends State<SavingsTab> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _goals.length,
-                      separatorBuilder: (ctx, i) => const SizedBox(height: 12),
+                      separatorBuilder: (ctx, i) => Divider(height: 1, color: AppColors.rule),
                       itemBuilder: (ctx, index) {
                         final goal = _goals[index];
                         final progress = goal.targetAmount > 0
@@ -292,14 +289,8 @@ class _SavingsTabState extends State<SavingsTab> {
                               ),
                             );
                           },
-                          borderRadius: BorderRadius.circular(20),
                           child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.tealLight),
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -309,8 +300,8 @@ class _SavingsTabState extends State<SavingsTab> {
                                       width: 44,
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: AppColors.tealPale,
                                         shape: BoxShape.circle,
+                                        border: Border.all(color: AppColors.ink, width: 1.5),
                                       ),
                                       child: Center(
                                         child: buildGoalIcon(goal.icon, size: 26),
@@ -364,18 +355,19 @@ class _SavingsTabState extends State<SavingsTab> {
                                       child: MoneyText(
                                         amount: goal.targetAmount,
                                         alignment: Alignment.centerRight,
-                                        style: TextStyle(fontSize: 13, color: AppColors.grey500),
+                                        prefix: '/ ',
+                                        style: TextStyle(fontSize: 13, color: AppColors.textMuted),
                                       ),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 6),
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(2),
                                   child: LinearProgressIndicator(
                                     value: progress.clamp(0.0, 1.0),
-                                    minHeight: 10,
-                                    backgroundColor: AppColors.tealLight,
+                                    minHeight: 5,
+                                    backgroundColor: AppColors.rule,
                                     valueColor: AlwaysStoppedAnimation<Color>(accentBeigy),
                                   ),
                                 ),
@@ -384,8 +376,8 @@ class _SavingsTabState extends State<SavingsTab> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: AppColors.tealPale,
-                                      borderRadius: BorderRadius.circular(10),
+                                      color: AppColors.note,
+                                      borderRadius: BorderRadius.circular(3),
                                     ),
                                     child: Row(
                                       children: [
@@ -394,7 +386,7 @@ class _SavingsTabState extends State<SavingsTab> {
                                         Expanded(
                                           child: Text(
                                             monthlySuggestionStr,
-                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: darkBeigy),
+                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.ink),
                                           ),
                                         ),
                                       ],

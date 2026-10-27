@@ -417,7 +417,7 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.tealDark,
-                    foregroundColor: AppColors.tealPale,
+                    foregroundColor: AppColors.onTeal,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
