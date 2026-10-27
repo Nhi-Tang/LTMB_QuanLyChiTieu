@@ -155,7 +155,7 @@ class _AddTransactionModalState extends State<AddTransactionModal> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
             ),
             items: (isExpense
-                    ? ['Ăn uống', 'Trà sữa', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí', 'Sức khoẻ', 'Làm đẹp',
+                    ? ['Ăn uống', 'Cà phê', 'Trà sữa', 'Hóa đơn', 'Di chuyển', 'Mua sắm', 'Giải trí', 'Sức khoẻ', 'Làm đẹp',
                     'Quần áo','Học tập','Thú cưng','Con cái','Hỗ trợ gia đình','Bảo hiểm','Thuế','Công việc','Nhà ở','Tiền nợ','Khác']
                     : ['Lương', 'Thưởng', 'Bán hàng', 'Đầu tư', 'Khác'])
                 .map((c) => DropdownMenuItem(value: c, child: Text(AppTranslations.trCategory(lang, c))))
