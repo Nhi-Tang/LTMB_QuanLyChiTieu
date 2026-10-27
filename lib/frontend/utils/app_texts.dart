@@ -439,4 +439,15 @@ const Map<String, List<String>> appTexts = {
   'Chi theo danh mục': ['Spending by category', 'カテゴリ別支出', '按分类支出', '카테고리별 지출'],
   'Thu theo danh mục': ['Income by category', 'カテゴリ別収入', '按分类收入', '카테고리별 수입'],
   '{n} tháng gần nhất': ['Last {n} months', '直近{n}か月', '最近{n}个月', '최근 {n}개월'],
+  // Quét hoá đơn (OCR)
+  'Quét hoá đơn': ['Scan receipt', 'レシートをスキャン', '扫描收据', '영수증 스캔'],
+  'Chụp hoá đơn': ['Take a photo of the receipt', 'レシートを撮影', '拍摄收据', '영수증 촬영'],
+  'Chọn ảnh từ thư viện': ['Choose from gallery', 'ギャラリーから選択', '从相册选择', '갤러리에서 선택'],
+  'Xem ảnh hoá đơn': ['View receipt photo', 'レシート画像を見る', '查看收据照片', '영수증 사진 보기'],
+  'Đổi': ['Change', '変更', '更换', '변경'],
+  'Quét từ hoá đơn của {merchant}. Bạn kiểm tra lại rồi lưu nhé.': ['Scanned from the {merchant} receipt. Please check it before saving.', '{merchant}のレシートから読み取りました。確認してから保存してください。', '已从{merchant}的收据扫描。请检查后再保存。', '{merchant} 영수증에서 스캔했어요. 확인 후 저장해 주세요.'],
+  'Đã đọc hoá đơn. Bạn kiểm tra lại rồi lưu nhé.': ['Receipt scanned. Please check it before saving.', 'レシートを読み取りました。確認してから保存してください。', '已读取收据。请检查后再保存。', '영수증을 읽었어요. 확인 후 저장해 주세요.'],
+  'Chưa đọc được số tiền trên hoá đơn. Bạn nhập giúp rồi lưu nhé.': ["Couldn't read the amount. Please enter it, then save.", '金額を読み取れませんでした。入力してから保存してください。', '未能识别金额。请输入后再保存。', '금액을 읽지 못했어요. 입력 후 저장해 주세요.'],
+  'Không đọc được ảnh hoá đơn. Bạn thử lại nhé.': ["Couldn't read the receipt photo. Please try again.", 'レシート画像を読み取れませんでした。もう一度お試しください。', '无法读取收据照片，请重试。', '영수증 사진을 읽지 못했어요. 다시 시도해 주세요.'],
+  'Không thấy chữ trên ảnh. Bạn chụp rõ hoá đơn hơn nhé.': ['No text found. Please take a clearer photo of the receipt.', '文字が見つかりません。レシートをもっと鮮明に撮影してください。', '照片中没有文字。请拍得更清晰一些。', '사진에서 글자를 찾지 못했어요. 영수증을 더 선명하게 찍어 주세요.'],
 };
