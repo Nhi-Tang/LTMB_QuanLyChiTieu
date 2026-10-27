@@ -162,6 +162,7 @@ class _CategoryGridState extends State<CategoryGrid> {
                       children: [
                         CategoryModel.getCategoryIconWidget(
                           name,
+                          iconKey: cat.iconKey,
                           size: 30,
                           fallbackColor: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
                         ),
