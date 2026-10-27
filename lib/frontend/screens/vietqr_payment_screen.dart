@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../backend/services/pro_service.dart';
@@ -136,22 +135,6 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
       if (!silent && mounted) {
         setState(() => _isChecking = false);
       }
-    }
-  }
-
-  /// Chỉ dùng khi dev: backend phải bật ENABLE_MOCK_PAY
-  Future<void> _mockPay() async {
-    setState(() => _isChecking = true);
-    try {
-      await ProService.instance.mockPay(widget.orderData['orderId'] as String);
-      if (mounted) setState(() => _isChecking = false);
-      await _checkPaymentStatus(silent: true);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isChecking = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.red),
-      );
     }
   }
 
@@ -393,14 +376,6 @@ class _VietQRPaymentScreenState extends State<VietQRPaymentScreen> {
                       ),
               ),
             ),
-            if (kDebugMode) ...[
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: _isChecking ? null : _mockPay,
-                icon: const Icon(Icons.bug_report_outlined, size: 18),
-                label: Text(context.t('Giả lập thanh toán (chỉ bản debug)')),
-              ),
-            ],
             const SizedBox(height: 12),
             Text(
               context.t('Hệ thống tự động kiểm tra giao dịch mỗi 5 giây.'),
