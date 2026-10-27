@@ -16,16 +16,21 @@ class NotebookTabItemData {
 
 /// Thanh tab dưới kiểu "cuốn sổ": nền giấy, một đường kẻ phía trên,
 /// tab đang chọn có vạch mực ngắn phía trên icon.
+/// Có [onCenterTap] thì chèn nút tròn nổi ở giữa (nút quét hoá đơn).
 class NotebookTabBar extends StatelessWidget {
   final List<NotebookTabItemData> items;
   final int currentIndex;
   final ValueChanged<int> onChanged;
+  final VoidCallback? onCenterTap;
+  final String? centerLabel;
 
   const NotebookTabBar({
     super.key,
     required this.items,
     required this.currentIndex,
     required this.onChanged,
+    this.onCenterTap,
+    this.centerLabel,
   });
 
   @override
@@ -40,11 +45,56 @@ class NotebookTabBar extends StatelessWidget {
         top: false,
         child: SizedBox(
           height: 66,
-          child: Row(
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              for (var i = 0; i < items.length; i++)
-                Expanded(child: _buildItem(i)),
+              Row(
+                children: [
+                  for (var i = 0; i < items.length; i++) ...[
+                    if (onCenterTap != null && i == items.length ~/ 2) const Expanded(child: SizedBox()),
+                    Expanded(child: _buildItem(i)),
+                  ],
+                ],
+              ),
+              if (onCenterTap != null)
+                Positioned(
+                  top: -20,
+                  left: 0,
+                  right: 0,
+                  child: Center(child: _buildCenterButton()),
+                ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCenterButton() {
+    return Semantics(
+      label: centerLabel,
+      button: true,
+      child: Material(
+        color: AppColors.primary,
+        shape: const CircleBorder(),
+        elevation: 4,
+        shadowColor: Colors.black38,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onCenterTap!();
+          },
+          child: const SizedBox(
+            width: 62,
+            height: 62,
+            child: Center(
+              child: SizedBox(
+                width: 26,
+                height: 26,
+                child: CustomPaint(painter: _ScanGlyphPainter()),
+              ),
+            ),
           ),
         ),
       ),
@@ -92,4 +142,30 @@ class NotebookTabBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Biểu tượng quét: bốn góc khung và một vạch ngang ở giữa.
+class _ScanGlyphPainter extends CustomPainter {
+  const _ScanGlyphPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.onTeal
+      ..strokeWidth = 2.2
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final w = size.width, h = size.height, len = w * 0.3;
+    final path = Path()
+      ..moveTo(0, len)..lineTo(0, 0)..lineTo(len, 0)
+      ..moveTo(w - len, 0)..lineTo(w, 0)..lineTo(w, len)
+      ..moveTo(0, h - len)..lineTo(0, h)..lineTo(len, h)
+      ..moveTo(w - len, h)..lineTo(w, h)..lineTo(w, h - len)
+      ..moveTo(w * 0.22, h / 2)..lineTo(w * 0.78, h / 2);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
