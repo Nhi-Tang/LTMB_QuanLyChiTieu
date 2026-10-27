@@ -49,7 +49,7 @@ class _ReceiptReviewSheetState extends State<ReceiptReviewSheet> {
     final data = widget.scan.data;
     final amount = data.amount?.round() ?? 0;
     _amountController = TextEditingController(text: amount > 0 ? formatMoneyStr(amount.toString()) : '');
-    _noteController = TextEditingController(text: data.merchant ?? '');
+    _noteController = TextEditingController(text: data.note ?? '');
     _category = data.category ?? 'Ăn uống';
     _date = data.date ?? DateTime.now();
   }
