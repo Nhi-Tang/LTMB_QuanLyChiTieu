@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -68,30 +69,46 @@ class DailyReminderService {
         ? AppLanguage.instance.t('Bạn có {pendingCount} giao dịch ngân hàng chờ xác nhận trong ngày. Hãy kiểm tra ngay!', {'pendingCount': pendingCount})
         : AppLanguage.instance.t('Hãy mở Mousey để kiểm tra và cập nhật thu chi trong ngày hôm nay nhé!');
 
+    // Báo thức chính xác cần quyền (Android 14+ mặc định tắt); không có thì dùng loại không chính xác
+    // nhưng vẫn phải chạy khi máy đang ngủ, nếu không 20:30 khoá màn hình sẽ không bao giờ nhắc
+    final canExact = await _android?.canScheduleExactNotifications() ?? false;
+
+    Future<void> schedule(AndroidScheduleMode mode) => _notificationsPlugin.zonedSchedule(
+          888,
+          AppLanguage.instance.t('Mousey - Nhắc nhở thu chi'),
+          message,
+          tzScheduledDate,
+          notificationDetails,
+          androidScheduleMode: mode,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+
     try {
-      await _notificationsPlugin.zonedSchedule(
-        888,
-        AppLanguage.instance.t('Mousey - Nhắc nhở thu chi'),
-        message,
-        tzScheduledDate,
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
+      await schedule(canExact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle);
     } catch (e) {
-      // Fallback nếu exact alarm chưa được cấp quyền
-      await _notificationsPlugin.zonedSchedule(
-        888,
-        AppLanguage.instance.t('Mousey - Nhắc nhở thu chi'),
-        message,
-        tzScheduledDate,
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.inexact,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
+      debugPrint('Đặt lịch nhắc chính xác lỗi, chuyển sang không chính xác: $e');
+      await schedule(AndroidScheduleMode.inexactAllowWhileIdle);
     }
+  }
+
+  AndroidFlutterLocalNotificationsPlugin? get _android =>
+      _notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+  /// Có quyền báo thức chính xác không; không có thì Android có thể nhắc trễ tới 1 tiếng.
+  /// Ngoài Android coi như có.
+  Future<bool> canRemindOnTime() async {
+    await init();
+    final android = _android;
+    return android == null || (await android.canScheduleExactNotifications() ?? false);
+  }
+
+  /// Mở màn "Báo thức và lời nhắc" để người dùng cho phép, rồi đặt lại lịch nhắc.
+  Future<bool> requestRemindOnTime({String? uid}) async {
+    await init();
+    await _android?.requestExactAlarmsPermission();
+    await scheduleDailyEveningReminder(uid: uid);
+    return canRemindOnTime();
   }
 
   Future<void> cancelDailyReminder() async {
