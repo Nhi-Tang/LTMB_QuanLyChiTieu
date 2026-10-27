@@ -144,7 +144,6 @@ class _CategoryEditSheetState extends State<CategoryEditSheet> {
                   style: TextStyle(fontSize: 12, color: AppColors.textSub),
                 ),
                 value: _isLinked,
-                activeThumbColor: AppColors.primaryGreen,
                 onChanged: (val) => setState(() => _isLinked = val),
               ),
               const SizedBox(height: 24),

@@ -453,7 +453,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 },
                 child: Text(
                   AppTranslations.tr(lang, 'save_changes'),
-                  style: TextStyle(color: darkBeige, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: AppColors.onTeal, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -1197,22 +1197,22 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               Divider(height: 1, color: AppColors.rule),
               SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 secondary: const AssetIcon('ui_loa'),
                 title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(AppTranslations.tr(lang, 'reminder_subtitle'), style: TextStyle(fontSize: 12, color: AppColors.grey500)),
                 value: _dailyReminderEnabled,
-                activeThumbColor: accentBeige,
                 onChanged: (val) {
                   setState(() => _dailyReminderEnabled = val);
                 },
               ),
               Divider(height: 1, color: AppColors.rule),
               SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 secondary: const AssetIcon('tab_bao_cao'),
                 title: Text(AppTranslations.tr(lang, 'budget_alerts_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                 subtitle: Text(AppTranslations.tr(lang, 'budget_alerts_subtitle'), style: TextStyle(fontSize: 12, color: AppColors.grey500)),
                 value: _budgetAlertsEnabled,
-                activeThumbColor: accentBeige,
                 onChanged: (val) async {
                   setState(() => _budgetAlertsEnabled = val);
                   final prefs = await SharedPreferences.getInstance();
