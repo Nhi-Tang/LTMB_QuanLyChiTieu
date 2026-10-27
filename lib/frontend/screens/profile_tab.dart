@@ -126,7 +126,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   Future<void> _syncNow() async {
-    if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
+    if (!ProService.instance.isPro) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ProUpgradeScreen()),
@@ -428,31 +428,8 @@ class _ProfileTabState extends State<ProfileTab> {
                 ),
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
-                    final oldName = widget.currentUser.name;
-                    final oldEmail = widget.currentUser.email;
                     final newName = nameController.text.trim();
                     final newEmail = emailController.text.trim().toLowerCase();
-                    final userId = widget.currentUser.id ?? 0;
-
-                    if (oldName != newName) {
-                      await DatabaseHelper.instance.logUserChange(
-                        userId: userId,
-                        userEmail: widget.currentUser.email,
-                        changedField: 'Họ và tên',
-                        oldValue: oldName,
-                        newValue: newName,
-                      );
-                    }
-
-                    if (oldEmail != newEmail) {
-                      await DatabaseHelper.instance.logUserChange(
-                        userId: userId,
-                        userEmail: widget.currentUser.email,
-                        changedField: 'Email / SĐT',
-                        oldValue: oldEmail,
-                        newValue: newEmail,
-                      );
-                    }
 
                     final updatedUser = widget.currentUser.copyWith(
                       name: newName,
@@ -659,7 +636,7 @@ class _ProfileTabState extends State<ProfileTab> {
                     ListenableBuilder(
                       listenable: ProService.instance,
                       builder: (context, _) {
-                        final isProUser = ProService.instance.isPro || widget.currentUser.isAdmin;
+                        final isProUser = ProService.instance.isPro;
                         return SizedBox(
                           width: double.infinity,
                           height: 48,
@@ -710,7 +687,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   void _showExportFileDialog() {
-    if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
+    if (!ProService.instance.isPro) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
@@ -905,7 +882,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ListenableBuilder(
             listenable: ProService.instance,
             builder: (context, _) {
-              final isProUser = ProService.instance.isPro || widget.currentUser.isAdmin;
+              final isProUser = ProService.instance.isPro;
               return InkWell(
                 onTap: _showEditProfileDialog,
                 borderRadius: BorderRadius.circular(24),
@@ -981,7 +958,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ListenableBuilder(
             listenable: ProService.instance,
             builder: (context, _) {
-              final isPro = ProService.instance.isPro || widget.currentUser.isAdmin;
+              final isPro = ProService.instance.isPro;
               if (isPro) {
                 return Container(
                   margin: const EdgeInsets.only(top: 16),
@@ -1167,7 +1144,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 subtitle: Text('Vietcombank, MB, Techcombank, MoMo,...', style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: () {
-                  if (!widget.currentUser.isAdmin && !ProService.instance.isPro) {
+                  if (!ProService.instance.isPro) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),

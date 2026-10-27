@@ -14,16 +14,14 @@ class BankNotificationListenerManager {
   static const _eventChannel = EventChannel('com.mousey.app/notifications');
   StreamSubscription? _subscription;
   bool _isListening = false;
-  bool _isAdmin = false;
 
-  /// Đọc thông báo ngân hàng là tính năng PRO (admin luôn được dùng)
-  bool get _canUseBankNotifications => _isAdmin || ProService.instance.isPro;
+  /// Đọc thông báo ngân hàng là tính năng PRO
+  bool get _canUseBankNotifications => ProService.instance.isPro;
 
-  void startListening({String? uid, bool isAdmin = false}) {
+  void startListening({String? uid}) {
     if (_isListening) {
       stopListening();
     }
-    _isAdmin = isAdmin;
 
     // Lên lịch nhắc nhở tổng hợp hàng ngày lúc 20:30
     DailyReminderService.instance.scheduleDailyEveningReminder(uid: uid);
@@ -79,6 +77,5 @@ class BankNotificationListenerManager {
     _subscription?.cancel();
     _subscription = null;
     _isListening = false;
-    _isAdmin = false;
   }
 }

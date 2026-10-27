@@ -1,7 +1,7 @@
 # Mousey Backend API (FastAPI)
 
 Backend là nơi **duy nhất** được cấp/gia hạn gói PRO. `firestore.rules` chặn app ghi các trường
-`plan`, `proExpiredAt`, `trialUsed`, `role`, và chặn mọi truy cập vào `orders`, `subscriptions`.
+`plan`, `proExpiredAt`, `trialUsed`, `isActive`, và chặn mọi truy cập vào `orders`, `subscriptions`.
 
 ## Chạy local
 
@@ -56,7 +56,7 @@ Lưu ý gói free:
 
 | Method | Path | Mô tả |
 |---|---|---|
-| POST | `/auth/session` | Tạo/cập nhật `users/{uid}` (role, plan mặc định) khi đăng nhập |
+| POST | `/auth/session` | Tạo/cập nhật `users/{uid}` (plan mặc định) khi đăng nhập |
 | GET | `/auth/me` | Thông tin người dùng |
 | GET | `/subscription/plans` | Giá gói, số ngày, mock-pay có bật không |
 | GET | `/subscription/status` | Trạng thái PRO (tự hạ về free khi hết hạn) |
@@ -65,7 +65,6 @@ Lưu ý gói free:
 | GET | `/subscription/check-order/{orderId}` | `pending` / `paid` / `expired` / `underpaid` |
 | POST | `/subscription/mock-pay` | Chỉ khi `ENABLE_MOCK_PAY=true` (dev) |
 | POST | `/subscription/webhook/bank` | Cổng thanh toán báo có tiền vào |
-| POST | `/admin/users/{uid}/active` | Chỉ Admin: `{active}` khóa/mở tài khoản (vô hiệu hóa ở Firebase Auth, thu hồi phiên, ghi `isActive`) |
 
 Mọi endpoint (trừ `/subscription/plans` và webhook) cần header `Authorization: Bearer <Firebase ID token>`.
 

@@ -12,7 +12,6 @@ import '../models/pending_transaction_model.dart';
 import '../models/savings_goal_model.dart';
 import '../models/savings_transaction_model.dart';
 import '../models/transaction_model.dart';
-import '../models/user_change_model.dart';
 import '../models/user_model.dart';
 import '../services/sync_service.dart';
 import '../services/transaction_service.dart';
@@ -66,8 +65,6 @@ class DatabaseHelper {
       },
     );
 
-    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@mousey.com' AND role != 'admin'");
-
     return db;
   }
 
@@ -89,7 +86,6 @@ class DatabaseHelper {
 
   Future<void> _createDB(Database db, int version) async {
     await ensureSchema(db);
-    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@mousey.com' AND role != 'admin'");
   }
 
   Future<void> ensureSchema(Database db) async {
@@ -109,18 +105,6 @@ class DatabaseHelper {
         plan TEXT DEFAULT 'free',
         proExpiredAt TEXT,
         lastLoginAt TEXT
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS user_change (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        user_email TEXT NOT NULL,
-        changed_field TEXT NOT NULL,
-        old_value TEXT,
-        new_value TEXT,
-        changed_at TEXT NOT NULL
       )
     ''');
 
@@ -283,33 +267,12 @@ class DatabaseHelper {
       await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON app_notifications(isRead);");
     } catch (_) {}
 
-    final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM users')) ?? 0;
-    if (count == 0) {
-      final now = DateTime.now().toIso8601String();
-      final adminHash = BCrypt.hashpw('admin123', BCrypt.gensalt());
-      await db.insert('users', {
-        'name': 'Quản trị viên (Admin)',
-        'email': 'admin@mousey.com',
-        'password': adminHash,
-        'role': 'admin',
-        'isActive': 1,
-        'createdAt': now,
-        'provider': 'password',
-        'plan': 'pro',
-      });
-
-      final userHash = BCrypt.hashpw('user123', BCrypt.gensalt());
-      await db.insert('users', {
-        'name': 'Nguyễn Văn A',
-        'email': 'user@mousey.com',
-        'password': userHash,
-        'role': 'user',
-        'isActive': 1,
-        'createdAt': now,
-        'provider': 'password',
-        'plan': 'free',
-      });
-    }
+    // Bản cũ tự tạo 2 tài khoản mẫu (admin/user) chỉ có trong SQLite, giờ đăng nhập qua Firebase nên xoá đi
+    await db.execute('DROP TABLE IF EXISTS user_change');
+    await db.delete(
+      'users',
+      where: "email IN ('admin@mousey.com', 'user@mousey.com') AND (uid IS NULL OR uid = '')",
+    );
 
     await _hashExistingPlaintextPasswords(db);
   }
@@ -368,20 +331,6 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     debugPrint('🗄️ [DatabaseHelper] _onUpgrade from $oldVersion to $newVersion');
     await ensureSchema(db);
-    await db.rawUpdate("UPDATE users SET role = 'user' WHERE email != 'admin@mousey.com' AND role != 'admin'");
-    if (oldVersion < 2) {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS user_change (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER NOT NULL,
-          user_email TEXT NOT NULL,
-          changed_field TEXT NOT NULL,
-          old_value TEXT,
-          new_value TEXT,
-          changed_at TEXT NOT NULL
-        )
-      ''');
-    }
     if (oldVersion < 3) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS savings_goals (
@@ -1034,58 +983,6 @@ class DatabaseHelper {
 
   // --- USER AUTHENTICATION & REGISTRATION ---
 
-  Future<int> registerUser(UserModel user) async {
-    final db = await instance.database;
-    try {
-      String passToSave = user.password;
-      if (passToSave.isNotEmpty && !passToSave.startsWith('\$2')) {
-        passToSave = BCrypt.hashpw(passToSave, BCrypt.gensalt());
-      }
-      final userToInsert = user.copyWith(
-        password: passToSave,
-        role: user.email == 'admin@mousey.com' ? 'admin' : 'user',
-      );
-      return await db.insert('users', userToInsert.toMap());
-    } catch (e) {
-      if (e.toString().contains('UNIQUE constraint failed')) {
-        throw Exception(AppLanguage.instance.t('Email hoặc số điện thoại này đã được đăng ký!'));
-      }
-      rethrow;
-    }
-  }
-
-  Future<UserModel?> loginUser(String emailOrPhone, String password) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'email = ?',
-      whereArgs: [emailOrPhone.trim().toLowerCase()],
-    );
-
-    if (result.isNotEmpty) {
-      final userMap = result.first;
-      final storedHash = userMap['password'] as String? ?? '';
-      bool isValid = false;
-      try {
-        if (storedHash.startsWith('\$2')) {
-          isValid = BCrypt.checkpw(password, storedHash);
-        } else {
-          isValid = (storedHash == password);
-          if (isValid) {
-            final newHash = BCrypt.hashpw(password, BCrypt.gensalt());
-            await db.update('users', {'password': newHash}, where: 'id = ?', whereArgs: [userMap['id']]);
-          }
-        }
-      } catch (_) {
-        isValid = (storedHash == password);
-      }
-      if (isValid) {
-        return UserModel.fromMap(userMap);
-      }
-    }
-    return null;
-  }
-
   Future<bool> isEmailRegistered(String email) async {
     final db = await instance.database;
     final result = await db.query(
@@ -1144,23 +1041,12 @@ class DatabaseHelper {
     return await db.delete('users', where: 'uid = ?', whereArgs: [uid]);
   }
 
-  // --- ADMIN ACCOUNT MANAGEMENT CRUD ---
+  // --- USER CRUD ---
 
   Future<List<UserModel>> getAllUsers() async {
     final db = await instance.database;
     final result = await db.query(
       'users',
-      orderBy: 'id DESC',
-    );
-    return result.map((map) => UserModel.fromMap(map)).toList();
-  }
-
-  Future<List<UserModel>> searchUsers(String query) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'name LIKE ? OR email LIKE ?',
-      whereArgs: ['%$query%', '%$query%'],
       orderBy: 'id DESC',
     );
     return result.map((map) => UserModel.fromMap(map)).toList();
@@ -1174,86 +1060,6 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [user.id],
     );
-  }
-
-  Future<int> toggleUserActiveStatus(int id, bool currentStatus) async {
-    final db = await instance.database;
-    return await db.update(
-      'users',
-      {'isActive': currentStatus ? 0 : 1},
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<int> deleteUser(int id) async {
-    final db = await instance.database;
-    return await db.delete(
-      'users',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<Map<String, int>> getUserStats() async {
-    final db = await instance.database;
-    final allUsers = await db.query('users');
-
-    int total = allUsers.length;
-    int admins = 0;
-    int activeUsers = 0;
-
-    for (var u in allUsers) {
-      if (u['role'] == 'admin') admins++;
-      if ((u['isActive'] as int? ?? 1) == 1) activeUsers++;
-    }
-
-    return {
-      'total': total,
-      'admins': admins,
-      'active': activeUsers,
-    };
-  }
-
-  // --- USER CHANGE AUDIT LOG METHODS ---
-
-  Future<int> logUserChange({
-    required int userId,
-    required String userEmail,
-    required String changedField,
-    required String oldValue,
-    required String newValue,
-  }) async {
-    final db = await instance.database;
-    final change = UserChangeModel(
-      userId: userId,
-      userEmail: userEmail,
-      changedField: changedField,
-      oldValue: oldValue,
-      newValue: newValue,
-      changedAt: DateTime.now().toIso8601String(),
-    );
-    return await db.insert('user_change', change.toMap());
-  }
-
-  Future<List<UserChangeModel>> getUserChanges(int userId) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'user_change',
-      where: 'user_id = ?',
-      whereArgs: [userId],
-      orderBy: 'id DESC',
-    );
-    return result.map((map) => UserChangeModel.fromMap(map)).toList();
-  }
-
-  Future<List<UserChangeModel>> getAllUserChanges() async {
-    final db = await instance.database;
-    final result = await db.query(
-      'user_change',
-      orderBy: 'id DESC',
-    );
-    return result.map((map) => UserChangeModel.fromMap(map)).toList();
   }
 
   // --- SAVINGS GOALS & TRANSACTIONS CRUD (ISOLATED BY UID) ---
