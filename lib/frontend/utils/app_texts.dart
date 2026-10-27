@@ -349,7 +349,6 @@ const Map<String, List<String>> appTexts = {
   'Nội dung chuyển khoản': ['Transfer description', '振込内容', '转账备注', '송금 메모'],
   'nội dung chuyển khoản': ['transfer description', '振込内容', '转账备注', '송금 메모'],
   'Hoàn tất chuyển khoản': ['I have transferred', '振込完了', '完成转账', '송금 완료'],
-  'Giả lập thanh toán (chỉ bản debug)': ['Simulate payment (debug build only)', '支払いをシミュレート（デバッグ版のみ）', '模拟支付（仅调试版）', '결제 시뮬레이션 (디버그 빌드 전용)'],
   'Hệ thống tự động kiểm tra giao dịch mỗi 5 giây.': ['The system checks for the transaction every 5 seconds.', 'システムは5秒ごとに取引を自動確認します。', '系统每5秒自动检查一次交易。', '시스템이 5초마다 거래를 자동으로 확인합니다.'],
 
   // Thông báo ngân hàng

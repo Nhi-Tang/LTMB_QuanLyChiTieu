@@ -294,20 +294,4 @@ class ProService extends ChangeNotifier {
       throw Exception(e.message);
     }
   }
-
-  /// Thanh toán giả lập — chỉ hoạt động khi backend bật ENABLE_MOCK_PAY (môi trường dev)
-  Future<bool> mockPay(String orderId) async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      final result = await ApiClient.instance.post('/subscription/mock-pay', {'orderId': orderId});
-      await checkProStatus();
-      return result['status'] == 'paid';
-    } on ApiException catch (e) {
-      throw Exception(e.message);
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
 }
