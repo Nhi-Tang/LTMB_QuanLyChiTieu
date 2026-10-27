@@ -400,7 +400,6 @@ class _BudgetFormSheetState extends State<BudgetFormSheet> {
                   style: TextStyle(fontSize: 12, color: AppColors.grey500),
                 ),
                 value: _isRecurring,
-                activeThumbColor: AppColors.tealDark,
                 onChanged: (val) {
                   setState(() {
                     _isRecurring = val;

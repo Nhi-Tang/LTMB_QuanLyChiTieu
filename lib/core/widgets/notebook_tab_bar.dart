@@ -76,10 +76,15 @@ class NotebookTabBar extends StatelessWidget {
               ),
             ),
             const Spacer(),
+            // Ảnh icon có sẵn nền trắng: ở nền tối làm mờ sẽ thành ô xám,
+            // nên chế độ tối giữ icon rõ, bo góc như ô icon ở màn Cá nhân
             AnimatedOpacity(
               duration: const Duration(milliseconds: 200),
-              opacity: selected ? 1 : 0.6,
-              child: Image.asset(item.assetPath, width: 46, height: 46),
+              opacity: selected || AppColors.isDark ? 1 : 0.6,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(item.assetPath, width: 46, height: 46),
+              ),
             ),
             const Spacer(),
           ],
