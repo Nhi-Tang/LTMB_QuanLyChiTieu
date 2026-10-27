@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../backend/models/transaction_model.dart';
-import '../../../backend/services/receipt_scan_service.dart';
 import '../../../backend/services/transaction_service.dart';
 import '../../screens/budgets_screen.dart';
+import '../../screens/receipt_camera_screen.dart';
 import '../app_alert_dialog.dart';
 import 'amount_card.dart';
 import 'amount_expression.dart';
 import 'calculator_keypad.dart';
 import 'category_grid.dart';
-import 'receipt_review_sheet.dart';
 import 'show_note_sheet.dart';
 import 'transaction_type_switcher.dart';
 import '../../utils/app_language.dart';
@@ -136,77 +135,10 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
     );
   }
 
-  /// Chụp / chọn ảnh hoá đơn → đọc chữ → mở màn kiểm tra để sửa rồi lưu.
+  /// Mở thẳng màn chụp hoá đơn; lưu xong ở đó thì đóng luôn màn ghi này.
   Future<void> _scanReceipt() async {
-    final fromCamera = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.photo_camera_outlined, color: AppColors.ink),
-                title: Text(ctx.t('Chụp hoá đơn'), style: TextStyle(color: AppColors.ink)),
-                onTap: () => Navigator.pop(ctx, true),
-              ),
-              ListTile(
-                leading: Icon(Icons.photo_library_outlined, color: AppColors.ink),
-                title: Text(ctx.t('Chọn ảnh từ thư viện'), style: TextStyle(color: AppColors.ink)),
-                onTap: () => Navigator.pop(ctx, false),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (fromCamera == null || !mounted) return;
-
-    ReceiptScanResult? scan;
-    try {
-      // Chờ chọn ảnh xong mới hiện vòng tải (ML Kit đọc mất 1-2 giây)
-      scan = await ReceiptScanService.instance.scan(
-        fromCamera: fromCamera,
-        onImagePicked: () {
-          if (!mounted) return;
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
-          );
-        },
-      );
-    } catch (e) {
-      debugPrint('Quét hoá đơn lỗi: $e');
-      if (mounted) {
-        Navigator.of(context).popUntil((r) => r is! DialogRoute);
-        showAppAlertDialog(
-          context: context,
-          title: context.t('Thông báo'),
-          message: context.t('Không đọc được ảnh hoá đơn. Bạn thử lại nhé.'),
-          isSuccess: false,
-        );
-      }
-      return;
-    }
-    if (!mounted || scan == null) return;
-    Navigator.of(context).popUntil((r) => r is! DialogRoute);
-
-    if (scan.data.rawText.trim().isEmpty) {
-      showAppAlertDialog(
-        context: context,
-        title: context.t('Thông báo'),
-        message: context.t('Không thấy chữ trên ảnh. Bạn chụp rõ hoá đơn hơn nhé.'),
-        isSuccess: false,
-      );
-      return;
-    }
-
-    final saved = await ReceiptReviewSheet.show(context: context, scan: scan, onSave: widget.onSave);
-    if (saved != true || !mounted) return;
+    final saved = await ReceiptCameraScreen.open(context, onSave: widget.onSave);
+    if (!saved || !mounted) return;
     Navigator.pop(context);
     showAppAlertDialog(
       context: context,

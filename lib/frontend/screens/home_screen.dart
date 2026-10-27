@@ -8,9 +8,11 @@ import '../../backend/services/totals_calculator.dart';
 import '../../core/widgets/notebook_tab_bar.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
+import '../widgets/app_alert_dialog.dart';
 import '../widgets/transaction_sheet/new_transaction_sheet.dart';
 import 'home_tab.dart';
 import 'profile_tab.dart';
+import 'receipt_camera_screen.dart';
 import 'reports_tab.dart';
 import 'savings_tab.dart';
 import '../utils/app_language.dart';
@@ -121,6 +123,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _openReceiptCamera() async {
+    final saved = await ReceiptCameraScreen.open(
+      context,
+      onSave: (newItem) async {
+        await _transactionService.addTransaction(newItem);
+        _loadTransactions();
+      },
+    );
+    if (!saved || !mounted) return;
+    showAppAlertDialog(
+      context: context,
+      title: context.t('Thành công'),
+      message: context.t('Đã lưu giao dịch mới thành công! 💸'),
+      isSuccess: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = _lang;
@@ -208,6 +227,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: NotebookTabBar(
         items: navItems,
         currentIndex: _currentTabIndex,
+        onCenterTap: _openReceiptCamera,
+        centerLabel: context.t('Quét hoá đơn'),
         onChanged: (index) {
           setState(() {
             _currentTabIndex = index;
