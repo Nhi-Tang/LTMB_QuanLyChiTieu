@@ -417,6 +417,11 @@ const Map<String, List<String>> appTexts = {
   'Mousey PRO có thể đọc thông báo biến động số dư từ app ngân hàng để tự ghi giao dịch. Hãy bật quyền "Truy cập thông báo" cho Mousey ở màn cài đặt sắp mở nhé.': ['Mousey PRO can read balance alerts from your banking apps to log transactions automatically. Please turn on "Notification access" for Mousey on the settings screen that opens next.', 'Mousey PROは銀行アプリの残高通知を読み取り、取引を自動で記録できます。次に開く設定画面でMouseyの「通知へのアクセス」をオンにしてください。', 'Mousey PRO 可以读取银行应用的余额变动通知，自动记录交易。请在接下来打开的设置页面中为 Mousey 开启“通知使用权”。', 'Mousey PRO는 은행 앱의 잔액 변동 알림을 읽어 거래를 자동으로 기록할 수 있어요. 다음에 열리는 설정 화면에서 Mousey의 "알림 접근"을 켜 주세요.'],
   'Để sau': ['Later', '後で', '稍后', '나중에'],
   'Mở cài đặt': ['Open settings', '設定を開く', '打开设置', '설정 열기'],
+  // Lượt chụp hoá đơn của tài khoản miễn phí
+  'Còn {left}/{limit} lượt chụp miễn phí tháng này': ['{left}/{limit} free scans left this month', '今月の無料撮影は残り{left}/{limit}回', '本月剩余免费拍摄次数 {left}/{limit}', '이번 달 무료 촬영 {left}/{limit}회 남음'],
+  'Hết lượt chụp hoá đơn tháng này': ['No receipt scans left this month', '今月のレシート撮影回数が上限に達しました', '本月收据拍摄次数已用完', '이번 달 영수증 촬영 횟수를 모두 사용했어요'],
+  'Tài khoản miễn phí được chụp {limit} hoá đơn mỗi tháng, sang tháng sau sẽ có lượt mới. Nâng cấp PRO để chụp không giới hạn nhé.': ['Free accounts can scan {limit} receipts per month, and the count resets next month. Upgrade to PRO for unlimited scans.', '無料アカウントは毎月{limit}枚までレシートを撮影でき、翌月にリセットされます。PROにアップグレードすると無制限で撮影できます。', '免费账户每月可拍摄 {limit} 张收据，下个月会重置次数。升级 PRO 即可无限拍摄。', '무료 계정은 매월 영수증을 {limit}장까지 촬영할 수 있고 다음 달에 초기화돼요. PRO로 업그레이드하면 무제한으로 촬영할 수 있어요.'],
+  'Nâng cấp PRO': ['Upgrade to PRO', 'PROにアップグレード', '升级 PRO', 'PRO로 업그레이드'],
   // Quét hoá đơn (OCR)
   'Quét hoá đơn': ['Scan receipt', 'レシートをスキャン', '扫描收据', '영수증 스캔'],
   'Chụp ảnh': ['Take photo', '写真を撮る', '拍照', '사진 촬영'],

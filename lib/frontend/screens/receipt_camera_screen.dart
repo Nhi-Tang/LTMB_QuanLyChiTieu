@@ -1,10 +1,14 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
+import '../../backend/services/receipt_quota_service.dart';
 import '../../backend/services/receipt_scan_service.dart';
+import '../../core/widgets/asset_icon.dart';
+import '../theme/app_colors.dart';
 import '../utils/app_language.dart';
 import '../widgets/app_alert_dialog.dart';
 import '../widgets/transaction_sheet/receipt_review_sheet.dart';
+import 'pro_upgrade_screen.dart';
 
 /// Màn chụp hoá đơn: camera mở sẵn, khung ngắm, nút chụp và "Chọn ảnh".
 /// Đọc xong mở màn kiểm tra; lưu xong thì đóng và trả về true.
@@ -14,6 +18,12 @@ class ReceiptCameraScreen extends StatefulWidget {
   const ReceiptCameraScreen({super.key, required this.onSave});
 
   static Future<bool> open(BuildContext context, {required Function(TransactionItem item) onSave}) async {
+    // Tài khoản FREE hết lượt tháng này thì mời nâng cấp thay vì mở camera
+    if (!await ReceiptQuotaService.instance.canScan()) {
+      if (context.mounted) await showReceiptLimitDialog(context);
+      return false;
+    }
+    if (!context.mounted) return false;
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => ReceiptCameraScreen(onSave: onSave)),
     );
@@ -34,6 +44,8 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
   bool _cameraFailed = false;
   bool _flashOn = false;
   bool _busy = false;
+  // Lượt chụp còn lại trong tháng (FREE); null là PRO, không giới hạn
+  int? _remaining;
   late final AnimationController _lineAnim;
 
   @override
@@ -43,6 +55,19 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
     _lineAnim = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800))
       ..repeat(reverse: true);
     _initCamera();
+    _loadRemaining();
+  }
+
+  Future<void> _loadRemaining() async {
+    final left = await ReceiptQuotaService.instance.remaining();
+    if (mounted) setState(() => _remaining = left);
+  }
+
+  /// Hết lượt thì hiện hộp mời nâng cấp và không chụp / chọn ảnh nữa.
+  Future<bool> _ensureQuota() async {
+    if (await ReceiptQuotaService.instance.canScan()) return true;
+    if (mounted) await showReceiptLimitDialog(context);
+    return false;
   }
 
   @override
@@ -105,6 +130,7 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
   Future<void> _capture() async {
     final controller = _controller;
     if (_busy || controller == null || !controller.value.isInitialized) return;
+    if (!await _ensureQuota()) return;
     try {
       final photo = await controller.takePicture();
       if (_flashOn) {
@@ -119,7 +145,7 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
   }
 
   Future<void> _pickFromGallery() async {
-    if (_busy) return;
+    if (_busy || !await _ensureQuota()) return;
     final path = await ReceiptScanService.instance.pickFromGallery();
     if (path != null) await _readAndReview(path);
   }
@@ -142,6 +168,10 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
       _showError('Không thấy chữ trên ảnh. Bạn chụp rõ hoá đơn hơn nhé.');
       return;
     }
+    // Đọc được hoá đơn mới tính một lượt; ảnh không có chữ không bị trừ
+    await ReceiptQuotaService.instance.recordScan();
+    await _loadRemaining();
+    if (!mounted) return;
     final saved = await ReceiptReviewSheet.show(context: context, scan: scan, onSave: widget.onSave);
     // Huỷ ở màn kiểm tra thì ở lại để chụp lại
     if (saved == true && mounted) Navigator.pop(context, true);
@@ -248,6 +278,26 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
                       context.t('Đưa hoá đơn vào khung để ghi nhanh'),
                       style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
                     ),
+                    if (_remaining != null) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          context.t('Còn {left}/{limit} lượt chụp miễn phí tháng này', {
+                            'left': _remaining,
+                            'limit': ReceiptQuotaService.freeMonthlyLimit,
+                          }),
+                          style: TextStyle(
+                            color: _remaining == 0 ? _scanLine : Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                     const Spacer(),
                     // Nút chụp
                     GestureDetector(
@@ -301,6 +351,42 @@ class _ReceiptCameraScreenState extends State<ReceiptCameraScreen>
         ],
       ),
     );
+  }
+}
+
+/// Hộp báo hết lượt chụp hoá đơn miễn phí trong tháng, mời nâng cấp PRO.
+Future<void> showReceiptLimitDialog(BuildContext context) async {
+  final upgrade = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      icon: const Center(child: AssetIcon('cat_camera', size: 64)),
+      title: Text(ctx.t('Hết lượt chụp hoá đơn tháng này')),
+      content: Text(
+        ctx.t('Tài khoản miễn phí được chụp {limit} hoá đơn mỗi tháng, sang tháng sau sẽ có lượt mới. Nâng cấp PRO để chụp không giới hạn nhé.', {
+          'limit': ReceiptQuotaService.freeMonthlyLimit,
+        }),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(ctx.t('Để sau'), style: TextStyle(color: AppColors.grey500)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(
+            ctx.t('Nâng cấp PRO'),
+            style: const TextStyle(color: AppColors.onTeal, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    ),
+  );
+  if (upgrade == true && context.mounted) {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => const ProUpgradeScreen()));
   }
 }
 
