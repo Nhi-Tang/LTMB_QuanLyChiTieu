@@ -6,7 +6,6 @@ import '../../core/widgets/money_text.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../utils/report_utils.dart';
-import '../widgets/mousey_avatar.dart';
 import '../utils/app_language.dart';
 
 class ReportsTab extends StatefulWidget {
@@ -23,67 +22,10 @@ class ReportsTab extends StatefulWidget {
 
 class _ReportsTabState extends State<ReportsTab> {
   int _reportTypeIndex = 0; // 0: Chi tiêu, 1: Thu nhập
-  String _timeRange = 'all_time';
+  String _timeRange = 'this_month';
   String _selectedCategoryFilter = 'Tất cả';
   bool _showAllCategories = false;
   int _trendMonthRange = 6; // 3t, 6t, 12t, 24t
-
-
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'Ăn uống':
-        return AppColors.expense;
-      case 'Cà phê':
-        return const Color(0xFF6D4C41);
-      case 'Trà sữa':
-        return const Color(0xFFA1887F);
-      case 'Hóa đơn':
-        return const Color(0xFF78909C);
-      case 'Điện thoại':
-        return const Color(0xFF26C6DA);
-      case 'Di chuyển':
-        return const Color(0xFFFB8C00);
-      case 'Mua sắm':
-        return const Color(0xFF8E24AA);
-      case 'Giải trí':
-        return const Color(0xFFD81B60);
-      case 'Sức khoẻ':
-        return const Color(0xFF00ACC1);
-      case 'Làm đẹp':
-        return const Color(0xFFEC407A);
-      case 'Quần áo':
-        return const Color(0xFF5C6BC0);
-      case 'Học tập':
-        return const Color(0xFF1E88E5);
-      case 'Thú cưng':
-        return const Color(0xFFFF7043);
-      case 'Con cái':
-        return const Color(0xFFAB47BC);
-      case 'Hỗ trợ gia đình':
-        return const Color(0xFF26A69A);
-      case 'Bảo hiểm':
-        return const Color(0xFF3949AB);
-      case 'Thuế':
-        return AppColors.pick(const Color(0xFF5D4037), const Color(0xFFC8C8D0));
-      case 'Công việc':
-        return const Color(0xFF455A64);
-      case 'Nhà ở':
-        return const Color(0xFF8D6E63);
-      case 'Tiền nợ':
-      case 'Tiền Nợ':
-        return const Color(0xFFD32F2F);
-      case 'Lương':
-        return AppColors.incomeLight;
-      case 'Thưởng':
-        return const Color(0xFF00ACC1);
-      case 'Đầu tư':
-        return const Color(0xFF3949AB);
-      case 'Bán hàng':
-        return const Color(0xFF7CB342);
-      default:
-        return const Color(0xFF009688);
-    }
-  }
 
   // Dynamic Filtering based on selected type (Chi tiêu / Thu nhập) and Category Filter
   /// Giao dịch đúng loại (chi/thu) và danh mục đang lọc, chưa lọc theo thời gian.
@@ -134,7 +76,6 @@ class _ReportsTabState extends State<ReportsTab> {
         'name': catName,
         'amount': sumAmount,
         'percentage': pct,
-        'color': _getCategoryColor(catName),
       });
     });
 
@@ -142,37 +83,84 @@ class _ReportsTabState extends State<ReportsTab> {
     return result;
   }
 
-  String get _aiInsightQuote {
-    final lang = context.lang;
-    final categories = _dynamicCategories;
-    if (categories.isEmpty || _totalReportAmount == 0) {
-      if (_reportTypeIndex == 1) {
-        return AppTranslations.tr(lang, 'mousey_quote_no_income');
-      }
-      return AppTranslations.tr(lang, 'mousey_quote_no_expense');
+  /// So với tháng trước, chỉ khi đang xem "Tháng này": null nếu không so được.
+  /// [higher]: tháng này nhiều hơn tháng trước.
+  ({String text, bool higher})? get _comparison {
+    if (_timeRange != 'this_month') return null;
+    final now = DateTime.now();
+    double lastMonth = 0;
+    for (final t in _typeFilteredTransactions) {
+      if (ReportUtils.inTimeRange('last_month', t.date, now)) lastMonth += t.amount;
     }
-    final top = categories.first;
-    final translatedCategory = AppTranslations.trCategory(lang, top['name'] as String);
-    return '"$translatedCategory ${(top['percentage'] as double).toStringAsFixed(0)}%."';
+    final current = _totalReportAmount;
+    if (lastMonth <= 0 || current <= 0) return null;
+    final pct = ((current - lastMonth) / lastMonth * 100).round();
+    final prevMonth = DateTime(now.year, now.month - 1, 1).month;
+    if (pct == 0) return (text: context.t('Bằng tháng {month}', {'month': prevMonth}), higher: false);
+    return (
+      text: context.t(
+        pct > 0 ? 'Cao hơn tháng {month} khoảng {pct}%' : 'Thấp hơn tháng {month} khoảng {pct}%',
+        {'month': prevMonth, 'pct': pct.abs()},
+      ),
+      higher: pct > 0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final lang = context.lang;
+    final filtered = _selectedCategoryFilter != 'Tất cả';
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Segmented Selector Tabs (Chi tiêu | Thu nhập)
+          // Báo cáo  [Tháng này ▾] [lọc]
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  AppTranslations.tr(lang, 'reports'),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: _showTimeRangePicker,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  side: BorderSide(color: AppColors.ink, width: 1.2),
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  visualDensity: VisualDensity.compact,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(AppTranslations.tr(lang, _timeRange), style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: AppTranslations.tr(lang, 'filter'),
+                onPressed: _showCategoryFilterPicker,
+                icon: Badge(
+                  isLabelVisible: filtered,
+                  smallSize: 8,
+                  backgroundColor: AppColors.expense,
+                  child: Icon(Icons.tune_rounded, color: AppColors.ink),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Chi tiêu | Thu nhập
           Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColors.tealLight,
-              borderRadius: BorderRadius.circular(20),
-            ),
+            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.rule))),
             child: Row(
               children: [
                 _buildSegmentTab(0, AppTranslations.tr(lang, 'expense')),
@@ -180,89 +168,19 @@ class _ReportsTabState extends State<ReportsTab> {
               ],
             ),
           ),
+          if (filtered) ...[
+            const SizedBox(height: 10),
+            InputChip(
+              label: Text(AppTranslations.trCategory(lang, _selectedCategoryFilter)),
+              onDeleted: () => setState(() => _selectedCategoryFilter = 'Tất cả'),
+              backgroundColor: AppColors.tealPale,
+              side: BorderSide.none,
+              labelStyle: TextStyle(color: AppColors.ink),
+              deleteIconColor: AppColors.ink,
+            ),
+          ],
+          const SizedBox(height: 20),
 
-          const SizedBox(height: 14),
-
-          // Filter Bar
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: _showTimeRangePicker,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.tealLight),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_month_outlined, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            AppTranslations.tr(lang, _timeRange),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.ink,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: InkWell(
-                  onTap: _showCategoryFilterPicker,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: _selectedCategoryFilter != 'Tất cả' ? AppColors.tealPale : AppColors.background,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        _selectedCategoryFilter != 'Tất cả'
-                            ? CategoryIcon(categoryOrIconKey: _selectedCategoryFilter, size: 22)
-                            : Icon(Icons.tune_rounded, size: 18, color: AppColors.pick(const Color(0xFF4A463D), const Color(0xFFC8C8D0))),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            _selectedCategoryFilter != 'Tất cả'
-                                ? AppTranslations.trCategory(lang, _selectedCategoryFilter)
-                                : AppTranslations.tr(lang, 'filter'),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.ink,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Main View (Chi tiêu / Thu nhập)
           _buildExpenseOrIncomeView(),
         ],
       ),
@@ -273,464 +191,186 @@ class _ReportsTabState extends State<ReportsTab> {
   Widget _buildExpenseOrIncomeView() {
     final lang = context.lang;
     final categories = _dynamicCategories;
-    final displayedCategories = _showAllCategories
-        ? categories
-        : categories.take(5).toList();
+    final displayedCategories = _showAllCategories ? categories : categories.take(5).toList();
+    final comparison = _comparison;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Hero Card (Chi tiêu / Thu nhập)
+        // Tổng chi/thu: số tô như bút dạ quang
+        Text(
+          '${AppTranslations.tr(lang, _reportTypeIndex == 0 ? 'total_spent' : 'total_earned')} · ${AppTranslations.tr(lang, _timeRange).toLowerCase()}',
+          style: TextStyle(fontSize: 14, color: AppColors.textMuted),
+        ),
+        const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [AppColors.tealBright, AppColors.mint],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: AppColors.highlight,
+            borderRadius: BorderRadius.circular(3),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: MoneyText(
+            amount: _totalReportAmount,
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.ink, letterSpacing: -0.5),
+          ),
+        ),
+        if (comparison != null) ...[
+          const SizedBox(height: 6),
+          // Chi tăng hoặc thu giảm là tin xấu: tô đỏ
+          Text(
+            comparison.text,
+            style: TextStyle(
+              fontSize: 14,
+              color: comparison.higher == (_reportTypeIndex == 0) ? AppColors.expense : AppColors.income,
+            ),
+          ),
+        ],
+        const SizedBox(height: 28),
+
+        // Chi / thu theo danh mục: dòng chữ + thanh mảnh một màu
+        Text(
+          _reportTypeIndex == 1 ? context.t('Thu theo danh mục') : context.t('Chi theo danh mục'),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
+        ),
+        const SizedBox(height: 8),
+        if (categories.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'no_income_data') : AppTranslations.tr(lang, 'no_report_data'),
+                  style: TextStyle(fontSize: 15, color: AppColors.ink),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _reportTypeIndex == 1
+                      ? AppTranslations.tr(lang, 'add_income_for_analysis')
+                      : AppTranslations.tr(lang, 'add_transaction_for_analysis'),
+                  style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                ),
+              ],
+            ),
+          )
+        else ...[
+          ...displayedCategories.map((cat) {
+            final pct = cat['percentage'] as double;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      _reportTypeIndex == 0
-                          ? '${AppTranslations.tr(lang, 'total_spent')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}'
-                          : '${AppTranslations.tr(lang, 'total_earned')} · ${AppTranslations.tr(lang, _timeRange).toUpperCase()}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                        color: Colors.white.withValues(alpha: 0.9),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${AppTranslations.trCategory(lang, cat['name'] as String)} · ${pct.toStringAsFixed(0)}%',
+                          style: TextStyle(fontSize: 15, color: AppColors.ink),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      const SizedBox(width: 8),
+                      MoneyText(
+                        amount: cat['amount'] as double,
+                        suffix: '',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.ink),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: LinearProgressIndicator(
+                      value: (pct / 100.0).clamp(0.0, 1.0),
+                      minHeight: 5,
+                      backgroundColor: AppColors.tealPale,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.ink),
                     ),
                   ),
-                  const MouseyAvatar(size: 48),
                 ],
               ),
-              const SizedBox(height: 4),
-              MoneyText(
-                amount: _totalReportAmount,
-                prefix: 'đ',
-                suffix: '',
-                style: const TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
-                ),
+            );
+          }),
+          if (categories.length > 5)
+            TextButton(
+              onPressed: () => setState(() => _showAllCategories = !_showAllCategories),
+              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              child: Text(
+                _showAllCategories
+                    ? context.t('Thu gọn ^')
+                    : context.t('Hiện tất cả ({count}) v', {'count': categories.length}),
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.surface.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _aiInsightQuote,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        color: AppColors.textPrimary,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '— ${AppTranslations.tr(lang, 'mousey_friend')}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+        ],
+        const SizedBox(height: 28),
 
-        const SizedBox(height: 24),
-
-        // Section: CHI TIẾT / NGUỒN THU
-        Text(
-          _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'income_sources') : AppTranslations.tr(lang, 'details'),
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
-            color: AppColors.textMuted,
-          ),
-        ),
-
-        const SizedBox(height: 10),
-
-        // Detail Card Container
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.tealLight),
-          ),
-          child: categories.isEmpty
-              ? SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 16),
-                      Icon(
-                        _reportTypeIndex == 1
-                            ? Icons.account_balance_wallet_outlined
-                            : Icons.pie_chart_outline_rounded,
-                        size: 52,
-                        color: AppColors.tealLight,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _reportTypeIndex == 1 ? AppTranslations.tr(lang, 'no_income_data') : AppTranslations.tr(lang, 'no_report_data'),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.ink,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        _reportTypeIndex == 1
-                            ? AppTranslations.tr(lang, 'add_income_for_analysis')
-                            : AppTranslations.tr(lang, 'add_transaction_for_analysis'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, color: AppColors.grey500),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    // Donut Chart + Legend Row
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          height: 120,
-                          child: CustomPaint(
-                            painter: DonutChartPainter(
-                              percentages: categories
-                                  .map((c) => (c['percentage'] as double))
-                                  .toList(),
-                              colors: categories
-                                  .map((c) => (c['color'] as Color))
-                                  .toList(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: categories.take(5).map((cat) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 3),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: BoxDecoration(
-                                              color: cat['color'] as Color,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              AppTranslations.trCategory(lang, cat['name'] as String),
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                                color: AppColors.ink,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        '${(cat['percentage'] as double).toStringAsFixed(1)}%',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.ink,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-                    Divider(color: AppColors.tealLight, height: 1),
-                    const SizedBox(height: 12),
-
-                    // Category List with Progress Bars
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: displayedCategories.length,
-                      separatorBuilder: (ctx, i) => const SizedBox(height: 14),
-                      itemBuilder: (ctx, index) {
-                        final cat = displayedCategories[index];
-                        final double pct = cat['percentage'] as double;
-                        final Color catColor = cat['color'] as Color;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      CategoryIcon(
-                                        categoryOrIconKey: cat['name'] as String,
-                                        size: 38,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          AppTranslations.trCategory(lang, cat['name'] as String),
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.ink,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: MoneyText(
-                                    amount: cat['amount'] as double,
-                                    prefix: 'đ',
-                                    suffix: '',
-                                    alignment: Alignment.centerRight,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.ink,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: LinearProgressIndicator(
-                                      value: (pct / 100.0).clamp(0.0, 1.0),
-                                      minHeight: 10,
-                                      backgroundColor: AppColors.tealPale,
-                                      valueColor: AlwaysStoppedAnimation<Color>(catColor),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                SizedBox(
-                                  width: 52,
-                                  child: Text(
-                                    '${pct.toStringAsFixed(1)}%',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textMuted,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-
-                    if (categories.length > 5) ...[
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            _showAllCategories = !_showAllCategories;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                          child: Text(
-                            _showAllCategories
-                                ? context.t('Thu gọn ^')
-                                : context.t('Hiện tất cả ({count}) v', {'count': categories.length}),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.pick(const Color(0xFF555048), const Color(0xFFC8C8D0)),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Section: XU HƯỚNG
-        Text(
-          AppTranslations.tr(lang, 'trend'),
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
-            color: AppColors.textMuted,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-
-        const SizedBox(height: 10),
-
-        // Trend Chart Container
+        // N tháng gần nhất: cột nhạt, tháng hiện tại tô mực
         Builder(builder: (context) {
           final trendMonths = ReportUtils.recentMonths(_trendMonthRange, DateTime.now());
           final trendTotals = ReportUtils.monthlyTotals(_typeFilteredTransactions, trendMonths);
           final trendAverage = trendTotals.fold(0.0, (a, b) => a + b) / _trendMonthRange;
-          return Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.tealLight),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          MoneyText(
-                            amount: trendAverage,
-                            prefix: 'đ',
-                            suffix: '',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.ink,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${AppTranslations.tr(lang, 'avg_per_month')} · ${AppTranslations.tr(lang, 'recent_months').replaceAll('{n}', '$_trendMonthRange')}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.pick(const Color(0xFF888480), const Color(0xFFA8A39C)),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [3, 6, 12, 24].map((range) {
-                        final isSel = _trendMonthRange == range;
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() => _trendMonthRange = range);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(left: 3),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSel ? AppColors.ink : AppColors.tealLight,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              context.t('{range}t', {'range': range}),
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: isSel ? AppColors.surface : AppColors.pick(const Color(0xFF666666), const Color(0xFFA8A39C)),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  height: 180,
-                  width: double.infinity,
-                  child: CustomPaint(
-                    painter: StackedBarChartPainter(
-                      months: trendMonths.map((m) => AppTranslations.formatMonthShort(lang, m)).toList(),
-                      totals: trendTotals,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.t('{n} tháng gần nhất', {'n': _trendMonthRange}),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
                     ),
                   ),
+                  for (final range in [3, 6, 12, 24])
+                    GestureDetector(
+                      onTap: () => setState(() => _trendMonthRange = range),
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        padding: const EdgeInsets.only(bottom: 2),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: _trendMonthRange == range ? AppColors.ink : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          context.t('{range}t', {'range': range}),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: _trendMonthRange == range ? FontWeight.w600 : FontWeight.w400,
+                            color: _trendMonthRange == range ? AppColors.ink : AppColors.unselectedTab,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              MoneyText(
+                amount: trendAverage,
+                prefix: '${AppTranslations.tr(lang, 'avg_per_month')}: ',
+                style: TextStyle(fontSize: 13, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 150,
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: MonthlyBarChartPainter(
+                    months: trendMonths.map((m) => AppTranslations.formatMonthShort(lang, m)).toList(),
+                    totals: trendTotals,
+                    barColor: AppColors.tealLight,
+                    currentColor: AppColors.ink,
+                    baseLineColor: AppColors.ink,
+                    labelColor: AppColors.textMuted,
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         }),
       ],
@@ -739,37 +379,26 @@ class _ReportsTabState extends State<ReportsTab> {
 
   Widget _buildSegmentTab(int index, String label) {
     final isSel = _reportTypeIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _reportTypeIndex = index;
-            _selectedCategoryFilter = 'Tất cả';
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSel ? AppColors.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: isSel
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
-              color: isSel ? AppColors.ink : AppColors.textMuted,
-            ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          _reportTypeIndex = index;
+          _selectedCategoryFilter = 'Tất cả';
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 24),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: isSel ? AppColors.ink : Colors.transparent, width: 2)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: isSel ? FontWeight.w600 : FontWeight.w400,
+            color: isSel ? AppColors.ink : AppColors.unselectedTab,
           ),
         ),
       ),
@@ -947,108 +576,74 @@ class _ReportsTabState extends State<ReportsTab> {
 }
 
 // --- DONUT CHART PAINTER ---
-class DonutChartPainter extends CustomPainter {
-  final List<double> percentages;
-  final List<Color> colors;
-
-  DonutChartPainter({required this.percentages, required this.colors});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 10;
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 22.0
-      ..strokeCap = StrokeCap.butt;
-
-    if (percentages.isEmpty || percentages.fold(0.0, (a, b) => a + b) == 0) {
-      paint.color = AppColors.tealMist;
-      canvas.drawCircle(center, radius, paint);
-      return;
-    }
-
-    double startAngle = -math.pi / 2;
-
-    for (int i = 0; i < percentages.length; i++) {
-      final sweepAngle = (percentages[i] / 100.0) * 2 * math.pi;
-      if (sweepAngle <= 0) continue;
-      paint.color = colors[i % colors.length];
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweepAngle - 0.05,
-        false,
-        paint,
-      );
-      startAngle += sweepAngle;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// --- STACKED BAR CHART PAINTER ---
-class StackedBarChartPainter extends CustomPainter {
+/// Biểu đồ cột theo tháng kiểu sổ: cột nhạt, cột cuối (tháng hiện tại) tô mực, một đường kẻ đáy
+class MonthlyBarChartPainter extends CustomPainter {
   final List<String> months;
   final List<double> totals;
+  final Color barColor;
+  final Color currentColor;
+  final Color baseLineColor;
+  final Color labelColor;
 
-  StackedBarChartPainter({required this.months, required this.totals});
+  MonthlyBarChartPainter({
+    required this.months,
+    required this.totals,
+    required this.barColor,
+    required this.currentColor,
+    required this.baseLineColor,
+    required this.labelColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final count = months.length;
     if (count == 0) return;
     // Cột co lại khi nhiều tháng (12t, 24t) để vẫn vừa khung
-    final double barWidth = math.min(26.0, size.width / count * 0.6);
-    final double spacing = (size.width - (count * barWidth)) / (count + 1);
+    final double slot = size.width / count;
+    final double barWidth = math.min(56.0, slot * 0.82);
     // Chỉ ghi nhãn cách quãng để chữ không chồng lên nhau
     final int labelStep = count <= 6 ? 1 : (count <= 12 ? 2 : 4);
 
     double maxVal = totals.fold(0.0, math.max);
-    if (maxVal == 0) maxVal = 100000.0;
+    if (maxVal == 0) maxVal = 1;
 
+    const double labelArea = 24;
+    final chartHeight = size.height - labelArea;
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    final chartHeight = size.height - 28;
-    final radius = Radius.circular(math.min(6.0, barWidth / 2));
 
     for (int i = 0; i < count; i++) {
-      final x = spacing + i * (barWidth + spacing);
-
-      // Draw light background column
-      final bgPaint = Paint()..color = AppColors.tealWhite;
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(x, 0, barWidth, chartHeight), radius),
-        bgPaint,
-      );
-
-      // Draw filled bar
+      final x = i * slot + (slot - barWidth) / 2;
       final val = totals[i];
       if (val > 0) {
-        final segH = (val / maxVal) * chartHeight;
-        final segPaint = Paint()..color = AppColors.tealLight;
-        canvas.drawRect(Rect.fromLTWH(x, chartHeight - segH, barWidth, segH), segPaint);
+        final h = math.max(2.0, (val / maxVal) * chartHeight);
+        final paint = Paint()..color = i == count - 1 ? currentColor : barColor;
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            Rect.fromLTWH(x, chartHeight - h, barWidth, h),
+            topLeft: const Radius.circular(3),
+            topRight: const Radius.circular(3),
+          ),
+          paint,
+        );
       }
 
       // Nhãn tháng dưới cột; luôn ghi tháng hiện tại (cột cuối)
       if ((count - 1 - i) % labelStep != 0) continue;
-      textPainter.text = TextSpan(
-        text: months[i],
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textMuted,
-        ),
-      );
+      textPainter.text = TextSpan(text: months[i], style: TextStyle(fontSize: 12, color: labelColor));
       textPainter.layout();
-      textPainter.paint(
-        canvas,
-        Offset(x + (barWidth - textPainter.width) / 2, size.height - 18),
-      );
+      textPainter.paint(canvas, Offset(i * slot + (slot - textPainter.width) / 2, chartHeight + 8));
     }
+
+    canvas.drawLine(
+      Offset(0, chartHeight),
+      Offset(size.width, chartHeight),
+      Paint()
+        ..color = baseLineColor
+        ..strokeWidth = 1.2,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant MonthlyBarChartPainter oldDelegate) =>
+      oldDelegate.totals != totals || oldDelegate.months != months || oldDelegate.currentColor != currentColor;
 }

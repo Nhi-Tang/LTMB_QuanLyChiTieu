@@ -8,12 +8,13 @@ void main() {
 
   tearDown(() => AppTheme.instance.value = ThemeMode.light);
 
-  test('chế độ sáng giữ nguyên bảng màu cũ', () {
+  test('chế độ sáng dùng bảng màu sổ tay: giấy kem, mực xanh navy', () {
     AppTheme.instance.value = ThemeMode.light;
     expect(AppColors.isDark, isFalse);
-    expect(AppColors.tealDark, const Color(0xFF00463E));
-    expect(AppColors.tealPale, const Color(0xFFCCF7F7));
-    expect(AppColors.surface, const Color(0xFFFFFFFF));
+    expect(AppColors.tealDark, const Color(0xFF1E2A5A));
+    expect(AppColors.tealPale, const Color(0xFFE9EBF6));
+    expect(AppColors.background, const Color(0xFFFAF8F1));
+    expect(AppColors.surface, const Color(0xFFFFFDF8));
     expect(AppColors.grey600, Colors.grey.shade600);
   });
 
@@ -26,9 +27,11 @@ void main() {
     expect(AppColors.tealDark.computeLuminance(), greaterThan(0.6));
   });
 
-  test('màu nhấn và chữ trên nền teal không đổi theo chế độ', () {
+  test('chữ trên nền màu chính luôn trắng; thu xanh lá, chi đỏ', () {
+    AppTheme.instance.value = ThemeMode.light;
+    expect(AppColors.income, const Color(0xFF2E7D4F));
+    expect(AppColors.expense, const Color(0xFFC0392B));
     AppTheme.instance.value = ThemeMode.dark;
-    expect(AppColors.teal, const Color(0xFF00BFB5));
-    expect(AppColors.onTeal, const Color(0xFF00463E));
+    expect(AppColors.onTeal, Colors.white);
   });
 }

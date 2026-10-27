@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../backend/database/db_helper.dart';
 import '../../../backend/models/category_model.dart';
 import '../../../backend/services/category_repository.dart';
-import 'mousey_colors.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
+/// Chọn danh mục kiểu sổ: 5 danh mục đầu (luôn gồm danh mục đang chọn) dạng ô tròn,
+/// ô thứ 6 là "Xem thêm" mở toàn bộ danh mục.
 class CategoryGrid extends StatefulWidget {
   final bool isExpense;
   final String selectedCategory;
@@ -24,6 +26,8 @@ class CategoryGrid extends StatefulWidget {
 }
 
 class _CategoryGridState extends State<CategoryGrid> {
+  static const int _visibleCount = 5;
+
   List<CategoryModel> _categories = [];
   bool _isLoading = true;
 
@@ -61,128 +65,189 @@ class _CategoryGridState extends State<CategoryGrid> {
     }
   }
 
+  List<CategoryModel> get _allCategories {
+    if (_categories.isNotEmpty) return _categories;
+    final defaults = widget.isExpense ? DatabaseHelper.defaultExpenseCategories : DatabaseHelper.defaultIncomeCategories;
+    return defaults
+        .map((c) => CategoryModel(
+              name: c['name']!,
+              iconKey: c['iconKey']!,
+              type: widget.isExpense ? 'expense' : 'income',
+              sortOrder: 0,
+              isDefault: true,
+              isArchived: false,
+              createdAt: '',
+              updatedAt: '',
+            ))
+        .toList();
+  }
+
+  /// 5 danh mục hiện ra; nếu danh mục đang chọn nằm sau thì đưa nó vào ô cuối
+  List<CategoryModel> _visibleCategories(List<CategoryModel> all) {
+    final visible = all.take(_visibleCount).toList();
+    if (visible.any((c) => c.name == widget.selectedCategory)) return visible;
+    final selected = all.where((c) => c.name == widget.selectedCategory);
+    if (selected.isNotEmpty && visible.isNotEmpty) visible[visible.length - 1] = selected.first;
+    return visible;
+  }
+
+  void _showAllCategories(List<CategoryModel> all) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.t('Chọn danh mục'),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded, color: AppColors.ink),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.95,
+                  ),
+                  itemCount: all.length,
+                  itemBuilder: (_, index) {
+                    final cat = all[index];
+                    return _CategoryCircle(
+                      label: context.tCategory(cat.name),
+                      category: cat,
+                      selected: cat.name == widget.selectedCategory,
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        widget.onCategorySelected(cat.name);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Expanded(
+      return SizedBox(
+        height: 200,
         child: Center(
           child: SizedBox(
             width: 24,
             height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2, color: MouseyColors.primaryGreen),
+            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
           ),
         ),
       );
     }
 
-    final defaultExpenseModels = DatabaseHelper.defaultExpenseCategories.map((c) => CategoryModel(
-      name: c['name']!,
-      iconKey: c['iconKey']!,
-      type: 'expense',
-      sortOrder: 0,
-      isDefault: true,
-      isArchived: false,
-      createdAt: '',
-      updatedAt: '',
-    )).toList();
+    final all = _allCategories;
+    final visible = _visibleCategories(all);
+    final cells = <Widget>[
+      for (final cat in visible)
+        _CategoryCircle(
+          label: context.tCategory(cat.name),
+          category: cat,
+          selected: cat.name == widget.selectedCategory,
+          onTap: () => widget.onCategorySelected(cat.name),
+        ),
+      if (all.length > visible.length)
+        _CategoryCircle(
+          label: context.t('Xem thêm'),
+          icon: Icons.more_horiz_rounded,
+          selected: false,
+          onTap: () => _showAllCategories(all),
+        ),
+    ];
 
-    final defaultIncomeModels = DatabaseHelper.defaultIncomeCategories.map((c) => CategoryModel(
-      name: c['name']!,
-      iconKey: c['iconKey']!,
-      type: 'income',
-      sortOrder: 0,
-      isDefault: true,
-      isArchived: false,
-      createdAt: '',
-      updatedAt: '',
-    )).toList();
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 6,
+      childAspectRatio: 1.35,
+      children: cells,
+    );
+  }
+}
 
-    final displayCategories = _categories.isNotEmpty
-        ? _categories
-        : (widget.isExpense ? defaultExpenseModels : defaultIncomeModels);
+/// Một ô danh mục: vòng tròn viền mực chứa icon, tên bên dưới. Ô đang chọn có viền đậm và nền nhạt.
+class _CategoryCircle extends StatelessWidget {
+  final String label;
+  final CategoryModel? category;
+  final IconData? icon;
+  final bool selected;
+  final VoidCallback onTap;
 
-    return Expanded(
+  const _CategoryCircle({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.category,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const double size = 58;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  context.t('DANH MỤC'),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.8,
-                    color: MouseyColors.textSub,
-                  ),
-                ),
-                Text(
-                  context.tCategory(widget.selectedCategory),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: MouseyColors.selectedBorder,
-                  ),
-                ),
-              ],
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: size,
+            height: size,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: selected ? AppColors.tealPale : Colors.transparent,
+              border: Border.all(color: AppColors.ink, width: selected ? 3 : 1.4),
             ),
+            child: category != null
+                ? CategoryModel.getCategoryIconWidget(
+                    category!.name,
+                    iconKey: category!.iconKey,
+                    size: size - 14,
+                    bgColor: Colors.transparent,
+                    fallbackColor: AppColors.ink,
+                  )
+                : Icon(icon, color: AppColors.ink, size: 26),
           ),
-          Expanded(
-            child: GridView.builder(
-              physics: const BouncingScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 2.6,
-              ),
-              itemCount: displayCategories.length,
-              itemBuilder: (context, index) {
-                final cat = displayCategories[index];
-                final name = cat.name;
-                final isSelected = widget.selectedCategory == name;
-
-                return InkWell(
-                  onTap: () => widget.onCategorySelected(name),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? MouseyColors.selectedCream : MouseyColors.cardCream,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected ? MouseyColors.selectedBorder : MouseyColors.borderBeige,
-                        width: isSelected ? 1.5 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        CategoryModel.getCategoryIconWidget(
-                          name,
-                          iconKey: cat.iconKey,
-                          size: 30,
-                          fallbackColor: isSelected ? MouseyColors.textMain : MouseyColors.textSub,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            context.tCategory(name),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: MouseyColors.textMain,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+          const SizedBox(height: 6),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              color: AppColors.ink,
             ),
           ),
         ],

@@ -7,7 +7,6 @@ import 'amount_card.dart';
 import 'amount_expression.dart';
 import 'calculator_keypad.dart';
 import 'category_grid.dart';
-import 'mousey_colors.dart';
 import 'show_note_sheet.dart';
 import 'transaction_type_switcher.dart';
 import '../../utils/app_language.dart';
@@ -146,52 +145,72 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
     }
   }
 
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null && mounted) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final dateLabel = '${_selectedDate.day.toString().padLeft(2, '0')}/${_selectedDate.month.toString().padLeft(2, '0')}';
+
     return Container(
       decoration: BoxDecoration(
-        color: MouseyColors.backgroundCream,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        color: AppColors.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
-          // Drag handle & Header
           const SizedBox(height: 10),
           Center(
             child: Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.grey400,
+                color: AppColors.rule,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
+
+          // Đầu trang sổ: đóng | Ghi vào sổ | ngày
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.close_rounded),
+                  icon: Icon(Icons.close_rounded, color: AppColors.ink),
                   onPressed: () => Navigator.pop(context),
                 ),
-                Text(
-                  widget.editingTransaction != null ? context.t('Sửa giao dịch') : context.t('Giao dịch mới'),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: MouseyColors.textMain),
+                Expanded(
+                  child: Text(
+                    widget.editingTransaction != null ? context.t('Sửa giao dịch') : context.t('Ghi vào sổ'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.w600, color: AppColors.ink),
+                  ),
                 ),
-                const SizedBox(width: 48),
+                TextButton(
+                  onPressed: _pickDate,
+                  child: Text(dateLabel, style: TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                ),
               ],
             ),
           ),
 
-          // Content body
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Transaction Type Switcher (Chi tiêu | Thu nhập | Ngân sách)
+                  // Chi tiêu | Thu nhập | Ngân sách
                   TransactionTypeSwitcher(
                     selectedIndex: _tabIndex,
                     onTabChanged: (index) {
@@ -214,10 +233,14 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                       });
                     },
                   ),
+                  const SizedBox(height: 20),
 
-                  const SizedBox(height: 14),
+                  AmountCard(
+                    expression: _expression,
+                    isExpense: _tabIndex == 0,
+                  ),
+                  const SizedBox(height: 16),
 
-                  // 2. Category Grid
                   CategoryGrid(
                     isExpense: _tabIndex == 0,
                     selectedCategory: _selectedCategory,
@@ -226,42 +249,51 @@ class _NewTransactionSheetState extends State<NewTransactionSheet> {
                       setState(() => _selectedCategory = cat);
                     },
                   ),
+                  const SizedBox(height: 8),
 
-                  const SizedBox(height: 12),
-
-                  // 3. Amount Card
-                  AmountCard(
-                    expression: _expression,
-                    isExpense: _tabIndex == 0,
+                  // Ghi chú: một dòng kẻ trong sổ
+                  InkWell(
+                    onTap: _showNoteDialog,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.rule))),
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '${context.t('Ghi chú')}: ',
+                              style: TextStyle(color: AppColors.textMuted),
+                            ),
+                            TextSpan(
+                              text: _note.isNotEmpty ? _note : context.t('Thêm ghi chú...'),
+                              style: TextStyle(color: _note.isNotEmpty ? AppColors.ink : AppColors.unselectedTab),
+                            ),
+                          ],
+                        ),
+                        style: const TextStyle(fontSize: 15),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-
-                  const SizedBox(height: 12),
-
-                  // 4. Calculator Keypad
-                  CalculatorKeypad(
-                    onKeyPressed: _onKeyPressed,
-                    onDeletePressed: _onDeletePressed,
-                    onDeleteLongPress: _onDeleteLongPress,
-                    onSavePressed: _onSavePressed,
-                    onDatePressed: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _selectedDate,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2030),
-                      );
-                      if (picked != null && mounted) {
-                        setState(() => _selectedDate = picked);
-                      }
-                    },
-                    onNotePressed: _showNoteDialog,
-                    selectedDate: _selectedDate,
-                    hasNote: _note.isNotEmpty,
-                  ),
-
                   const SizedBox(height: 16),
                 ],
               ),
+            ),
+          ),
+
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 4, 16, 16 + MediaQuery.of(context).padding.bottom),
+            child: CalculatorKeypad(
+              onKeyPressed: _onKeyPressed,
+              onDeletePressed: _onDeletePressed,
+              onDeleteLongPress: _onDeleteLongPress,
+              onSavePressed: _onSavePressed,
+              onDatePressed: _pickDate,
+              onNotePressed: _showNoteDialog,
+              selectedDate: _selectedDate,
+              hasNote: _note.isNotEmpty,
             ),
           ),
         ],

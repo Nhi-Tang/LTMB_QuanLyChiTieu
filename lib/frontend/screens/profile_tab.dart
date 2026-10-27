@@ -874,180 +874,131 @@ class _ProfileTabState extends State<ProfileTab> {
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // User Info Profile Header Card
+          Text(
+            AppTranslations.tr(lang, 'profile'),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
+          ),
+          const SizedBox(height: 16),
+
+          // Bìa sổ: tên, email, gói FREE/PRO
           ListenableBuilder(
             listenable: ProService.instance,
             builder: (context, _) {
               final isProUser = ProService.instance.isPro;
-              return InkWell(
-                onTap: _showEditProfileDialog,
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.tealPale),
-                  ),
-                  child: Row(
-                    children: [
-                      buildUserAvatar(
-                        avatarKey: widget.selectedAvatarKey,
-                        userName: widget.currentUser.name,
-                        size: 72,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+              return Material(
+                color: AppColors.cover,
+                borderRadius: BorderRadius.circular(14),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: _showEditProfileDialog,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Gáy sổ
+                        Container(width: 14, color: AppColors.coverSpine),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 18, 16, 18),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    widget.currentUser.name,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.ink,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget.currentUser.name,
+                                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        widget.currentUser.email,
+                                        style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8)),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
                                 ),
+                                const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: isProUser ? primaryBeige : AppColors.grey200,
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: isProUser ? AppColors.highlight : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: isProUser ? AppColors.highlight : Colors.white.withValues(alpha: 0.7)),
                                   ),
                                   child: Text(
                                     isProUser ? 'PRO' : 'FREE',
                                     style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: isProUser ? darkBeige : AppColors.grey700,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isProUser ? AppColors.ink : Colors.white,
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.currentUser.email,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           ),
 
-          // PRO Upgrade Banner Card
+          // Tờ giấy nhớ: mời nâng cấp PRO, hoặc số ngày PRO còn lại
           ListenableBuilder(
             listenable: ProService.instance,
             builder: (context, _) {
               final isPro = ProService.instance.isPro;
-              if (isPro) {
-                return Container(
-                  margin: const EdgeInsets.only(top: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.tealPale, AppColors.tealLight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              return Container(
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.fromLTRB(18, 16, 16, 16),
+                decoration: BoxDecoration(
+                  color: AppColors.note,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border(bottom: BorderSide(color: AppColors.noteBorder, width: 3)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 6, offset: const Offset(0, 3)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isPro ? context.t('Tài khoản Mousey PRO 👑') : AppTranslations.tr(lang, 'upgrade_pro_title'),
+                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isPro
+                                ? (ProService.instance.remainingDays > 0
+                                    ? context.t('Còn lại {remainingDays} ngày sử dụng PRO', {'remainingDays': ProService.instance.remainingDays})
+                                    : context.t('Đã mở khóa toàn bộ tính năng cao cấp'))
+                                : AppTranslations.tr(lang, 'upgrade_pro_desc'),
+                            style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.35),
+                          ),
+                        ],
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFFD54F)),
-                  ),
-                  child: Row(
-                    children: [
-                      const AssetIcon('ui_ngoi_sao', size: 40),
+                    if (!isPro) ...[
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.t('Tài khoản Mousey PRO 👑'),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.pick(const Color(0xFF5D4037), const Color(0xFFC8C8D0))),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              ProService.instance.remainingDays > 0
-                                  ? context.t('Còn lại {remainingDays} ngày sử dụng PRO', {'remainingDays': ProService.instance.remainingDays})
-                                  : context.t('Đã mở khóa toàn bộ tính năng cao cấp'),
-                              style: TextStyle(fontSize: 12, color: AppColors.pick(const Color(0xFF795548), const Color(0xFFA8A39C))),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                return Container(
-                  margin: const EdgeInsets.only(top: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.tealLight, AppColors.tealPale],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const AssetIcon('ui_ngoi_sao', size: 40),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppTranslations.tr(lang, 'upgrade_pro_title'),
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.pick(const Color(0xFF3B2A17), const Color(0xFFEDEDED))),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              AppTranslations.tr(lang, 'upgrade_pro_desc'),
-                              style: TextStyle(fontSize: 11, color: AppColors.pick(const Color(0xFF8A7A66), const Color(0xFFA8A39C))),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.tealDark,
-                          foregroundColor: AppColors.surface,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: const StadiumBorder(),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                         ),
                         onPressed: () {
                           Navigator.push(
@@ -1055,12 +1006,12 @@ class _ProfileTabState extends State<ProfileTab> {
                             MaterialPageRoute(builder: (context) => const ProUpgradeScreen()),
                           );
                         },
-                        child: Text(AppTranslations.tr(lang, 'upgrade'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(AppTranslations.tr(lang, 'upgrade'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                       ),
                     ],
-                  ),
-                );
-              }
+                  ],
+                ),
+              );
             },
           ),
 
@@ -1118,7 +1069,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   );
                 },
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SettingsTile(
                 leading: const AssetIcon('ui_chuong_thong_bao'),
                 title: Row(
@@ -1134,10 +1085,11 @@ class _ProfileTabState extends State<ProfileTab> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFECB3),
-                        borderRadius: BorderRadius.circular(6),
+                        color: AppColors.note,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: AppColors.noteBorder),
                       ),
-                      child: const Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE65100))),
+                      child: Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.ink)),
                     ),
                   ],
                 ),
@@ -1177,7 +1129,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showLedgerPickerSheet,
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SettingsTile(
                 leading: const AssetIcon('cat_tat_ca'),
                 title: Text(AppTranslations.tr(lang, 'categories_manager'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
@@ -1185,7 +1137,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showCategoriesManagerSheet,
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SettingsTile(
                 leading: const AssetIcon('ui_tai_xuong'),
                 title: Row(
@@ -1201,10 +1153,11 @@ class _ProfileTabState extends State<ProfileTab> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFECB3),
-                        borderRadius: BorderRadius.circular(6),
+                        color: AppColors.note,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: AppColors.noteBorder),
                       ),
-                      child: const Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE65100))),
+                      child: Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.ink)),
                     ),
                   ],
                 ),
@@ -1229,7 +1182,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showLanguagePickerSheet,
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SettingsTile(
                 leading: Container(
                   width: 36,
@@ -1242,7 +1195,7 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showThemePickerSheet,
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SwitchListTile(
                 secondary: const AssetIcon('ui_loa'),
                 title: Text(AppTranslations.tr(lang, 'daily_reminder'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -1253,7 +1206,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   setState(() => _dailyReminderEnabled = val);
                 },
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SwitchListTile(
                 secondary: const AssetIcon('tab_bao_cao'),
                 title: Text(AppTranslations.tr(lang, 'budget_alerts_toggle'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -1331,14 +1284,14 @@ class _ProfileTabState extends State<ProfileTab> {
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showRatingDialog,
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SettingsTile(
                 leading: const AssetIcon('ui_micro'),
                 title: Text(AppTranslations.tr(lang, 'contact_support'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
                 onTap: _showSupportDialog,
               ),
-              Divider(height: 1, indent: 56, color: AppColors.tealMist),
+              Divider(height: 1, color: AppColors.rule),
               SettingsTile(
                 leading: const AssetIcon('ui_thong_tin'),
                 title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
@@ -1387,14 +1340,13 @@ class _SectionHeaderTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
+      padding: EdgeInsets.zero,
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
-          color: AppColors.pick(const Color(0xFF7A6F62), const Color(0xFFA8A39C)),
-          letterSpacing: 0.5,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textMuted,
         ),
         overflow: TextOverflow.ellipsis,
       ),

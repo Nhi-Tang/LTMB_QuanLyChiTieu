@@ -5,7 +5,7 @@ import '../../backend/services/auth_service.dart';
 import '../../backend/services/bank_notification_listener_manager.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../backend/services/totals_calculator.dart';
-import '../../core/widgets/notch_tab_bar.dart';
+import '../../core/widgets/notebook_tab_bar.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/transaction_sheet/new_transaction_sheet.dart';
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pop(ctx);
               await AuthService().signOut();
             },
-            child: Text(context.t('Đăng xuất'), style: TextStyle(color: AppColors.darkBeige, fontWeight: FontWeight.bold)),
+            child: Text(context.t('Đăng xuất'), style: const TextStyle(color: AppColors.onTeal, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -126,22 +126,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final lang = _lang;
 
     final navItems = [
-      NotchTabItemData(
+      NotebookTabItemData(
         keyName: 'home',
         label: AppTranslations.tr(lang, 'home'),
         assetPath: 'assets/icon/tab_trang_chu.png',
       ),
-      NotchTabItemData(
+      NotebookTabItemData(
         keyName: 'savings',
         label: AppTranslations.tr(lang, 'savings'),
         assetPath: 'assets/icon/tab_tiet_kiem.png',
       ),
-      NotchTabItemData(
+      NotebookTabItemData(
         keyName: 'reports',
         label: AppTranslations.tr(lang, 'reports'),
         assetPath: 'assets/icon/tab_bao_cao.png',
       ),
-      NotchTabItemData(
+      NotebookTabItemData(
         keyName: 'profile',
         label: AppTranslations.tr(lang, 'profile'),
         assetPath: 'assets/icon/tab_ca_nhan.png',
@@ -149,87 +149,70 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundCream,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: Stack(
+        // Giữ trạng thái từng tab bằng IndexedStack (4 tab)
+        child: IndexedStack(
+          index: _currentTabIndex,
           children: [
-            // Preserved tab state using IndexedStack (4 tabs)
-            IndexedStack(
-              index: _currentTabIndex,
-              children: [
-                HomeTab(
-                  currentUser: _currentUser,
-                  selectedAvatarKey: _selectedAvatarKey,
-                  selectedMonth: _selectedMonth,
-                  totalIncome: _totalIncome,
-                  totalExpense: _totalExpense,
-                  totalBalance: _totalBalance,
-                  transactions: _transactions,
-                  onLogout: () => _logout(context),
-                  onAddIncome: () => _showAddTransactionModal(defaultExpense: false),
-                  onAddExpense: () => _showAddTransactionModal(defaultExpense: true),
-                ),
-                SavingsTab(
-                  selectedAvatarKey: _selectedAvatarKey,
-                  userName: _currentUser.name,
-                ),
-                ReportsTab(
-                  transactions: _transactions,
-                ),
-                ProfileTab(
-                  currentUser: _currentUser,
-                  selectedAvatarKey: _selectedAvatarKey,
-                  onUserUpdated: (updatedUser) {
-                    setState(() {
-                      _currentUser = updatedUser;
-                    });
-                  },
-                  onAvatarChanged: (newAvatarKey) {
-                    setState(() {
-                      _selectedAvatarKey = newAvatarKey;
-                    });
-                  },
-                  onLanguageChanged: (newLanguage) {
-                    AppLanguage.instance.change(newLanguage, uid: _currentUser.uid);
-                  },
-                  onLogout: () => _logout(context),
-                ),
-              ],
+            HomeTab(
+              currentUser: _currentUser,
+              selectedAvatarKey: _selectedAvatarKey,
+              selectedMonth: _selectedMonth,
+              totalIncome: _totalIncome,
+              totalExpense: _totalExpense,
+              totalBalance: _totalBalance,
+              transactions: _transactions,
+              onLogout: () => _logout(context),
+              onAddIncome: () => _showAddTransactionModal(defaultExpense: false),
+              onAddExpense: () => _showAddTransactionModal(defaultExpense: true),
             ),
-
-            // Separate FAB (+) for adding transaction
-            Positioned(
-              right: 20,
-              bottom: 96,
-              child: FloatingActionButton(
-                heroTag: 'home_add_tx_fab',
-                backgroundColor: AppColors.accentBeige,
-                foregroundColor: Colors.white,
-                elevation: 6,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                onPressed: () => _showAddTransactionModal(defaultExpense: true),
-                child: const Icon(Icons.add_rounded, size: 28),
-              ),
+            SavingsTab(
+              selectedAvatarKey: _selectedAvatarKey,
+              userName: _currentUser.name,
             ),
-
-            // Sliding Curved Notched TabBar
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: NotchTabBar(
-                items: navItems,
-                currentIndex: _currentTabIndex,
-                onChanged: (index) {
-                  setState(() {
-                    _currentTabIndex = index;
-                  });
-                },
-              ),
+            ReportsTab(
+              transactions: _transactions,
+            ),
+            ProfileTab(
+              currentUser: _currentUser,
+              selectedAvatarKey: _selectedAvatarKey,
+              onUserUpdated: (updatedUser) {
+                setState(() {
+                  _currentUser = updatedUser;
+                });
+              },
+              onAvatarChanged: (newAvatarKey) {
+                setState(() {
+                  _selectedAvatarKey = newAvatarKey;
+                });
+              },
+              onLanguageChanged: (newLanguage) {
+                AppLanguage.instance.change(newLanguage, uid: _currentUser.uid);
+              },
+              onLogout: () => _logout(context),
             ),
           ],
         ),
+      ),
+      // Nút (+) ghi giao dịch chỉ hiện ở Trang chủ, như cây bút kẹp vào sổ
+      floatingActionButton: _currentTabIndex == 0
+          ? FloatingActionButton(
+              heroTag: 'home_add_tx_fab',
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              onPressed: () => _showAddTransactionModal(defaultExpense: true),
+              child: const Icon(Icons.edit_rounded, size: 24),
+            )
+          : null,
+      bottomNavigationBar: NotebookTabBar(
+        items: navItems,
+        currentIndex: _currentTabIndex,
+        onChanged: (index) {
+          setState(() {
+            _currentTabIndex = index;
+          });
+        },
       ),
     );
   }

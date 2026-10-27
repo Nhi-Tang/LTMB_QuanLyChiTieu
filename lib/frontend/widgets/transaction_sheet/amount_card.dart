@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'amount_expression.dart';
 import 'mousey_colors.dart';
 import '../../utils/app_language.dart';
+import '../../theme/app_colors.dart';
 
+/// Ô "Số tiền" kiểu sổ: nhãn nhỏ, số tiền lớn, một đường kẻ mực phía dưới
 class AmountCard extends StatelessWidget {
   final String expression;
   final bool isExpense;
@@ -14,54 +16,40 @@ class AmountCard extends StatelessWidget {
   });
 
   String _getFormattedAmount() {
-    if (expression.isEmpty) return '0 ₫';
+    if (expression.isEmpty) return '0 đ';
     double val = AmountExpression.evaluate(expression);
-    if (val == 0.0 && !expression.contains('0')) return '$expression ₫';
+    if (val == 0.0 && !expression.contains('0')) return '$expression đ';
     return AmountExpression.formatMoney(val);
   }
 
   @override
   Widget build(BuildContext context) {
     final amountColor = isExpense ? MouseyColors.expenseRed : MouseyColors.incomeGreen;
-    final formattedText = _getFormattedAmount();
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.only(bottom: 6),
       decoration: BoxDecoration(
-        color: MouseyColors.cardCream,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: MouseyColors.borderBeige),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border(bottom: BorderSide(color: AppColors.ink, width: 1.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            context.t('SỐ TIỀN'),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
-              color: MouseyColors.textSub,
-            ),
+            context.t('Số tiền'),
+            style: TextStyle(fontSize: 14, color: AppColors.textMuted),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              formattedText,
+              _getFormattedAmount(),
               style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
+                fontSize: 40,
+                fontWeight: FontWeight.w700,
                 color: amountColor,
+                letterSpacing: -0.5,
               ),
             ),
           ),
