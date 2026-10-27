@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bcrypt/bcrypt.dart';
 import '../models/app_notification_model.dart';
 import '../models/budget_model.dart';
+import '../models/category_model.dart';
 import '../models/pending_transaction_model.dart';
 import '../models/savings_goal_model.dart';
 import '../models/savings_transaction_model.dart';
@@ -683,17 +684,46 @@ class DatabaseHelper {
     final db = await instance.database;
     final now = DateTime.now().toIso8601String();
 
-    // 1. Đọc tất cả tên danh mục hiện có của user trong 1 query duy nhất
+    // 1. Đọc tất cả danh mục user đang thấy trong 1 query duy nhất. Danh mục tự tạo
+    // chưa gán uid cũng phải tính, nếu không sẽ thêm trùng danh mục mặc định cùng tên.
     final existingRows = await db.query(
       'categories',
-      columns: ['name'],
-      where: 'uid = ? OR isDefault = 1',
+      columns: ['id', 'name', 'type', 'isDefault'],
+      where: "uid = ? OR uid IS NULL OR uid = '' OR isDefault = 1",
       whereArgs: [uid],
     );
-    final existingNames = existingRows.map((r) => (r['name'] as String).trim().toLowerCase()).toSet();
+    String keyOf(Object? type, Object? name) => '$type|${CategoryModel.normalizeKey(name as String)}';
 
-    final missingExpense = defaultExpenseCategories.where((c) => !existingNames.contains(c['name']!.toLowerCase())).toList();
-    final missingIncome = defaultIncomeCategories.where((c) => !existingNames.contains(c['name']!.toLowerCase())).toList();
+    // 2. Danh mục tự tạo trùng tên với danh mục mặc định cùng loại (vd. "Cà phê" tạo trước khi
+    // thành mặc định): xoá bản tự tạo, giao dịch đã dùng tên đó chuyển sang tên danh mục mặc định
+    final defaultNames = {
+      for (final r in existingRows.where((r) => r['isDefault'] == 1)) keyOf(r['type'], r['name']): r['name'] as String,
+    };
+    final duplicates = existingRows
+        .where((r) => r['isDefault'] != 1 && defaultNames.containsKey(keyOf(r['type'], r['name'])))
+        .toList();
+    if (duplicates.isNotEmpty) {
+      await db.transaction((txn) async {
+        for (final r in duplicates) {
+          final name = r['name'] as String;
+          final defaultName = defaultNames[keyOf(r['type'], name)]!;
+          if (name != defaultName) {
+            await txn.update(
+              'transactions',
+              {'category': defaultName},
+              where: "category = ? AND (uid = ? OR uid IS NULL OR uid = '')",
+              whereArgs: [name, uid],
+            );
+          }
+          await txn.delete('ledger_categories', where: 'categoryId = ?', whereArgs: [r['id']]);
+          await txn.delete('categories', where: 'id = ?', whereArgs: [r['id']]);
+        }
+      });
+    }
+
+    final existingKeys = existingRows.map((r) => keyOf(r['type'], r['name'])).toSet();
+    final missingExpense = defaultExpenseCategories.where((c) => !existingKeys.contains(keyOf('expense', c['name']))).toList();
+    final missingIncome = defaultIncomeCategories.where((c) => !existingKeys.contains(keyOf('income', c['name']))).toList();
 
     if (missingExpense.isEmpty && missingIncome.isEmpty) {
       return; // Đã đủ danh mục, thoát ngay tức thì trong <1ms
