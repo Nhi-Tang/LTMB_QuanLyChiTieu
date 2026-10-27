@@ -192,7 +192,6 @@ class _LinkedCategoriesScreenState extends State<LinkedCategoriesScreen> {
       backgroundColor: AppColors.backgroundCream,
       appBar: LinkedCategoriesHeader(
         title: context.t('Quản lý & Liên kết danh mục'),
-        onAddPressed: _showAddCategorySheet,
       ),
       body: Column(
         children: [
