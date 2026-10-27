@@ -157,6 +157,10 @@ class CategoryModel {
       case 'receipt_rounded':
       case 'bill_icon':
         return 'assets/icon/cat_hoa_don.png';
+      case 'dien thoai':
+      case 'phone':
+      case 'smartphone_rounded':
+        return 'assets/icon/cat_phone.png';
       case 'di chuyen':
       case 'directions_bus_rounded':
       case 'move_icon':
@@ -318,6 +322,8 @@ class CategoryModel {
         return Icons.local_cafe_rounded;
       case 'emoji_food_beverage_rounded':
         return Icons.emoji_food_beverage_rounded;
+      case 'smartphone_rounded':
+        return Icons.smartphone_rounded;
       case 'local_grocery_store_rounded':
         return Icons.local_grocery_store_rounded;
       case 'fitness_center_rounded':

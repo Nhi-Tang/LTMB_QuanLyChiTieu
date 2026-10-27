@@ -17,6 +17,7 @@ class IconPickerGrid extends StatelessWidget {
     {'key': 'local_cafe_rounded', 'label': 'Cà phê'},
     {'key': 'emoji_food_beverage_rounded', 'label': 'Trà sữa'},
     {'key': 'receipt_rounded', 'label': 'Hóa đơn'},
+    {'key': 'smartphone_rounded', 'label': 'Điện thoại'},
     {'key': 'directions_bus_rounded', 'label': 'Di chuyển'},
     {'key': 'shopping_bag_rounded', 'label': 'Mua sắm'},
     {'key': 'sports_esports_rounded', 'label': 'Giải trí'},
