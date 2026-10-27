@@ -86,8 +86,19 @@ Widget buildUserAvatar({
   }
 }
 
-Widget buildGoalIcon(String? icon, {double size = 24}) {
+/// Icon mục tiêu cũ đã bị xoá khỏi assets được đổi sang icon thay thế
+const Map<String, String> _replacedGoalIcons = {
+  'assets/icon/dienthoai_icon.jpg': 'assets/icon/cat_phone.png',
+};
+
+/// Đường dẫn icon mục tiêu hiện dùng được (đổi icon cũ đã xoá sang icon mới)
+String normalizeGoalIcon(String? icon) {
   final safeIcon = icon ?? 'assets/icon/tietkiem_icon.jpg';
+  return _replacedGoalIcons[safeIcon] ?? safeIcon;
+}
+
+Widget buildGoalIcon(String? icon, {double size = 24}) {
+  final safeIcon = normalizeGoalIcon(icon);
   if (safeIcon.startsWith('assets/')) {
     return ClipOval(
       child: Image.asset(
