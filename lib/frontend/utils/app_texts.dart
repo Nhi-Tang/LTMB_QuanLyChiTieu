@@ -420,4 +420,23 @@ const Map<String, List<String>> appTexts = {
   'Sáng': ['Light', 'ライト', '浅色', '라이트'],
   'Tối': ['Dark', 'ダーク', '深色', '다크'],
   'Theo hệ thống': ['System default', 'システム設定に従う', '跟随系统', '시스템 설정'],
+
+  // Giao diện kiểu sổ tay
+  'Sổ chi tiêu': ['Spending book', '家計簿', '记账本', '가계부'],
+  'Tháng {month}/{year}': ['Month {month}/{year}', '{year}年{month}月', '{year}年{month}月', '{year}년 {month}월'],
+  'Thu': ['Income', '収入', '收入', '수입'],
+  'Chi': ['Expense', '支出', '支出', '지출'],
+  'Còn lại': ['Remaining', '残り', '结余', '잔액'],
+  'Nội dung': ['Description', '内容', '内容', '내용'],
+  'Chưa có ghi chép nào trong tháng này': ['No entries this month yet', '今月の記録はまだありません', '本月还没有记录', '이번 달 기록이 아직 없습니다'],
+  'Ghi vào sổ': ['Add to book', '記帳する', '记一笔', '기록하기'],
+  'Thêm ghi chú...': ['Add a note...', 'メモを追加...', '添加备注...', '메모 추가...'],
+  'Xem thêm': ['More', 'もっと見る', '更多', '더 보기'],
+  'Chọn danh mục': ['Choose category', 'カテゴリを選択', '选择分类', '카테고리 선택'],
+  'Cao hơn tháng {month} khoảng {pct}%': ['About {pct}% higher than month {month}', '{month}月より約{pct}%多い', '比{month}月高约{pct}%', '{month}월보다 약 {pct}% 많음'],
+  'Thấp hơn tháng {month} khoảng {pct}%': ['About {pct}% lower than month {month}', '{month}月より約{pct}%少ない', '比{month}月低约{pct}%', '{month}월보다 약 {pct}% 적음'],
+  'Bằng tháng {month}': ['Same as month {month}', '{month}月と同じ', '与{month}月持平', '{month}월과 같음'],
+  'Chi theo danh mục': ['Spending by category', 'カテゴリ別支出', '按分类支出', '카테고리별 지출'],
+  'Thu theo danh mục': ['Income by category', 'カテゴリ別収入', '按分类收入', '카테고리별 수입'],
+  '{n} tháng gần nhất': ['Last {n} months', '直近{n}か月', '最近{n}个月', '최근 {n}개월'],
 };

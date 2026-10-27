@@ -14,7 +14,7 @@ class AmountExpression {
       }
     }
     final reversed = buffer.toString().split('').reversed.join('');
-    return '$reversed ₫';
+    return '$reversed đ';
   }
 
   static double evaluate(String expression) {

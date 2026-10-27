@@ -10,7 +10,6 @@ import '../../core/widgets/category_icon.dart';
 import '../../core/utils/money_input_formatter.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
-import '../widgets/mousey_avatar.dart';
 import '../widgets/budget_form_sheet.dart';
 import '../widgets/notification/notification_center_sheet.dart';
 import 'all_transactions_screen.dart';
@@ -136,7 +135,7 @@ class _HomeTabState extends State<HomeTab> {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.tealBright,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: SingleChildScrollView(
@@ -190,9 +189,9 @@ class _HomeTabState extends State<HomeTab> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.mint),
+                        border: Border.all(color: AppColors.rule),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,271 +342,114 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
+  /// Các giao dịch trong tháng đang xem, mới nhất trước (danh sách đã được sắp xếp sẵn)
+  List<TransactionItem> get _monthTransactions => widget.transactions
+      .where((t) =>
+          !t.isDeleted &&
+          t.date.year == widget.selectedMonth.year &&
+          t.date.month == widget.selectedMonth.month)
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     final lang = context.lang;
     final totalBadge = _unreadNotifCount + _pendingDraftCount;
+    final remaining = widget.totalIncome - widget.totalExpense;
+    final monthTxs = _monthTransactions;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
+          // Tiêu đề sổ: "Sổ chi tiêu  Tháng 10/2026" + chuông thông báo
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Text(
+                context.t('Sổ chi tiêu'),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
+              ),
+              const SizedBox(width: 12),
               Expanded(
-                child: Row(
-                  children: [
-                    buildUserAvatar(
-                      avatarKey: widget.selectedAvatarKey,
-                      userName: widget.currentUser.name,
-                      size: 44,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.currentUser.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: HomeTab.darkBeige,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            AppTranslations.tr(lang, 'welcome_back'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: HomeTab.darkBeige.withValues(alpha: 0.7),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  context.t('Tháng {month}/{year}', {
+                    'month': widget.selectedMonth.month,
+                    'year': widget.selectedMonth.year,
+                  }),
+                  style: TextStyle(fontSize: 14, color: AppColors.textMuted),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              _NotificationBell(count: totalBadge, onTap: _openNotificationCenter),
+            ],
+          ),
+          const SizedBox(height: 20),
 
-              const SizedBox(width: 8),
+          // Thu | Chi của tháng, ngăn bằng một đường kẻ dọc
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _SummaryCell(
+                    label: context.t('Thu'),
+                    amount: widget.totalIncome,
+                    color: AppColors.income,
+                    onTap: widget.onAddIncome,
+                  ),
+                ),
+                VerticalDivider(width: 24, thickness: 1, color: AppColors.rule),
+                Expanded(
+                  child: _SummaryCell(
+                    label: context.t('Chi'),
+                    amount: widget.totalExpense,
+                    color: AppColors.expense,
+                    onTap: widget.onAddExpense,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Divider(color: AppColors.rule),
+          const SizedBox(height: 14),
 
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Bell icon with dynamic badge
-                    GestureDetector(
-                      onTap: _openNotificationCenter,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.surface.withValues(alpha: 0.85),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.tealPale),
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Icon(Icons.notifications_none_rounded, color: HomeTab.darkBeige, size: 22),
-                            if (totalBadge > 0)
-                              Positioned(
-                                right: 2,
-                                top: 2,
-                                child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
-                                  ),
-                                  child: Text(
-                                    totalBadge > 9 ? '9+' : '$totalBadge',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                          ],
+          // Còn lại: số lớn, gạch chân đôi như dòng tổng trong sổ
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(context.t('Còn lại'), style: TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: AppColors.ink, width: 1.2)),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: AppColors.ink, width: 1.2)),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: MoneyText(
+                          amount: remaining,
+                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.ink, letterSpacing: -0.5),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 28),
 
-          const SizedBox(height: 16),
-
-          // Total Balance Hero Card (Gradient theme)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.tealBright, AppColors.teal],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppTranslations.tr(lang, 'total_balance').toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                MoneyText(
-                  amount: widget.totalBalance,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Income & Expense summary row (Tappable Buttons)
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: widget.onAddIncome,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface.withValues(alpha: 0.9),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.income,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.arrow_downward_rounded, size: 14, color: Colors.white),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      AppTranslations.tr(lang, 'income'),
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.tealDark,
-                                      ),
-                                    ),
-                                    MoneyText(
-                                      amount: widget.totalIncome,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.income,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: InkWell(
-                        onTap: widget.onAddExpense,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface.withValues(alpha: 0.75),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.tealPale),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.expenseStrong,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.arrow_upward_rounded, size: 14, color: Colors.white),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      AppTranslations.tr(lang, 'expense'),
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.tealDark,
-                                      ),
-                                    ),
-                                    MoneyText(
-                                      amount: widget.totalExpense,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.expenseStrong,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Budget Overview Widget
+          // Ngân sách: danh sách kẻ dòng, thanh tiến độ mảnh
           ListenableBuilder(
             listenable: BudgetService.instance,
             builder: (context, _) {
@@ -617,258 +459,328 @@ class _HomeTabState extends State<HomeTab> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        AppTranslations.tr(lang, 'budget_overview').toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textMuted,
-                          letterSpacing: 0.8,
+                  _SectionHeader(
+                    title: AppTranslations.tr(lang, 'budget_overview'),
+                    actionLabel: AppTranslations.tr(lang, 'view_all'),
+                    onAction: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BudgetsScreen(ledgerId: TransactionService.instance.currentLedgerId),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BudgetsScreen(ledgerId: TransactionService.instance.currentLedgerId),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          AppTranslations.tr(lang, 'view_all'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: HomeTab.darkBeige,
-                          ),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.tealPale),
-                    ),
-                    child: Column(
-                      children: budgetStatuses.take(2).map((s) {
-                        final name = s.budget.categoryId != null ? context.tCategory(s.budget.categoryId!) : context.t('Tổng ngân sách tháng');
-                        final pct = s.percent.clamp(0.0, 100.0);
-                        Color barColor = const Color(0xFF4CAF50);
-                        if (s.level == 'exceeded') {
-                          barColor = Colors.red;
-                        } else if (s.level == 'reached') {
-                          barColor = Colors.deepOrange;
-                        } else if (s.level == 'warning') {
-                          barColor = Colors.orange;
-                        }
+                  ...budgetStatuses.take(2).map((s) {
+                    final name = s.budget.categoryId != null ? context.tCategory(s.budget.categoryId!) : context.t('Tổng ngân sách tháng');
+                    final pct = s.percent.clamp(0.0, 100.0);
+                    final overLimit = s.level == 'exceeded' || s.level == 'reached';
+                    final barColor = overLimit
+                        ? AppColors.expense
+                        : (s.level == 'warning' ? AppColors.noteBorder : AppColors.ink);
 
-                        return InkWell(
-                          onTap: () {
-                            BudgetFormSheet.show(
-                              context: context,
-                              ledgerId: TransactionService.instance.currentLedgerId,
-                              currentMonth: _monthStr,
-                              editingBudget: s.budget,
-                              existingBudgets: budgetStatuses.map((b) => b.budget).toList(),
-                              onSave: (updatedBudget) async {
-                                final scaffold = ScaffoldMessenger.of(context);
-                                try {
-                                  if (updatedBudget.id == null || updatedBudget.id!.isEmpty) {
-                                    await BudgetService.instance.insertBudget(updatedBudget);
-                                  } else {
-                                    await BudgetService.instance.updateBudget(updatedBudget);
-                                  }
-                                  if (!mounted) return;
-                                  scaffold.showSnackBar(
-                                    SnackBar(content: Text(AppLanguage.instance.t('Đã cập nhật ngân sách!')), backgroundColor: Colors.green),
-                                  );
-                                } catch (e) {
-                                  debugPrint('Error updating budget: $e');
-                                }
-                              },
-                            );
+                    return InkWell(
+                      onTap: () {
+                        BudgetFormSheet.show(
+                          context: context,
+                          ledgerId: TransactionService.instance.currentLedgerId,
+                          currentMonth: _monthStr,
+                          editingBudget: s.budget,
+                          existingBudgets: budgetStatuses.map((b) => b.budget).toList(),
+                          onSave: (updatedBudget) async {
+                            final scaffold = ScaffoldMessenger.of(context);
+                            try {
+                              if (updatedBudget.id == null || updatedBudget.id!.isEmpty) {
+                                await BudgetService.instance.insertBudget(updatedBudget);
+                              } else {
+                                await BudgetService.instance.updateBudget(updatedBudget);
+                              }
+                              if (!mounted) return;
+                              scaffold.showSnackBar(
+                                SnackBar(content: Text(AppLanguage.instance.t('Đã cập nhật ngân sách!')), backgroundColor: AppColors.income),
+                              );
+                            } catch (e) {
+                              debugPrint('Error updating budget: $e');
+                            }
                           },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.rule))),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        name,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: HomeTab.darkBeige,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    MoneyText(
-                                      amount: s.spent,
-                                      prefix: '',
-                                      suffix: ' / ${formatMoney(s.limit)} đ',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: HomeTab.darkBeige,
-                                      ),
-                                    ),
-                                  ],
+                                Expanded(
+                                  child: Text(
+                                    name,
+                                    style: TextStyle(fontSize: 14, color: AppColors.ink),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: 6),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: LinearProgressIndicator(
-                                    value: (pct / 100.0).clamp(0.0, 1.0),
-                                    minHeight: 8,
-                                    backgroundColor: AppColors.tealMist,
-                                    valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                                MoneyText(
+                                  amount: s.spent,
+                                  suffix: ' / ${formatMoney(s.limit)} đ',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: overLimit ? AppColors.expense : AppColors.ink,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: (pct / 100.0).clamp(0.0, 1.0),
+                                minHeight: 4,
+                                backgroundColor: AppColors.tealPale,
+                                valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 28),
                 ],
               );
             },
           ),
 
-          // Recent Transactions Section Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppTranslations.tr(lang, 'recent_transactions').toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: HomeTab.darkBeige,
-                  letterSpacing: 0.8,
+          // Bảng sổ: Ngày | Nội dung | Số tiền, có đường kẻ lề đỏ
+          _LedgerHeader(
+            date: context.t('Ngày'),
+            content: context.t('Nội dung'),
+            amount: context.t('Số tiền'),
+          ),
+          if (monthTxs.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 28),
+              child: Center(
+                child: Text(
+                  context.t('Chưa có ghi chép nào trong tháng này'),
+                  style: TextStyle(fontSize: 14, color: AppColors.textMuted),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AllTransactionsScreen(
-                        transactions: widget.transactions,
-                      ),
+            )
+          else
+            ...monthTxs.take(10).map((item) => _LedgerRow(
+                  date: '${item.date.day.toString().padLeft(2, '0')}/${item.date.month.toString().padLeft(2, '0')}',
+                  content: item.title.isNotEmpty ? item.title : context.tCategory(item.category),
+                  amount: item.amount,
+                  isExpense: item.isExpense,
+                  onTap: () => _showTransactionDetailSheet(item),
+                )),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AllTransactionsScreen(
+                      transactions: widget.transactions,
                     ),
-                  );
-                },
-                child: Text(
-                  AppTranslations.tr(lang, 'view_all'),
+                  ),
+                );
+              },
+              child: Text(
+                '${AppTranslations.tr(lang, 'view_all')} →',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Cột Ngày của bảng sổ rộng cố định, ngay sau là đường kẻ lề đỏ
+const double _ledgerDateWidth = 56;
+
+class _LedgerHeader extends StatelessWidget {
+  final String date;
+  final String content;
+  final String amount;
+
+  const _LedgerHeader({required this.date, required this.content, required this.amount});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary);
+    return Container(
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.ink, width: 1.2))),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: _ledgerDateWidth,
+              child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(date, style: style)),
+            ),
+            Container(width: 1.2, color: AppColors.margin),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 0, 8),
+                child: Text(content, style: style),
+              ),
+            ),
+            Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(amount, style: style)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LedgerRow extends StatelessWidget {
+  final String date;
+  final String content;
+  final double amount;
+  final bool isExpense;
+  final VoidCallback onTap;
+
+  const _LedgerRow({
+    required this.date,
+    required this.content,
+    required this.amount,
+    required this.isExpense,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.rule))),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: _ledgerDateWidth,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  child: Text(date, style: TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                ),
+              ),
+              Container(width: 1.2, color: AppColors.margin),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 13, 8, 13),
+                  child: Text(
+                    content,
+                    style: TextStyle(fontSize: 15, color: AppColors.ink),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                child: MoneyText(
+                  amount: amount,
+                  prefix: isExpense ? '-' : '+',
+                  suffix: '',
                   style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: HomeTab.darkBeige,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isExpense ? AppColors.expense : AppColors.income,
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
 
-          const SizedBox(height: 10),
+class _SummaryCell extends StatelessWidget {
+  final String label;
+  final double amount;
+  final Color color;
+  final VoidCallback onTap;
 
-          // Recent Transactions List
-          widget.transactions.isEmpty
-              ? Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.tealPale),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.receipt_long_rounded, size: 48, color: AppColors.tealLight),
-                      const SizedBox(height: 8),
-                      Text(
-                        AppTranslations.tr(lang, 'no_recent_transactions'),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: HomeTab.darkBeige,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.tealPale),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                    clipBehavior: Clip.antiAlias,
-                    child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.transactions.take(5).length,
-                    separatorBuilder: (ctx, i) => Divider(height: 1, indent: 56, color: AppColors.tealMist),
-                    itemBuilder: (ctx, index) {
-                      final item = widget.transactions[index];
+  const _SummaryCell({required this.label, required this.amount, required this.color, required this.onTap});
 
-                      return ListTile(
-                        onTap: () => _showTransactionDetailSheet(item),
-                        leading: CategoryIcon(
-                          categoryOrIconKey: item.category,
-                          size: 40,
-                          bgColor: item.isExpense ? AppColors.expenseBg : AppColors.incomeBg,
-                          iconColor: item.isExpense ? AppColors.expense : const Color(0xFF4CAF50),
-                        ),
-                        title: Text(
-                          item.title.isNotEmpty ? item.title : context.tCategory(item.category),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.ink,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          _formatDateTime(item.date),
-                          style: TextStyle(fontSize: 12, color: AppColors.grey500),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: MoneyText(
-                          amount: item.amount,
-                          prefix: item.isExpense ? '-' : '+',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: item.isExpense ? AppColors.expense : const Color(0xFF4CAF50),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                ),
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: MoneyText(
+                amount: amount,
+                suffix: '',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: color),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String actionLabel;
+  final VoidCallback onAction;
+
+  const _SectionHeader({required this.title, required this.actionLabel, required this.onAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.ink, width: 1.2))),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.ink)),
+          ),
+          GestureDetector(
+            onTap: onAction,
+            child: Text(actionLabel, style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _NotificationBell extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+
+  const _NotificationBell({required this.count, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onTap,
+      icon: Badge(
+        isLabelVisible: count > 0,
+        backgroundColor: AppColors.expense,
+        label: Text(count > 9 ? '9+' : '$count'),
+        child: Icon(Icons.notifications_none_rounded, color: AppColors.ink, size: 24),
       ),
     );
   }

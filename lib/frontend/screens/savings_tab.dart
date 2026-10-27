@@ -80,103 +80,74 @@ class _SavingsTabState extends State<SavingsTab> {
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero Card Tiết Kiệm (Summary Card)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [AppColors.tealBright, AppColors.teal],
+          // Đầu trang kiểu sổ: tiêu đề, tổng tiết kiệm tô dạ quang, lời nhắn của Mousey
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  AppTranslations.tr(lang, 'savings'),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              buildUserAvatar(
+                avatarKey: widget.selectedAvatarKey,
+                userName: widget.userName,
+                size: 40,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppTranslations.tr(lang, 'total_savings'),
+            style: TextStyle(fontSize: 13, color: AppColors.textMuted, letterSpacing: 0.4),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.highlight,
+              borderRadius: BorderRadius.circular(3),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: MoneyText(
+              amount: _totalSavedAmount,
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              border: Border.symmetric(horizontal: BorderSide(color: AppColors.rule)),
+            ),
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        AppTranslations.tr(lang, 'mousey_savings_badge'),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                ClipOval(
+                  child: Image.asset(
+                    'assets/avatar/avatar.jpg',
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    AppTranslations.tr(lang, 'mousey_quote_home'),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                      color: AppColors.textSecondary,
+                      height: 1.35,
                     ),
-                    buildUserAvatar(
-                      avatarKey: widget.selectedAvatarKey,
-                      userName: widget.userName,
-                      size: 44,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  AppTranslations.tr(lang, 'total_savings'),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.8,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                MoneyText(
-                  amount: _totalSavedAmount,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipOval(
-                        child: Image.asset(
-                          'assets/avatar/avatar.jpg',
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          AppTranslations.tr(lang, 'mousey_quote_home'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -224,7 +195,7 @@ class _SavingsTabState extends State<SavingsTab> {
                 ),
                 label: Text(
                   AppTranslations.tr(lang, 'create_goal'),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.onTeal),
                 ),
               ),
             ],
