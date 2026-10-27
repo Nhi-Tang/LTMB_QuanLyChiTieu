@@ -174,6 +174,11 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
                       title: AppTranslations.tr(lang, 'benefit_4_title'),
                       subtitle: AppTranslations.tr(lang, 'benefit_4_sub'),
                     ),
+                    _buildBenefitItem(
+                      icon: 'cat_camera',
+                      title: AppTranslations.tr(lang, 'benefit_5_title'),
+                      subtitle: AppTranslations.tr(lang, 'benefit_5_sub'),
+                    ),
                     const SizedBox(height: 24),
 
                     Text(
