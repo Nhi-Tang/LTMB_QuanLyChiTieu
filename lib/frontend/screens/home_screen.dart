@@ -3,12 +3,14 @@ import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
 import '../../backend/services/bank_notification_listener_manager.dart';
+import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../backend/services/totals_calculator.dart';
 import '../../core/widgets/notebook_tab_bar.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/app_alert_dialog.dart';
+import '../widgets/notification/notification_permission_prompt.dart';
 import '../widgets/transaction_sheet/new_transaction_sheet.dart';
 import 'home_tab.dart';
 import 'profile_tab.dart';
@@ -47,6 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadTransactions();
     _transactionService.addListener(_loadTransactions);
     BankNotificationListenerManager.instance.startListening(uid: _currentUser.uid);
+    // Tài khoản PRO lần đầu vào app (hoặc vừa lên PRO): hỏi quyền thông báo
+    ProService.instance.addListener(_askNotificationPermission);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _askNotificationPermission());
+  }
+
+  void _askNotificationPermission() {
+    final uid = _currentUser.uid;
+    if (!mounted || uid == null) return;
+    NotificationPermissionPrompt.maybeAsk(context, uid: uid);
   }
 
   Future<void> _loadPreferences() async {
@@ -56,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _transactionService.removeListener(_loadTransactions);
+    ProService.instance.removeListener(_askNotificationPermission);
     BankNotificationListenerManager.instance.stopListening();
     super.dispose();
   }
