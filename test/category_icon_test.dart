@@ -43,6 +43,15 @@ void main() {
     expect(CategoryModel.getCategoryAssetPath('Sửa máy', iconKey: 'smartphone_rounded'), 'assets/icon/cat_phone.png');
   });
 
+  test('icon Netflix, Spotify, YouTube theo tên hoặc iconKey', () {
+    expect(CategoryModel.getCategoryAssetPath('Netflix'), 'assets/icon/cat_netflix.png');
+    expect(CategoryModel.getCategoryAssetPath('Spotify'), 'assets/icon/cat_spotify.png');
+    expect(CategoryModel.getCategoryAssetPath('YouTube'), 'assets/icon/cat_youtube.png');
+    expect(CategoryModel.getCategoryAssetPath('Phim', iconKey: 'movie_rounded'), 'assets/icon/cat_netflix.png');
+    expect(CategoryModel.getCategoryAssetPath('Nhạc', iconKey: 'headphones_rounded'), 'assets/icon/cat_spotify.png');
+    expect(CategoryModel.getCategoryAssetPath('Video', iconKey: 'live_tv_rounded'), 'assets/icon/cat_youtube.png');
+  });
+
   test('icon người dùng chọn được ưu tiên, category_rounded thì theo tên', () {
     expect(CategoryModel.getCategoryAssetPath('Cà phê', iconKey: 'fastfood_rounded'), 'assets/icon/cat_an_uong.png');
     expect(CategoryModel.getCategoryAssetPath('Kết hôn', iconKey: 'category_rounded'), 'assets/icon/cat_ket_hon.png');

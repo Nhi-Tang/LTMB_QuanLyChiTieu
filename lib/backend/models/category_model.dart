@@ -169,6 +169,15 @@ class CategoryModel {
       case 'shopping_bag_rounded':
       case 'shopping_icon':
         return 'assets/icon/cat_mua_sam.png';
+      case 'netflix':
+      case 'movie_rounded':
+        return 'assets/icon/cat_netflix.png';
+      case 'spotify':
+      case 'headphones_rounded':
+        return 'assets/icon/cat_spotify.png';
+      case 'youtube':
+      case 'live_tv_rounded':
+        return 'assets/icon/cat_youtube.png';
       case 'giai tri':
       case 'sports_esports_rounded':
       case 'game_icon':
@@ -280,6 +289,12 @@ class CategoryModel {
         return Icons.shopping_bag_rounded;
       case 'sports_esports_rounded':
         return Icons.sports_esports_rounded;
+      case 'movie_rounded':
+        return Icons.movie_rounded;
+      case 'headphones_rounded':
+        return Icons.headphones_rounded;
+      case 'live_tv_rounded':
+        return Icons.live_tv_rounded;
       case 'medical_services_rounded':
         return Icons.medical_services_rounded;
       case 'content_cut_rounded':
