@@ -241,13 +241,62 @@ class ReceiptParser {
       // Không có tiêu đề bảng: chỉ nhận dòng có giá tiền
       if (header < 0 && moneyValues(key.replaceAll(_datePattern, ' ')).isEmpty) continue;
       final name = _itemName(lines[i]);
-      if (name != null) items.add(name);
+      if (name != null) items.add(restoreMenuAccents(name));
     }
     return items;
   }
 
+  /// Từ / cụm từ hay gặp trong menu, viết không dấu → có dấu. OCR hay làm mất dấu tên món.
+  static const Map<String, String> _menuAccents = {
+    'tra sua': 'trà sữa', 'ca phe': 'cà phê', 'bac xiu': 'bạc xỉu', 'banh mi': 'bánh mì',
+    'tran chau': 'trân châu', 'sua tuoi': 'sữa tươi', 'sua chua': 'sữa chua', 'nuoc ep': 'nước ép',
+    'nuoc cam': 'nước cam', 'nuoc suoi': 'nước suối', 'tra dao': 'trà đào', 'tra vai': 'trà vải',
+    'tra chanh': 'trà chanh', 'com tam': 'cơm tấm', 'com ga': 'cơm gà', 'bun bo': 'bún bò',
+    'pho bo': 'phở bò', 'pho ga': 'phở gà', 'banh xeo': 'bánh xèo',
+    'tra': 'trà', 'sua': 'sữa', 'den': 'đen', 'nong': 'nóng', 'da': 'đá', 'dao': 'đào',
+  };
+
+  /// Thêm lại dấu cho các từ menu bị OCR đọc mất dấu, giữ kiểu viết hoa của chữ gốc.
+  /// Chỉ sửa từ hoàn toàn không dấu; từ đã có dấu (OCR đọc đúng) giữ nguyên.
+  static String restoreMenuAccents(String name) {
+    // Ký hiệu cỡ ly bị dính chữ: "(tM)" → "(M)"
+    var text = name.replaceAllMapped(RegExp(r'\(\s*[a-z]?([SMLsml])\s*\)'), (m) => '(${m[1]!.toUpperCase()})');
+    final words = text.split(' ');
+    final out = <String>[];
+    var i = 0;
+    bool plain(String w) => RegExp(r'^[A-Za-z]+$').hasMatch(w);
+    String applyCase(String src, String dst) {
+      if (src.length > 1 && src == src.toUpperCase()) return dst.toUpperCase();
+      if (src[0] == src[0].toUpperCase()) return dst[0].toUpperCase() + dst.substring(1);
+      return dst;
+    }
+
+    while (i < words.length) {
+      // Thử cụm 2 từ trước, rồi 1 từ
+      if (i + 1 < words.length && plain(words[i]) && plain(words[i + 1])) {
+        final pair = _menuAccents['${words[i].toLowerCase()} ${words[i + 1].toLowerCase()}'];
+        if (pair != null) {
+          final parts = pair.split(' ');
+          out..add(applyCase(words[i], parts[0]))..add(applyCase(words[i + 1], parts[1]));
+          i += 2;
+          continue;
+        }
+      }
+      final w = words[i];
+      final single = plain(w) ? _menuAccents[w.toLowerCase()] : null;
+      out.add(single != null ? applyCase(w, single) : w);
+      i++;
+    }
+    return out.join(' ');
+  }
+
   static DateTime? _findDate(List<String> lines) {
-    for (final line in lines) {
+    // Ưu tiên ngày nằm trên dòng có chữ "Ngày" / "Date" (tránh nhầm số khác giống ngày)
+    final ordered = [
+      ...lines.where((l) => _hasAny(CategoryModel.normalizeKey(l), ['ngay', 'date'])),
+      ...lines.where((l) => !_hasAny(CategoryModel.normalizeKey(l), ['ngay', 'date'])),
+    ];
+    for (final line in ordered) {
       for (final m in _datePattern.allMatches(line)) {
         final day = int.parse(m.group(1) ?? m.group(3)!);
         final month = int.parse(m.group(2) ?? m.group(4)!);

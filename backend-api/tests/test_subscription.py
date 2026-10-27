@@ -1,4 +1,4 @@
-"""Chạy: python -m unittest discover -s tests (từ thư mục backend-api)."""
+"""Chạy (từ thư mục backend-api): pip install -r requirements-dev.txt rồi python -m pytest -q tests."""
 import os
 import unittest
 from unittest import mock
@@ -6,12 +6,16 @@ from unittest import mock
 os.environ.setdefault("PAYMENT_WEBHOOK_SECRET", "test-secret")
 os.environ.setdefault("ENABLE_MOCK_PAY", "false")
 
+import firebase_admin
 from fastapi.testclient import TestClient
+from firebase_admin import firestore
 from google.api_core.exceptions import AlreadyExists
 
-import main
-from middleware.auth import verify_firebase_token
-from services import subscription_service as svc
+# Test dùng Firestore giả, không cần khoá service account (CI không có): chặn kết nối Firebase thật lúc import
+with mock.patch.object(firebase_admin, "initialize_app"), mock.patch.object(firestore, "client"):
+    import main
+    from middleware.auth import verify_firebase_token
+    from services import subscription_service as svc
 
 
 class _FakeSnap:
