@@ -26,7 +26,7 @@ void main() {
   test('icon Tất cả cho bộ lọc và Kết hôn', () {
     expect(CategoryModel.getCategoryAssetPath('Tất cả'), 'assets/icon/cat_tat_ca.png');
     expect(CategoryModel.getCategoryAssetPath('total'), 'assets/icon/cat_tat_ca.png');
-    expect(CategoryModel.getCategoryAssetPath('Kết hôn'), 'assets/icon/cat_ket_hon.png');
+    expect(CategoryModel.getCategoryAssetPath('Kết hôn'), 'assets/icon/kethon_icon.jpg');
   });
 
   test('icon Cà phê và Trà sữa theo tên hoặc iconKey', () {
@@ -54,7 +54,7 @@ void main() {
 
   test('icon người dùng chọn được ưu tiên, category_rounded thì theo tên', () {
     expect(CategoryModel.getCategoryAssetPath('Cà phê', iconKey: 'fastfood_rounded'), 'assets/icon/cat_an_uong.png');
-    expect(CategoryModel.getCategoryAssetPath('Kết hôn', iconKey: 'category_rounded'), 'assets/icon/cat_ket_hon.png');
+    expect(CategoryModel.getCategoryAssetPath('Kết hôn', iconKey: 'category_rounded'), 'assets/icon/kethon_icon.jpg');
     expect(CategoryModel.getCategoryAssetPath('Không biết'), 'assets/icon/cat_khac.png');
   });
 

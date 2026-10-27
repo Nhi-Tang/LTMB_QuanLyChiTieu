@@ -216,7 +216,7 @@ class CategoryModel {
       case 'ket hon':
       case 'favorite_rounded':
       case 'kethon_icon':
-        return 'assets/icon/cat_ket_hon.png';
+        return 'assets/icon/kethon_icon.jpg';
       case 'bao hiem':
       case 'security_rounded':
       case 'baohiem_tk_icon':
