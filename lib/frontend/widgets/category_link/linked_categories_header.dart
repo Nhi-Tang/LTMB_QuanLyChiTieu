@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
-import '../../utils/app_language.dart';
 
 class LinkedCategoriesHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final VoidCallback onAddPressed;
 
   const LinkedCategoriesHeader({
     super.key,
     required this.title,
-    required this.onAddPressed,
   });
 
   @override
@@ -33,14 +30,6 @@ class LinkedCategoriesHeader extends StatelessWidget implements PreferredSizeWid
           color: AppColors.textMain,
         ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add_circle_rounded, color: AppColors.primaryGreen, size: 28),
-          onPressed: onAddPressed,
-          tooltip: context.t('Thêm danh mục mới'),
-        ),
-        const SizedBox(width: 8),
-      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
