@@ -650,6 +650,7 @@ class DatabaseHelper {
 
   static const List<Map<String, String>> defaultExpenseCategories = [
     {'name': 'Ăn uống', 'iconKey': 'fastfood_rounded'},
+    {'name': 'Cà phê', 'iconKey': 'local_cafe_rounded'},
     {'name': 'Trà sữa', 'iconKey': 'emoji_food_beverage_rounded'},
     {'name': 'Hóa đơn', 'iconKey': 'receipt_rounded'},
     {'name': 'Di chuyển', 'iconKey': 'directions_bus_rounded'},
@@ -737,6 +738,7 @@ class DatabaseHelper {
     final now = DateTime.now().toIso8601String();
     final expenseCats = [
       {'name': 'Ăn uống', 'iconKey': 'fastfood_rounded'},
+      {'name': 'Cà phê', 'iconKey': 'local_cafe_rounded'},
       {'name': 'Trà sữa', 'iconKey': 'emoji_food_beverage_rounded'},
       {'name': 'Hóa đơn', 'iconKey': 'receipt_rounded'},
       {'name': 'Di chuyển', 'iconKey': 'directions_bus_rounded'},
