@@ -6,6 +6,7 @@ import '../../core/utils/money_input_formatter.dart';
 import '../utils/app_translations.dart';
 import 'package:quanlychitieu/frontend/theme/app_colors.dart';
 import 'app_alert_dialog.dart';
+import 'mousey_avatar.dart';
 import '../utils/app_language.dart';
 
 class AddEditSavingsGoalDialog extends StatefulWidget {
@@ -43,7 +44,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
     'assets/icon/nha_icon.jpg',
     'assets/icon/sach_icon.jpg',
     'assets/icon/concai_icon.jpg',
-    'assets/icon/dienthoai_icon.jpg',
+    'assets/icon/cat_phone.png',
   ];
 
   @override
@@ -66,7 +67,7 @@ class _AddEditSavingsGoalDialogState extends State<AddEditSavingsGoalDialog> {
       _selectedDeadline = DateTime.tryParse(widget.goalToEdit!.deadline!);
     }
     if (widget.goalToEdit != null) {
-      _selectedIcon = widget.goalToEdit!.icon;
+      _selectedIcon = normalizeGoalIcon(widget.goalToEdit!.icon);
       _selectedColor = widget.goalToEdit!.color;
     }
   }
