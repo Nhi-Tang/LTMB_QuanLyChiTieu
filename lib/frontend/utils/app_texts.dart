@@ -417,7 +417,7 @@ const Map<String, List<String>> appTexts = {
   '{n} tháng gần nhất': ['Last {n} months', '直近{n}か月', '最近{n}个月', '최근 {n}개월'],
   // Hỏi quyền thông báo cho tài khoản PRO
   'Tự động ghi giao dịch ngân hàng': ['Auto-log bank transactions', '銀行取引を自動記録', '自动记录银行交易', '은행 거래 자동 기록'],
-  'Mousey PRO có thể đọc thông báo biến động số dư từ app ngân hàng để tự ghi giao dịch. Hãy bật quyền "Truy cập thông báo" cho Mousey ở màn cài đặt sắp mở nhé.': ['Mousey PRO can read balance alerts from your banking apps to log transactions automatically. Please turn on "Notification access" for Mousey on the settings screen that opens next.', 'Mousey PROは銀行アプリの残高通知を読み取り、取引を自動で記録できます。次に開く設定画面でMouseyの「通知へのアクセス」をオンにしてください。', 'Mousey PRO 可以读取银行应用的余额变动通知，自动记录交易。请在接下来打开的设置页面中为 Mousey 开启“通知使用权”。', 'Mousey PRO는 은행 앱의 잔액 변동 알림을 읽어 거래를 자동으로 기록할 수 있어요. 다음에 열리는 설정 화면에서 Mousey의 "알림 접근"을 켜 주세요.'],
+  'Mousey có thể đọc thông báo biến động số dư từ app ngân hàng để tự ghi giao dịch. Hãy bật quyền "Truy cập thông báo" cho Mousey ở màn cài đặt sắp mở nhé.': ['Mousey can read balance alerts from your banking apps to log transactions automatically. Please turn on "Notification access" for Mousey on the settings screen that opens next.', 'Mouseyは銀行アプリの残高通知を読み取り、取引を自動で記録できます。次に開く設定画面でMouseyの「通知へのアクセス」をオンにしてください。', 'Mousey 可以读取银行应用的余额变动通知，自动记录交易。请在接下来打开的设置页面中为 Mousey 开启“通知使用权”。', 'Mousey는 은행 앱의 잔액 변동 알림을 읽어 거래를 자동으로 기록할 수 있어요. 다음에 열리는 설정 화면에서 Mousey의 "알림 접근"을 켜 주세요.'],
   'Để sau': ['Later', '後で', '稍后', '나중에'],
   'Mở cài đặt': ['Open settings', '設定を開く', '打开设置', '설정 열기'],
   // Lượt chụp hoá đơn của tài khoản miễn phí
