@@ -49,7 +49,7 @@ class NotificationPermissionPrompt {
           icon: Icon(Icons.notifications_active_outlined, color: AppColors.primary, size: 32),
           title: Text(ctx.t('Tự động ghi giao dịch ngân hàng')),
           content: Text(
-            ctx.t('Mousey PRO có thể đọc thông báo biến động số dư từ app ngân hàng để tự ghi giao dịch. Hãy bật quyền "Truy cập thông báo" cho Mousey ở màn cài đặt sắp mở nhé.'),
+            ctx.t('Mousey có thể đọc thông báo biến động số dư từ app ngân hàng để tự ghi giao dịch. Hãy bật quyền "Truy cập thông báo" cho Mousey ở màn cài đặt sắp mở nhé.'),
           ),
           actions: [
             TextButton(
