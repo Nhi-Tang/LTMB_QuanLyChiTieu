@@ -38,6 +38,8 @@ class ReceiptParser {
     ['tong thanh toan', 'can thanh toan', 'khach can tra', 'khach phai tra', 'phai thanh toan', 'grand total'],
     ['tong cong', 'tong tien', 'thanh tien', 'total', 'amount due'],
     ['thanh toan', 'tong'],
+    // Tạm tính là số trước giảm giá, chỉ dùng khi không có dòng tổng nào
+    ['tam tinh', 'subtotal'],
   ];
 
   /// Tiền khách đưa / tiền thừa / giảm giá: số đứng sau các nhãn này không phải số cần ghi.
@@ -194,9 +196,14 @@ class ReceiptParser {
     return best;
   }
 
+  static bool _isTotal(String key) => _totalKeywords.any((level) => _hasAny(key, level));
+
   static int _itemHeaderIndex(List<String> keys) {
     for (var i = 0; i < keys.length; i++) {
       if (_hasAny(keys[i], _itemHeaderKeywords)) return i;
+      // Tiêu đề bảng món nằm trước dòng tổng; "sản phẩm" ở chân hoá đơn là chữ chính sách đổi trả
+      if (_hasAny(keys[i], _titleKeywords)) continue;
+      if (_isTotal(keys[i]) || _firstIgnore(keys[i]) >= 0) break;
     }
     return -1;
   }
@@ -216,11 +223,16 @@ class ReceiptParser {
   }
 
   /// Tên món: phần chữ của dòng hàng, bỏ STT ở đầu và SL / đơn giá / thành tiền phía sau.
-  static String? _itemName(String line) {
+  static List<String> _itemTokens(String line) {
     final tokens = line.split(RegExp(r'\s+|\|')).where((t) => t.isNotEmpty).toList();
     while (tokens.isNotEmpty && RegExp(r'^[\d.,:)\-]+$').hasMatch(tokens.first)) {
       tokens.removeAt(0);
     }
+    return tokens;
+  }
+
+  static String? _itemName(String line) {
+    final tokens = _itemTokens(line);
     final name = <String>[];
     for (final t in tokens) {
       if (RegExp(r'^[x×*]?\d[\d.,]*[dđ]?$', caseSensitive: false).hasMatch(t)) break;
@@ -231,15 +243,14 @@ class ReceiptParser {
   }
 
   static List<String> _findItems(List<String> lines, List<String> keys, int header) {
-    bool isTotal(String key) => _totalKeywords.any((level) => _hasAny(key, level));
     final items = <String>[];
     for (var i = header + 1; i < lines.length; i++) {
       final key = keys[i];
       if (_hasAny(key, _metaKeywords)) continue;
       // Hết bảng món khi gặp dòng tổng / tiền khách đưa
-      if (isTotal(key) || _firstIgnore(key) >= 0) break;
-      // Không có tiêu đề bảng: chỉ nhận dòng có giá tiền
-      if (header < 0 && moneyValues(key.replaceAll(_datePattern, ' ')).isEmpty) continue;
+      if (_isTotal(key) || _firstIgnore(key) >= 0) break;
+      // Không có tiêu đề bảng: chỉ nhận dòng có giá tiền sau tên (số ở đầu dòng là STT / mã cửa hàng)
+      if (header < 0 && moneyValues(_itemTokens(key.replaceAll(_datePattern, ' ')).join(' ')).isEmpty) continue;
       final name = _itemName(lines[i]);
       if (name != null) items.add(restoreMenuAccents(name));
     }
