@@ -19,6 +19,7 @@ import '../widgets/notification/notification_settings_screen.dart';
 import '../widgets/notification/pending_inbox.dart';
 import '../widgets/export_options_bottom_sheet.dart';
 import 'pro_upgrade_screen.dart';
+import '../../core/constants/pricing.dart';
 import '../utils/app_language.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -925,8 +926,9 @@ class _ProfileTabState extends State<ProfileTab> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Container(
+                                if (PricingConstants.proEnabled) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: isProUser ? AppColors.highlight : Colors.transparent,
@@ -942,7 +944,8 @@ class _ProfileTabState extends State<ProfileTab> {
                                       letterSpacing: 0.5,
                                     ),
                                   ),
-                                ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -956,6 +959,7 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
 
           // Tờ giấy nhớ: mời nâng cấp PRO, hoặc số ngày PRO còn lại
+          if (PricingConstants.proEnabled)
           ListenableBuilder(
             listenable: ProService.instance,
             builder: (context, _) {
@@ -1081,8 +1085,9 @@ class _ProfileTabState extends State<ProfileTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Container(
+                    if (PricingConstants.proEnabled) ...[
+                      const SizedBox(width: 6),
+                      Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.note,
@@ -1090,7 +1095,8 @@ class _ProfileTabState extends State<ProfileTab> {
                         border: Border.all(color: AppColors.noteBorder),
                       ),
                       child: Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.ink)),
-                    ),
+                      ),
+                    ],
                   ],
                 ),
                 subtitle: Text('Vietcombank, MB, Techcombank, MoMo,...', style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
@@ -1149,8 +1155,9 @@ class _ProfileTabState extends State<ProfileTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Container(
+                    if (PricingConstants.proEnabled) ...[
+                      const SizedBox(width: 6),
+                      Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.note,
@@ -1158,7 +1165,8 @@ class _ProfileTabState extends State<ProfileTab> {
                         border: Border.all(color: AppColors.noteBorder),
                       ),
                       child: Text('PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.ink)),
-                    ),
+                      ),
+                    ],
                   ],
                 ),
                 subtitle: Text('.csv & .xlsx', style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
