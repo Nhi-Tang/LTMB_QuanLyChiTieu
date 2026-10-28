@@ -1023,32 +1023,6 @@ class DatabaseHelper {
     return res;
   }
 
-  // --- USER AUTHENTICATION & REGISTRATION ---
-
-  Future<bool> isEmailRegistered(String email) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'email = ?',
-      whereArgs: [email.trim().toLowerCase()],
-    );
-    return result.isNotEmpty;
-  }
-
-  Future<int> updatePasswordByEmail(String email, String newPassword) async {
-    final db = await instance.database;
-    String passToSave = newPassword;
-    if (passToSave.isNotEmpty && !passToSave.startsWith('\$2')) {
-      passToSave = BCrypt.hashpw(passToSave, BCrypt.gensalt());
-    }
-    return await db.update(
-      'users',
-      {'password': passToSave},
-      where: 'email = ?',
-      whereArgs: [email.trim().toLowerCase()],
-    );
-  }
-
   // --- SOCIAL LOGIN & USER DAO METHODS ---
 
   Future<int> insertOrUpdateUser(UserModel user) async {
