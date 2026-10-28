@@ -106,6 +106,42 @@ TIen thưa  40 000 d
     expect(r.date, DateTime(2026, 10, 3));
   });
 
+  // Chữ trên giaodien/mau_test_2.jpg (hoá đơn Ministop, không có hàng tiêu đề bảng món)
+  test('hoá đơn mẫu 2: bỏ mã cửa hàng / Tạm tính, không lấy "sản phẩm" ở chân hoá đơn làm tiêu đề', () {
+    final r = ReceiptParser.parse('''
+CÔNG TY TNHH MINISTOP VIỆT NAM
+96 Cao Thắng, Phường Bàn Cờ, TP.HCM
+MST: 0313096162
+8104 -  Dai Hoc HUTECH
+15A Phan khu E1, KCN Cao, XLHN, P. Tang Nhon Phu
+, TP. HCM, VN.
+Hoa don Ban hang
+28/10/2026  12:11:30
+SCU Probi Viet quat  1  12,000  12,000
+Tam tinh:  12,000
+Tong cong (gom thue):  12,000
+Tien mat  20,000
+(Tien mat)Tien thua:  -8,000
+Ma don:20261028.3.84768  Thu ngan:104559
+Khong ap dung tra hang doi voi nhung san pham
+tham gia chuong trinh khuyen mai, ruou, bia,
+thuoc la va nhung san pham thuc an nhanh da lam
+nong (tru cac san pham bi loi tu nha san xuat).
+Phieu chi co hieu luc xuat HD trong ngay mua
+hang. Cap nhat HDDT tai website sau 24h xuat
+Thong tin hoa don do cua ban nhu sau:
+Website tra cuu: https://msv-ei.fast.com.vn
+Ma tra cuu: 8104328847682610
+Ma CQT: M1-26-TGG5R-10437684768
+Ministop xin cam on
+''');
+    expect(r.amount, 12000);
+    expect(r.date, DateTime(2026, 10, 28));
+    expect(r.items, ['SCU Probi Viet quat']);
+    expect(r.note, 'SCU Probi Viet quat');
+    expect(r.category, 'Mua sắm');
+  });
+
   test('ảnh nghiêng làm dòng ghép lệch: vẫn lấy số sau nhãn tổng, bỏ tiền mặt / tiền nhận', () {
     const text = '''
 HÓA ĐƠN THANH TOÁN
