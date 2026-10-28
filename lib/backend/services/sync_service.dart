@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import '../database/db_helper.dart';
+import 'transaction_service.dart';
 
 class SyncService {
   static final SyncService instance = SyncService._init();
@@ -63,10 +64,14 @@ class SyncService {
             isDefault: true,
           );
         }
+        // Đăng nhập lại sau khi đăng xuất: dữ liệu local đã bị xoá và vừa được kéo về,
+        // chọn lại sổ đang dùng rồi báo màn hình tải lại (không thì phải thêm giao dịch mới thấy)
+        await TransactionService.instance.initActiveLedger(user.uid);
       } else {
         // CÁC LẦN ĐỒNG BỘ TIẾP THEO: PUSH TRƯỚC, PULL SAU
         await pushPending(user.uid);
         await pullChanges(user.uid);
+        TransactionService.instance.notifyUpdated();
       }
     } catch (e) {
       debugPrint('☁️ [SyncService] Sync Error: $e');
