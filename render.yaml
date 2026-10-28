@@ -40,3 +40,10 @@ services:
         sync: false
       - key: PAYMENT_CODE_PREFIX
         value: MSY
+      # Quên mật khẩu: gửi mã OTP qua email (Brevo)
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM_EMAIL
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Mousey

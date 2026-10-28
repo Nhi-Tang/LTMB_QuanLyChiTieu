@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from datetime import datetime, timezone
 from services.firebase_service import db
+from services import password_reset_service
 from middleware.auth import verify_firebase_token
 from pydantic import BaseModel
 
@@ -93,3 +94,32 @@ async def get_current_user_profile(user_data: dict = Depends(verify_firebase_tok
         plan=doc_data.get("plan", "free"),
         proExpiredAt=doc_data.get("proExpiredAt"),
     )
+
+
+# ---- Quên mật khẩu (không cần đăng nhập): gửi mã -> xác nhận mã -> đặt mật khẩu mới ----
+
+class ResetCodeRequest(BaseModel):
+    email: str
+    lang: str = "vi"
+
+class VerifyResetCodeRequest(BaseModel):
+    email: str
+    code: str
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    resetToken: str
+    newPassword: str
+
+# def (không async): các hàm gọi Firebase/Brevo chặn luồng, FastAPI chạy chúng trong threadpool
+@router.post("/password-reset/request")
+def request_password_reset_code(body: ResetCodeRequest):
+    return password_reset_service.request_code(body.email, body.lang)
+
+@router.post("/password-reset/verify")
+def verify_password_reset_code(body: VerifyResetCodeRequest):
+    return password_reset_service.verify_code(body.email, body.code)
+
+@router.post("/password-reset/confirm")
+def confirm_password_reset(body: ResetPasswordRequest):
+    return password_reset_service.reset_password(body.email, body.resetToken, body.newPassword)

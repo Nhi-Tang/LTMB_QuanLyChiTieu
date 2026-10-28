@@ -65,8 +65,29 @@ Lưu ý gói free:
 | GET | `/subscription/check-order/{orderId}` | `pending` / `paid` / `expired` / `underpaid` |
 | POST | `/subscription/mock-pay` | Chỉ khi `ENABLE_MOCK_PAY=true` (dev) |
 | POST | `/subscription/webhook/bank` | Cổng thanh toán báo có tiền vào |
+| POST | `/auth/password-reset/request` | `{email, lang}` → gửi mã 6 số qua email (60s mới được gửi lại) |
+| POST | `/auth/password-reset/verify` | `{email, code}` → `resetToken` (sai 5 lần phải xin mã mới) |
+| POST | `/auth/password-reset/confirm` | `{email, resetToken, newPassword}` → đổi mật khẩu Firebase, đăng xuất mọi thiết bị |
 
-Mọi endpoint (trừ `/subscription/plans` và webhook) cần header `Authorization: Bearer <Firebase ID token>`.
+Mọi endpoint (trừ `/subscription/plans`, webhook và `/auth/password-reset/*`) cần header `Authorization: Bearer <Firebase ID token>`.
+
+## Quên mật khẩu: gửi mã qua email (Brevo)
+
+Render gói free chặn cổng SMTP, nên backend gửi email qua HTTP API của Brevo (free 300 email/ngày).
+Chưa cấu hình thì app báo "Chức năng gửi email tạm thời chưa sẵn sàng".
+
+1. Đăng ký https://www.brevo.com.
+2. **Senders, Domains & Dedicated IPs → Senders → Add a sender**: nhập tên `Mousey` và địa chỉ gửi
+   (vd. Gmail riêng của dự án), bấm link xác minh Brevo gửi tới địa chỉ đó.
+3. **SMTP & API → API Keys → Generate a new API key**, copy key (chỉ hiện một lần).
+4. Trên Render (service `mousey-api` → Environment) điền:
+   - `BREVO_API_KEY`: key vừa tạo
+   - `MAIL_FROM_EMAIL`: địa chỉ gửi đã xác minh ở bước 2
+   - `MAIL_FROM_NAME`: `Mousey` (đã có sẵn trong `render.yaml`)
+5. Thử trong app: Đăng nhập → Quên mật khẩu? → nhập email → nhận mã.
+
+Gửi từ Gmail qua Brevo đôi khi vẫn vào Spam. Muốn chắc chắn vào hộp thư chính thì mua tên miền,
+xác thực nó trong Brevo (DKIM/DMARC) và gửi từ địa chỉ như `no-reply@<tên-miền>`.
 
 ## Kết nối thanh toán thật
 
