@@ -36,6 +36,10 @@ class ApiClient {
   Future<Map<String, dynamic>> post(String path, [Map<String, dynamic>? body]) =>
       _send('POST', path, body: body);
 
+  /// POST không kèm token, cho endpoint dùng khi chưa đăng nhập (vd. quên mật khẩu)
+  Future<Map<String, dynamic>> postPublic(String path, [Map<String, dynamic>? body]) async =>
+      _decode(await _request('POST', path, body: body, forceRefreshToken: false, authenticated: false));
+
   Future<Map<String, dynamic>> _send(String method, String path, {Map<String, dynamic>? body}) async {
     var response = await _request(method, path, body: body, forceRefreshToken: false);
     // Token có thể vừa hết hạn: lấy token mới và thử lại 1 lần
@@ -46,15 +50,18 @@ class ApiClient {
   }
 
   Future<http.Response> _request(String method, String path,
-      {Map<String, dynamic>? body, required bool forceRefreshToken}) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      throw ApiException(AppLanguage.instance.t('Bạn chưa đăng nhập.'), statusCode: 401);
+      {Map<String, dynamic>? body, required bool forceRefreshToken, bool authenticated = true}) async {
+    String? token;
+    if (authenticated) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw ApiException(AppLanguage.instance.t('Bạn chưa đăng nhập.'), statusCode: 401);
+      }
+      token = await user.getIdToken(forceRefreshToken);
     }
-    final token = await user.getIdToken(forceRefreshToken);
     final uri = Uri.parse('${ApiConfig.baseUrl}$path');
     final headers = {
-      'Authorization': 'Bearer $token',
+      if (token != null) 'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };

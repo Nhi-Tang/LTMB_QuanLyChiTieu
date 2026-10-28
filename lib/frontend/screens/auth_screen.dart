@@ -4,6 +4,7 @@ import '../widgets/app_alert_dialog.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
 import '../../core/widgets/asset_icon.dart';
+import 'forgot_password_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -13,8 +14,6 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  static Color get primaryBeige => AppColors.teal;
-
   bool _isLogin = true;
 
   final _formKey = GlobalKey<FormState>();
@@ -70,121 +69,19 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  /// Quên mật khẩu: Firebase gửi link đặt lại mật khẩu vào email đã đăng ký.
-  void _showForgotPasswordDialog() {
-    final emailController = TextEditingController(
-      text: _emailController.text.contains('@') ? _emailController.text.trim() : '',
+  Future<void> _openForgotPassword() async {
+    final typed = _emailController.text.trim();
+    final email = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => ForgotPasswordScreen(initialEmail: typed.contains('@') ? typed : '')),
     );
-    final formKey = GlobalKey<FormState>();
-    bool isLoading = false;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (dialogCtx, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                const AssetIcon('ui_khoa', size: 32),
-                const SizedBox(width: 8),
-                Text(
-                  context.t('Khôi phục mật khẩu'),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            content: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.t('Nhập email đã đăng ký, Mousey sẽ gửi link đặt lại mật khẩu vào email của bạn.'),
-                    style: TextStyle(fontSize: 13, color: AppColors.grey500),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: context.t('Email'),
-                      prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập email') : null,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx),
-                child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryBeige,
-                  foregroundColor: AppColors.onTeal,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: isLoading
-                    ? null
-                    : () async {
-                        if (!formKey.currentState!.validate()) return;
-                        final email = emailController.text.trim().toLowerCase();
-
-                        // Tài khoản đăng ký bằng SĐT dùng email nội bộ @mousey.local, không nhận được thư
-                        if (!email.contains('@') || email.endsWith('@mousey.local')) {
-                          showAppAlertDialog(
-                            context: dialogCtx,
-                            title: AppLanguage.instance.t('Chưa hỗ trợ'),
-                            message: AppLanguage.instance.t('Tài khoản đăng ký bằng số điện thoại chưa thể đặt lại mật khẩu qua email. Vui lòng liên hệ hỗ trợ Mousey.'),
-                            isSuccess: false,
-                          );
-                          return;
-                        }
-
-                        setDialogState(() => isLoading = true);
-                        try {
-                          await _authService.sendPasswordResetEmail(email);
-                          if (!dialogCtx.mounted) return;
-                          Navigator.pop(dialogCtx);
-                          if (!mounted) return;
-                          showAppAlertDialog(
-                            context: context,
-                            title: AppLanguage.instance.t('Đã gửi email'),
-                            message: AppLanguage.instance.t('Nếu {email} đã đăng ký tài khoản Mousey, link đặt lại mật khẩu đã được gửi tới email này. Hãy kiểm tra cả thư mục Spam.', {'email': email}),
-                            isSuccess: true,
-                          );
-                        } catch (e) {
-                          setDialogState(() => isLoading = false);
-                          if (!dialogCtx.mounted) return;
-                          showAppAlertDialog(
-                            context: dialogCtx,
-                            title: AppLanguage.instance.t('Lỗi'),
-                            message: e.toString().replaceAll('Exception: ', ''),
-                            isSuccess: false,
-                          );
-                        }
-                      },
-                child: isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onTeal),
-                      )
-                    : Text(
-                        context.t('GỬI LINK'),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onTeal),
-                      ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
+    // Đặt lại xong: điền sẵn email, xoá mật khẩu cũ đã gõ
+    if (email != null && mounted) {
+      setState(() {
+        _emailController.text = email;
+        _passwordController.clear();
+      });
+    }
   }
 
   Future<void> _submitForm() async {
@@ -517,7 +414,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: _showForgotPasswordDialog,
+                              onPressed: _openForgotPassword,
                               child: Text(
                                 context.t('Quên mật khẩu?'),
                                 style: TextStyle(
