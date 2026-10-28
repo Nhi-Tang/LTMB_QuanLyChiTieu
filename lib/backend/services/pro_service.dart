@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/constants/pricing.dart';
 import 'api_client.dart';
 import 'auth_service.dart';
 import 'in_app_notification_service.dart';
@@ -21,7 +22,8 @@ class ProService extends ChangeNotifier {
   bool _isLoading = false;
   StreamSubscription? _userDocSub;
 
-  bool get isPro => _isPro;
+  /// Khi tắt gói PRO (PricingConstants.proEnabled = false), mọi tài khoản đều được mở khoá toàn bộ tính năng
+  bool get isPro => !PricingConstants.proEnabled || _isPro;
   String? get proExpiredAt => _proExpiredAt;
   bool get trialUsed => _trialUsed;
   int get remainingDays => _remainingDays;
@@ -187,6 +189,7 @@ class ProService extends ChangeNotifier {
   }
 
   void _notifyExpiry(String uid) {
+    if (!PricingConstants.proEnabled) return;
     if (_isPro && _remainingDays <= 3) {
       InAppNotificationService.instance.add(
         type: 'pro',
