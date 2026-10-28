@@ -70,14 +70,13 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Quên mật khẩu: Firebase gửi link đặt lại mật khẩu vào email đã đăng ký.
   void _showForgotPasswordDialog() {
-    final emailController = TextEditingController();
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
+    final emailController = TextEditingController(
+      text: _emailController.text.contains('@') ? _emailController.text.trim() : '',
+    );
     final formKey = GlobalKey<FormState>();
-    int step = 1; // 1: Enter email, 2: Enter new password
     bool isLoading = false;
-    String verifiedEmail = '';
 
     showDialog(
       context: context,
@@ -90,7 +89,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 const AssetIcon('ui_khoa', size: 32),
                 const SizedBox(width: 8),
                 Text(
-                  step == 1 ? context.t('Khôi phục mật khẩu') : context.t('Đặt lại mật khẩu mới'),
+                  context.t('Khôi phục mật khẩu'),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -101,58 +100,21 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (step == 1) ...[
-                    Text(
-                      context.t('Nhập email hoặc số điện thoại đã đăng ký tài khoản của bạn:'),
-                      style: TextStyle(fontSize: 13, color: AppColors.grey500),
+                  Text(
+                    context.t('Nhập email đã đăng ký, Mousey sẽ gửi link đặt lại mật khẩu vào email của bạn.'),
+                    style: TextStyle(fontSize: 13, color: AppColors.grey500),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: context.t('Email'),
+                      prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: context.t('Email / Số điện thoại'),
-                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_thu', size: 26)),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email hoặc SĐT') : null,
-                    ),
-                  ] else ...[
-                    Text(
-                      context.t('Tài khoản: {verifiedEmail}', {'verifiedEmail': verifiedEmail}),
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.black87),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: newPasswordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: context.t('Mật khẩu mới'),
-                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_khoa', size: 26)),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return context.t('Vui lòng nhập mật khẩu mới');
-                        if (v.length < 6) return context.t('Mật khẩu phải có ít nhất 6 ký tự');
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: confirmPasswordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: context.t('Xác nhận mật khẩu mới'),
-                        prefixIcon: const Padding(padding: EdgeInsets.all(10), child: AssetIcon('ui_khoa', size: 26)),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return context.t('Vui lòng xác nhận mật khẩu');
-                        if (v != newPasswordController.text) return context.t('Mật khẩu xác nhận không khớp');
-                        return null;
-                      },
-                    ),
-                  ],
+                    validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập email') : null,
+                  ),
                 ],
               ),
             ),
@@ -170,63 +132,52 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: isLoading
                     ? null
                     : () async {
-                        if (formKey.currentState!.validate()) {
-                          setDialogState(() => isLoading = true);
-                          try {
-                            if (step == 1) {
-                              final email = emailController.text.trim().toLowerCase();
-                              final exists = await _authService.isEmailRegistered(email);
-                              if (!exists) {
-                                setDialogState(() => isLoading = false);
-                                if (!dialogCtx.mounted) return;
-                                showAppAlertDialog(
-                                  context: dialogCtx,
-                                  title: AppLanguage.instance.t('Không tìm thấy'),
-                                  message: AppLanguage.instance.t('Email hoặc số điện thoại này chưa được đăng ký trong hệ thống!'),
-                                  isSuccess: false,
-                                );
-                                return;
-                              }
-                              verifiedEmail = email;
-                              setDialogState(() {
-                                step = 2;
-                                isLoading = false;
-                              });
-                            } else {
-                              final newPass = newPasswordController.text;
-                              await _authService.updatePasswordByEmail(verifiedEmail, newPass);
-                              setDialogState(() => isLoading = false);
-                              if (!dialogCtx.mounted) return;
-                              Navigator.pop(dialogCtx);
-                              if (!mounted) return;
-                              showAppAlertDialog(
-                                context: context,
-                                title: AppLanguage.instance.t('Thành công'),
-                                message: AppLanguage.instance.t('Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.'),
-                                isSuccess: true,
-                              );
-                            }
-                          } catch (e) {
-                            setDialogState(() => isLoading = false);
-                            if (!dialogCtx.mounted) return;
-                            showAppAlertDialog(
-                              context: dialogCtx,
-                              title: AppLanguage.instance.t('Lỗi'),
-                              message: e.toString(),
-                              isSuccess: false,
-                            );
-                          }
+                        if (!formKey.currentState!.validate()) return;
+                        final email = emailController.text.trim().toLowerCase();
+
+                        // Tài khoản đăng ký bằng SĐT dùng email nội bộ @mousey.local, không nhận được thư
+                        if (!email.contains('@') || email.endsWith('@mousey.local')) {
+                          showAppAlertDialog(
+                            context: dialogCtx,
+                            title: AppLanguage.instance.t('Chưa hỗ trợ'),
+                            message: AppLanguage.instance.t('Tài khoản đăng ký bằng số điện thoại chưa thể đặt lại mật khẩu qua email. Vui lòng liên hệ hỗ trợ Mousey.'),
+                            isSuccess: false,
+                          );
+                          return;
+                        }
+
+                        setDialogState(() => isLoading = true);
+                        try {
+                          await _authService.sendPasswordResetEmail(email);
+                          if (!dialogCtx.mounted) return;
+                          Navigator.pop(dialogCtx);
+                          if (!mounted) return;
+                          showAppAlertDialog(
+                            context: context,
+                            title: AppLanguage.instance.t('Đã gửi email'),
+                            message: AppLanguage.instance.t('Nếu {email} đã đăng ký tài khoản Mousey, link đặt lại mật khẩu đã được gửi tới email này. Hãy kiểm tra cả thư mục Spam.', {'email': email}),
+                            isSuccess: true,
+                          );
+                        } catch (e) {
+                          setDialogState(() => isLoading = false);
+                          if (!dialogCtx.mounted) return;
+                          showAppAlertDialog(
+                            context: dialogCtx,
+                            title: AppLanguage.instance.t('Lỗi'),
+                            message: e.toString().replaceAll('Exception: ', ''),
+                            isSuccess: false,
+                          );
                         }
                       },
                 child: isLoading
                     ? SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.tealDark),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onTeal),
                       )
                     : Text(
-                        step == 1 ? context.t('TIẾP TỤC') : context.t('CẬP NHẬT MẬT KHẨU'),
-                        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.tealDark),
+                        context.t('GỬI LINK'),
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onTeal),
                       ),
               ),
             ],

@@ -295,11 +295,31 @@ class AuthService {
     return await signInWithEmail(emailOrPhone, password);
   }
 
-  Future<bool> isEmailRegistered(String email) async {
-    return await _dbHelper.isEmailRegistered(email);
-  }
-
-  Future<int> updatePasswordByEmail(String email, String newPassword) async {
-    return await _dbHelper.updatePasswordByEmail(email, newPassword);
+  /// Gửi email chứa link đặt lại mật khẩu (Firebase Auth). Email chưa đăng ký cũng coi như
+  /// đã gửi để không lộ email nào có tài khoản. Tài khoản đăng ký bằng SĐT (@mousey.local)
+  /// không có hộp thư thật nên màn hình phải chặn trước khi gọi hàm này.
+  Future<void> sendPasswordResetEmail(String email) async {
+    const languageCodes = {
+      'Tiếng Việt': 'vi',
+      'English (US)': 'en',
+      '日本語 (Japanese)': 'ja',
+      '中文 (Chinese)': 'zh',
+      '한국어 (Korean)': 'ko',
+    };
+    try {
+      await _firebaseAuth.setLanguageCode(languageCodes[AppLanguage.instance.value] ?? 'vi');
+      await _firebaseAuth.sendPasswordResetEmail(email: email.trim().toLowerCase());
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          return;
+        case 'invalid-email':
+          throw Exception(AppLanguage.instance.t('Email không hợp lệ.'));
+        case 'too-many-requests':
+          throw Exception(AppLanguage.instance.t('Bạn đã yêu cầu quá nhiều lần. Vui lòng thử lại sau ít phút.'));
+        default:
+          throw Exception(_mapFirebaseErrorToVietnamese(e.code));
+      }
+    }
   }
 }
