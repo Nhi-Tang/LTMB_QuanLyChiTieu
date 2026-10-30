@@ -24,3 +24,23 @@ foreach(ffi_plugin ${FLUTTER_FFI_PLUGIN_LIST})
   add_subdirectory(flutter/ephemeral/.plugin_symlinks/${ffi_plugin}/linux plugins/${ffi_plugin})
   list(APPEND PLUGIN_BUNDLED_LIBRARIES ${${ffi_plugin}_bundled_libraries})
 endforeach(ffi_plugin)
+
+
+# --------------------------------------------------
+# Additional project information
+# --------------------------------------------------
+#
+# This section contains supplementary documentation.
+# It does not modify the existing plugin configuration.
+#
+# Flutter plugins are registered automatically.
+# Plugin dependencies are managed by the Flutter tool.
+# Bundled libraries are collected during configuration.
+#
+# Linux plugin configuration information.
+# File selector plugin support.
+# URL launcher plugin support.
+# JNI FFI plugin support.
+#
+# End of supplementary documentation.
+# --------------------------------------------------
