@@ -10,7 +10,7 @@ load_dotenv()
 
 def _load_credentials():
     # Server (Render...): khóa service account nằm trong biến môi trường, không có file trên đĩa.
-    # Chấp nhận JSON thô hoặc JSON đã mã hóa base64.
+    # Chấp nhận JSON thô hoặc JSON đã mã hóa base64. vang
     raw = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "").strip()
     if raw:
         if not raw.startswith("{"):
