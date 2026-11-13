@@ -49,3 +49,7 @@ app.*.map.json
 
 # Ảnh mẫu giao diện (chỉ để tham khảo, không đưa lên repo)
 /giaodien/
+
+  key.properties
+  *.jks
+  *.keystore

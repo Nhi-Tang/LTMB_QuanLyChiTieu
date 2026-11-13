@@ -13,8 +13,6 @@ class SessionResponse(BaseModel):
     displayName: str | None = None
     photoUrl: str | None = None
     provider: str
-    plan: str
-    proExpiredAt: str | None = None
 
 @router.post("/session", response_model=SessionResponse)
 async def create_or_update_session(request: Request, user_data: dict = Depends(verify_firebase_token)):
@@ -39,8 +37,6 @@ async def create_or_update_session(request: Request, user_data: dict = Depends(v
             "displayName": display_name,
             "photoUrl": photo_url,
             "provider": provider,
-            "plan": "free",
-            "proExpiredAt": None,
             "createdAt": now,
             "lastLoginAt": now,
         }
@@ -51,9 +47,7 @@ async def create_or_update_session(request: Request, user_data: dict = Depends(v
         update_data = {
             "lastLoginAt": now,
         }
-        # Doc do client tạo trước đó có thể thiếu các trường do server quản lý
-        if "plan" not in existing:
-            update_data["plan"] = "free"
+        # Doc do client tạo trước đó có thể thiếu createdAt
         if "createdAt" not in existing:
             update_data["createdAt"] = now
         if display_name:
@@ -71,8 +65,6 @@ async def create_or_update_session(request: Request, user_data: dict = Depends(v
         displayName=doc_data.get("displayName"),
         photoUrl=doc_data.get("photoUrl"),
         provider=doc_data.get("provider", "password"),
-        plan=doc_data.get("plan", "free"),
-        proExpiredAt=doc_data.get("proExpiredAt"),
     )
 
 @router.get("/me", response_model=SessionResponse)
@@ -91,8 +83,6 @@ async def get_current_user_profile(user_data: dict = Depends(verify_firebase_tok
         displayName=doc_data.get("displayName"),
         photoUrl=doc_data.get("photoUrl"),
         provider=doc_data.get("provider", "password"),
-        plan=doc_data.get("plan", "free"),
-        proExpiredAt=doc_data.get("proExpiredAt"),
     )
 
 

@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../backend/services/pro_service.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_language.dart';
 
 /// Lần đầu dùng app: xin quyền gửi thông báo (hộp hỏi của hệ thống, như quyền camera) cho mọi tài khoản,
 /// để nhắc ghi chi tiêu hằng ngày và cảnh báo ngân sách hiện được trên Android 13+.
-/// Tài khoản PRO được mời thêm quyền đọc thông báo ngân hàng (Android chỉ cho bật trong Cài đặt).
+/// Sau đó mời bật quyền đọc thông báo ngân hàng (Android chỉ cho bật trong Cài đặt).
 /// Mỗi tài khoản hỏi mỗi loại một lần.
 class NotificationPermissionPrompt {
   NotificationPermissionPrompt._();
@@ -21,11 +20,11 @@ class NotificationPermissionPrompt {
     if (_running) return;
     final prefs = await SharedPreferences.getInstance();
     final postKey = 'notification_post_asked_$uid';
-    // Khoá cũ, trước đây chỉ PRO được hỏi và hỏi cả hai quyền cùng lúc
+    // Khoá cũ, trước đây hỏi cả hai quyền cùng lúc
     final listenerKey = 'notification_permission_asked_$uid';
     final listenerAsked = prefs.getBool(listenerKey) ?? false;
     final askPost = !(prefs.getBool(postKey) ?? false) && !listenerAsked;
-    final askListener = ProService.instance.isPro && !listenerAsked;
+    final askListener = !listenerAsked;
     if (!askPost && !askListener) return;
 
     _running = true;

@@ -2,7 +2,7 @@
 class AppNotificationModel {
   final String id; // UUID định danh duy nhất thông báo
   final String? uid; // UID người dùng sở hữu thông báo
-  final String type; // Loai thông báo: 'pending_tx' | 'budget' | 'pro' | 'savings' | 'sync'
+  final String type; // Loai thông báo: 'pending_tx' | 'budget' | 'savings' | 'sync'
   final String title; // Tiêu đề thông báo
   final String body; // Nội dung chi tiết thông báo
   final String? payload; // Dữ liệu đính kèm (JSON string hoặc tham số điều hướng)
