@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,7 +8,6 @@ import '../database/db_helper.dart';
 import '../models/user_model.dart';
 import 'api_client.dart';
 import 'bank_notification_listener_manager.dart';
-import 'pro_service.dart';
 import 'sync_service.dart';
 
 import '../../frontend/utils/app_language.dart';
@@ -168,7 +168,15 @@ class AuthService {
 
   Future<UserModel> _syncWithBackendOrLocal(User firebaseUser, String? idToken, String provider) async {
     final now = DateTime.now().toIso8601String();
-    
+    // TẠM: in token để thử API trên /docs. Xóa trước khi commit.
+    // Logcat cắt dòng dài ~1000 ký tự nên in thành từng đoạn 500 ký tự.
+    if (kDebugMode && idToken != null) {
+      for (var i = 0; i < idToken.length; i += 500) {
+        debugPrint('ID_TOKEN_PART: ${idToken.substring(i, (i + 500).clamp(0, idToken.length))}');
+      }
+      debugPrint('ID_TOKEN_END');
+    }
+
     final existingLocal = await _dbHelper.getCurrentUser(firebaseUser.uid);
 
     UserModel userModel = existingLocal ?? UserModel(
@@ -178,49 +186,29 @@ class AuthService {
       password: '',
       photoUrl: firebaseUser.photoURL,
       provider: provider,
-      plan: 'free',
       lastLoginAt: now,
       createdAt: now,
     );
 
     // Đăng ký/cập nhật phiên với backend: server tạo doc users/{uid} với các trường
-    // do server quản lý (plan, proExpiredAt) mà client không được phép ghi.
+    // do server quản lý (isActive) mà client không được phép ghi.
     if (idToken != null) {
       try {
-        final session = await ApiClient.instance.post('/auth/session');
-        if (session['plan'] == 'pro') {
-          userModel = userModel.copyWith(plan: 'pro', proExpiredAt: session['proExpiredAt'] as String?);
-        }
+        await ApiClient.instance.post('/auth/session');
       } on ApiException catch (e) {
         developer.log('Backend session sync failed (offline fallback): ${e.message}');
       }
     }
 
-    // Fetch from Cloud Firestore to preserve real plan status
+    // isActive chỉ đọc, không ghi đè từ máy người dùng (firestore.rules chặn client ghi)
     try {
       final doc = await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).get();
       if (doc.exists) {
-        final data = doc.data()!;
-        final cloudPlan = data['plan'] as String? ?? 'free';
-        // isActive chỉ đọc, không ghi đè từ máy người dùng (firestore.rules chặn client ghi)
-        final cloudActive = data['isActive'];
+        final cloudActive = doc.data()!['isActive'];
         if (cloudActive is bool) userModel = userModel.copyWith(isActive: cloudActive);
-        final cloudExpiry = data['proExpiredAt'] as String?;
-        if (cloudPlan == 'pro') {
-          userModel = userModel.copyWith(plan: 'pro', proExpiredAt: cloudExpiry);
-          developer.log('💎 [AuthService] Preserved PRO plan from Firestore for user ${firebaseUser.uid}');
-        }
       }
     } catch (e) {
-      developer.log('Error reading plan from Firestore in AuthService: $e');
-    }
-
-    // Preserve existing local PRO plan if active
-    if (existingLocal != null && existingLocal.plan == 'pro') {
-      userModel = userModel.copyWith(
-        plan: existingLocal.plan,
-        proExpiredAt: existingLocal.proExpiredAt,
-      );
+      developer.log('Error reading user profile from Firestore in AuthService: $e');
     }
 
     // Save/update user document in Cloud Firestore
@@ -228,7 +216,7 @@ class AuthService {
       await FirebaseFirestore.instance.collection('users').doc(firebaseUser.uid).set({
         'name': userModel.name,
         'email': userModel.email,
-        // plan / proExpiredAt / trialUsed / isActive do backend quản lý (firestore.rules chặn client ghi)
+        // isActive do backend quản lý (firestore.rules chặn client ghi)
         'createdAt': userModel.createdAt,
         'photoUrl': userModel.photoUrl,
         'provider': userModel.provider,
@@ -249,17 +237,10 @@ class AuthService {
     // Ngừng đọc thông báo ngân hàng để không ghi giao dịch vào tài khoản đăng nhập sau
     BankNotificationListenerManager.instance.stopListening();
 
-    // Reset ProService in-memory state so it doesn't leak Pro to the next logged in user
-    ProService.instance.resetState();
-
     if (uid != null) {
       await SyncService.instance.clearSyncData(uid);
       await _dbHelper.clearUserSession(uid);
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('mousey_is_pro_$uid');
-      await prefs.remove('mousey_pro_expired_at_$uid');
-      await prefs.remove('mousey_trial_used_$uid');
-      await prefs.remove('mousey_remaining_days_$uid');
       await prefs.remove('last_sync_$uid');
       await prefs.remove('mousey_last_sync_$uid');
     }

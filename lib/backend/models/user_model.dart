@@ -10,8 +10,6 @@ class UserModel {
   final String? uid;
   final String? photoUrl;
   final String provider; // 'password', 'google.com', 'facebook.com'
-  final String plan; // 'free', 'pro'
-  final String? proExpiredAt;
   final String? lastLoginAt;
 
   UserModel({
@@ -24,12 +22,8 @@ class UserModel {
     this.uid,
     this.photoUrl,
     this.provider = 'password',
-    this.plan = 'free',
-    this.proExpiredAt,
     this.lastLoginAt,
   });
-
-  bool get isPro => plan == 'pro';
 
   Map<String, dynamic> toMap() {
     return {
@@ -42,8 +36,6 @@ class UserModel {
       'uid': uid,
       'photoUrl': photoUrl,
       'provider': provider,
-      'plan': plan,
-      'proExpiredAt': proExpiredAt,
       'lastLoginAt': lastLoginAt,
     };
   }
@@ -59,8 +51,6 @@ class UserModel {
       uid: map['uid'] as String?,
       photoUrl: map['photoUrl'] as String?,
       provider: map['provider'] as String? ?? 'password',
-      plan: map['plan'] as String? ?? 'free',
-      proExpiredAt: map['proExpiredAt'] as String?,
       lastLoginAt: map['lastLoginAt'] as String?,
     );
   }
@@ -75,8 +65,6 @@ class UserModel {
     String? uid,
     String? photoUrl,
     String? provider,
-    String? plan,
-    String? proExpiredAt,
     String? lastLoginAt,
   }) {
     return UserModel(
@@ -89,8 +77,6 @@ class UserModel {
       uid: uid ?? this.uid,
       photoUrl: photoUrl ?? this.photoUrl,
       provider: provider ?? this.provider,
-      plan: plan ?? this.plan,
-      proExpiredAt: proExpiredAt ?? this.proExpiredAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }

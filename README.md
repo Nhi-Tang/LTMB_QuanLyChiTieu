@@ -2,11 +2,11 @@
 
 Ứng dụng Flutter giúp ghi chép thu chi, đặt ngân sách, theo dõi mục tiêu tiết kiệm và tự động
 ghi giao dịch từ thông báo ngân hàng. Dữ liệu lưu trên máy (SQLite) và đồng bộ lên Firebase.
-Gói PRO được cấp qua backend FastAPI, thanh toán bằng VietQR.
+Mọi chức năng đều miễn phí.
 
 ## Tính năng
 
-- **Thu chi & sổ sách**: thêm thu nhập / chi tiêu / chuyển tiền bằng bàn phím máy tính, ghi chú,
+- **Thu chi và sổ sách**: thêm thu nhập / chi tiêu / chuyển tiền bằng bàn phím máy tính, ghi chú,
   chọn ngày. Có nhiều sổ sách, mỗi sổ tách dữ liệu riêng.
 - **Danh mục**: danh mục thu/chi có icon, thêm/sửa/xoá, gợi ý danh mục theo nội dung.
 - **Ngân sách**: đặt hạn mức theo danh mục, cảnh báo khi sắp vượt hoặc đã vượt.
@@ -17,7 +17,6 @@ Gói PRO được cấp qua backend FastAPI, thanh toán bằng VietQR.
   và các ngân hàng khác, tạo giao dịch chờ duyệt.
 - **Nhắc nhở**: nhắc ghi chép hằng ngày, trung tâm thông báo trong app.
 - **Tài khoản**: đăng nhập email/mật khẩu hoặc Google, quên mật khẩu, đồng bộ nhiều thiết bị.
-- **PRO**: dùng thử 7 ngày, gói tháng/năm, thanh toán VietQR, tự mở khoá khi tiền về.
 - **Giao diện**: chế độ sáng/tối/theo hệ thống; 5 ngôn ngữ (Tiếng Việt, English, 日本語, 中文, 한국어).
 
 ## Công nghệ
@@ -29,7 +28,6 @@ Gói PRO được cấp qua backend FastAPI, thanh toán bằng VietQR.
 | Đăng nhập & đồng bộ | Firebase Auth, Cloud Firestore, Realtime Database, Google Sign-In |
 | Thông báo | `flutter_local_notifications`, `NotificationListenerService` (Android) |
 | Backend | FastAPI (Python 3.12), Firebase Admin SDK, deploy trên Render |
-| Thanh toán | VietQR + webhook SePay |
 
 ## Cấu trúc thư mục
 
@@ -40,7 +38,7 @@ lib/
   backend/            # dữ liệu & nghiệp vụ
     database/         #   SQLite (db_helper)
     models/           #   giao dịch, ngân sách, tiết kiệm, người dùng...
-    services/         #   auth, đồng bộ, báo cáo, ngân sách, PRO, xuất file...
+    services/         #   auth, đồng bộ, báo cáo, ngân sách, xuất file...
       bank_parser/    #   đọc thông báo ngân hàng (MB, MoMo, ZaloPay, chung)
   core/               # hằng số, tiện ích, widget dùng chung
   frontend/
@@ -101,9 +99,8 @@ trong Cài đặt của điện thoại.
 
 ## Backend
 
-Backend FastAPI nằm trong `backend-api/`. Đây là nơi duy nhất được cấp gói PRO;
-`firestore.rules` chặn app tự ghi các trường này. Hướng dẫn chạy local, deploy Render, danh sách
-endpoint và cách nối SePay: [backend-api/README.md](backend-api/README.md).
+Backend FastAPI nằm trong `backend-api/`, lo phiên đăng nhập và quên mật khẩu. Hướng dẫn chạy local,
+deploy Render và danh sách endpoint: [backend-api/README.md](backend-api/README.md).
 
 Không commit `serviceAccountKey.json` hay `.env`.
 

@@ -1,14 +1,9 @@
 """Chạy (từ thư mục backend-api): python -m pytest -q tests."""
-import os
 import re
 import unittest
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from unittest import mock
-
-# config đọc biến môi trường lúc import: đặt giống test_subscription vì file này có thể chạy trước
-os.environ.setdefault("PAYMENT_WEBHOOK_SECRET", "test-secret")
-os.environ.setdefault("ENABLE_MOCK_PAY", "false")
 
 import firebase_admin
 from fastapi.testclient import TestClient

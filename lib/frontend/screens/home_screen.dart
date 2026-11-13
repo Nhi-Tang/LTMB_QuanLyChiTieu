@@ -4,7 +4,6 @@ import '../../backend/models/user_model.dart';
 import '../../backend/services/auth_service.dart';
 import '../../backend/services/bank_notification_listener_manager.dart';
 import '../../backend/services/daily_reminder_service.dart';
-import '../../backend/services/pro_service.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../backend/services/totals_calculator.dart';
 import '../../core/widgets/notebook_tab_bar.dart';
@@ -51,8 +50,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _transactionService.addListener(_loadTransactions);
     WidgetsBinding.instance.addObserver(this);
     BankNotificationListenerManager.instance.startListening(uid: _currentUser.uid);
-    // Tài khoản PRO lần đầu vào app (hoặc vừa lên PRO): hỏi quyền thông báo
-    ProService.instance.addListener(_askNotificationPermission);
+    // Lần đầu vào app: hỏi quyền thông báo
     WidgetsBinding.instance.addPostFrameCallback((_) => _askNotificationPermission());
   }
 
@@ -70,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     _transactionService.removeListener(_loadTransactions);
     WidgetsBinding.instance.removeObserver(this);
-    ProService.instance.removeListener(_askNotificationPermission);
     BankNotificationListenerManager.instance.stopListening();
     super.dispose();
   }

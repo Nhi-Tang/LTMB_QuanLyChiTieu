@@ -6,7 +6,6 @@ import '../../../backend/services/in_app_notification_service.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_translations.dart';
 import '../../screens/budgets_screen.dart';
-import '../../screens/pro_upgrade_screen.dart';
 import 'pending_inbox.dart';
 import '../../utils/app_language.dart';
 
@@ -107,14 +106,6 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
           ),
         );
         break;
-      case 'pro':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ProUpgradeScreen(),
-          ),
-        );
-        break;
       case 'savings':
       case 'sync':
       default:
@@ -156,8 +147,6 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
         return Icons.error_outline_rounded;
       case 'budget_exceeded':
         return Icons.warning_amber_rounded;
-      case 'pro':
-        return Icons.workspace_premium_rounded;
       case 'savings':
         return Icons.savings_rounded;
       case 'sync':
@@ -178,8 +167,6 @@ class _NotificationCenterSheetState extends State<NotificationCenterSheet> {
         return Colors.deepOrange.shade700;
       case 'budget_exceeded':
         return Colors.red.shade700;
-      case 'pro':
-        return Colors.amber.shade900;
       case 'savings':
         return Colors.green.shade700;
       case 'sync':

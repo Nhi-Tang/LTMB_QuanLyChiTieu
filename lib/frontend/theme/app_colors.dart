@@ -28,7 +28,7 @@ class AppColors {
   // Màu riêng của phong cách sổ
   /// Bút dạ quang tô số tổng
   static Color get highlight => _c(const Color(0xFFFBEA9E), const Color(0xFF5E5220));
-  /// Tờ giấy nhớ (thẻ nâng cấp PRO) và viền của nó
+  /// Tờ giấy nhớ và viền của nó
   static Color get note => _c(const Color(0xFFFCEFB4), const Color(0xFF3D3720));
   static Color get noteBorder => _c(const Color(0xFFE6C95C), const Color(0xFF8A7630));
   /// Đường kẻ dòng của sổ
