@@ -16,7 +16,7 @@ class MouseyColors {
   static Color get textMain => AppColors.textPrimary;
   static Color get textSub => AppColors.textMuted;
 
-  // Thêm các màu theo yêu cầu thiết kế PRO / Mousey
+  // Thêm các màu theo yêu cầu thiết kế Mousey
   static Color get background => AppColors.background;
   static Color get surface => AppColors.surface;
   static Color get primary => AppColors.tealDark;

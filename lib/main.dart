@@ -6,7 +6,6 @@ import 'backend/database/db_helper.dart';
 import 'backend/models/user_model.dart';
 import 'backend/services/auth_service.dart';
 import 'backend/services/category_repository.dart';
-import 'backend/services/pro_service.dart';
 import 'backend/services/sync_service.dart';
 import 'frontend/screens/auth_screen.dart';
 import 'frontend/screens/home_screen.dart';
@@ -23,7 +22,6 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }
-  await ProService.instance.init();
   await AppLanguage.instance.load(uid: FirebaseAuth.instance.currentUser?.uid);
   await AppTheme.instance.load();
   runApp(const MouseyApp());
@@ -132,10 +130,9 @@ class _AuthGateState extends State<AuthGate> {
     if (_userFuture == null || _uid != firebaseUser.uid) {
       _uid = firebaseUser.uid;
       _userFuture = DatabaseHelper.instance.getCurrentUser(firebaseUser.uid).then((user) {
-        // Background sync with backend & Pro status (non-blocking on network error)
+        // Background sync with backend (non-blocking on network error)
         AuthService().syncSessionInBackground(firebaseUser);
         SyncService.instance.syncAll();
-        ProService.instance.init();
         CategoryRepository.instance.loadIconKeys();
         return user;
       });
@@ -180,7 +177,6 @@ class _AuthGateState extends State<AuthGate> {
                 password: '',
                 photoUrl: firebaseUser.photoURL,
                 provider: firebaseUser.providerData.isNotEmpty ? firebaseUser.providerData.first.providerId : 'password',
-                plan: 'free',
                 createdAt: DateTime.now().toIso8601String(),
               );
 

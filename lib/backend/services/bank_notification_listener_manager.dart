@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'bank_parser/bank_notification_parser.dart';
 import 'category_suggestion_service.dart';
 import 'daily_reminder_service.dart';
-import 'pro_service.dart';
 
 class BankNotificationListenerManager {
   static final BankNotificationListenerManager instance = BankNotificationListenerManager._();
@@ -14,9 +13,6 @@ class BankNotificationListenerManager {
   static const _eventChannel = EventChannel('com.mousey.app/notifications');
   StreamSubscription? _subscription;
   bool _isListening = false;
-
-  /// Đọc thông báo ngân hàng là tính năng PRO
-  bool get _canUseBankNotifications => ProService.instance.isPro;
 
   void startListening({String? uid}) {
     if (_isListening) {
@@ -29,9 +25,8 @@ class BankNotificationListenerManager {
     _subscription = _eventChannel.receiveBroadcastStream().listen(
       (dynamic event) async {
         if (event is Map) {
-          // Chỉ ghi cho đúng tài khoản đang đăng nhập và tài khoản đó phải là PRO
+          // Chỉ ghi cho đúng tài khoản đang đăng nhập
           if (uid == null || FirebaseAuth.instance.currentUser?.uid != uid) return;
-          if (!_canUseBankNotifications) return;
 
           final prefs = await SharedPreferences.getInstance();
           final enabled = prefs.getBool('bank_notifications_enabled') ?? true;
