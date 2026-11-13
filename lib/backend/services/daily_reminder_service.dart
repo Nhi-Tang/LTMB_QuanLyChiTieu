@@ -43,9 +43,8 @@ class DailyReminderService {
 
     final pendingCount = await DatabaseHelper.instance.getPendingTransactionsCount(uid: uid);
 
-    // Xoá thông báo cũ để đặt lịch mới
-    await _notificationsPlugin.cancel(888);
-
+    // Không huỷ lịch cũ trước: zonedSchedule cùng id tự thay lịch cũ. Huỷ trước thì nếu app bị tắt
+    // ngay khi xuống nền (vivo, Xiaomi...) lịch cũ đã mất mà lịch mới chưa kịp đặt.
     final now = DateTime.now();
     var scheduledDate = DateTime(now.year, now.month, now.day, hour, minute);
     if (scheduledDate.isBefore(now)) {
