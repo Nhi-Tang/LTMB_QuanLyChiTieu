@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -168,15 +167,6 @@ class AuthService {
 
   Future<UserModel> _syncWithBackendOrLocal(User firebaseUser, String? idToken, String provider) async {
     final now = DateTime.now().toIso8601String();
-    // TẠM: in token để thử API trên /docs. Xóa trước khi commit.
-    // Logcat cắt dòng dài ~1000 ký tự nên in thành từng đoạn 500 ký tự.
-    if (kDebugMode && idToken != null) {
-      for (var i = 0; i < idToken.length; i += 500) {
-        debugPrint('ID_TOKEN_PART: ${idToken.substring(i, (i + 500).clamp(0, idToken.length))}');
-      }
-      debugPrint('ID_TOKEN_END');
-    }
-
     final existingLocal = await _dbHelper.getCurrentUser(firebaseUser.uid);
 
     UserModel userModel = existingLocal ?? UserModel(
