@@ -5,6 +5,91 @@ import '../../../backend/services/category_repository.dart';
 import '../../utils/app_language.dart';
 import '../../theme/app_colors.dart';
 
+/// Danh mục đang dùng của sổ (đã liên kết, chưa lưu trữ); lỗi hoặc chưa có thì dùng danh mục mặc định
+Future<List<CategoryModel>> loadActiveCategories({required bool isExpense, required String ledgerId}) async {
+  final type = isExpense ? 'expense' : 'income';
+  try {
+    final list = await CategoryRepository.instance.getCategoriesForLedger(ledgerId, type);
+    final activeLinked = list.where((c) => c.isLinked && !c.isArchived).toList();
+    if (activeLinked.isNotEmpty) return activeLinked;
+  } catch (e) {
+    debugPrint('Error loading categories: $e');
+  }
+  final defaults = isExpense ? DatabaseHelper.defaultExpenseCategories : DatabaseHelper.defaultIncomeCategories;
+  return defaults
+      .map((c) => CategoryModel(
+            name: c['name']!,
+            iconKey: c['iconKey']!,
+            type: type,
+            sortOrder: 0,
+            isDefault: true,
+            isArchived: false,
+            createdAt: '',
+            updatedAt: '',
+          ))
+      .toList();
+}
+
+/// Sheet chọn trong toàn bộ danh mục; trả về tên danh mục được chọn, null nếu đóng
+Future<String?> showCategoryPickerSheet(
+  BuildContext context, {
+  required List<CategoryModel> categories,
+  required String selected,
+}) {
+  return showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      ctx.t('Chọn danh mục'),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: AppColors.ink),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: GridView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 0.95,
+                ),
+                itemCount: categories.length,
+                itemBuilder: (_, index) {
+                  final cat = categories[index];
+                  return _CategoryCircle(
+                    label: ctx.tCategory(cat.name),
+                    category: cat,
+                    selected: cat.name == selected,
+                    onTap: () => Navigator.pop(ctx, cat.name),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 /// Chọn danh mục kiểu sổ: 5 danh mục đầu (luôn gồm danh mục đang chọn) dạng ô tròn,
 /// ô thứ 6 là "Xem thêm" mở toàn bộ danh mục.
 class CategoryGrid extends StatefulWidget {
@@ -52,40 +137,13 @@ class _CategoryGridState extends State<CategoryGrid> {
   }
 
   Future<void> _loadCategories() async {
-    try {
-      final type = widget.isExpense ? 'expense' : 'income';
-      final list = await CategoryRepository.instance.getCategoriesForLedger(widget.ledgerId, type);
-      // Chỉ lấy các danh mục đã liên kết (isLinked == true) và không bị lưu trữ (isArchived == false)
-      final activeLinked = list.where((c) => c.isLinked && !c.isArchived).toList();
-      if (mounted) {
-        setState(() {
-          _categories = activeLinked;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading categories in grid: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    final list = await loadActiveCategories(isExpense: widget.isExpense, ledgerId: widget.ledgerId);
+    if (mounted) {
+      setState(() {
+        _categories = list;
+        _isLoading = false;
+      });
     }
-  }
-
-  List<CategoryModel> get _allCategories {
-    if (_categories.isNotEmpty) return _categories;
-    final defaults = widget.isExpense ? DatabaseHelper.defaultExpenseCategories : DatabaseHelper.defaultIncomeCategories;
-    return defaults
-        .map((c) => CategoryModel(
-              name: c['name']!,
-              iconKey: c['iconKey']!,
-              type: widget.isExpense ? 'expense' : 'income',
-              sortOrder: 0,
-              isDefault: true,
-              isArchived: false,
-              createdAt: '',
-              updatedAt: '',
-            ))
-        .toList();
   }
 
   /// 5 danh mục hiện ra; nếu danh mục đang chọn nằm sau thì đưa nó vào ô cuối
@@ -97,62 +155,9 @@ class _CategoryGridState extends State<CategoryGrid> {
     return visible;
   }
 
-  void _showAllCategories(List<CategoryModel> all) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.t('Chọn danh mục'),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.ink),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.close_rounded, color: AppColors.ink),
-                      onPressed: () => Navigator.pop(ctx),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 0.95,
-                  ),
-                  itemCount: all.length,
-                  itemBuilder: (_, index) {
-                    final cat = all[index];
-                    return _CategoryCircle(
-                      label: context.tCategory(cat.name),
-                      category: cat,
-                      selected: cat.name == widget.selectedCategory,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        widget.onCategorySelected(cat.name);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  Future<void> _showAllCategories(List<CategoryModel> all) async {
+    final picked = await showCategoryPickerSheet(context, categories: all, selected: widget.selectedCategory);
+    if (picked != null) widget.onCategorySelected(picked);
   }
 
   @override
@@ -170,7 +175,7 @@ class _CategoryGridState extends State<CategoryGrid> {
       );
     }
 
-    final all = _allCategories;
+    final all = _categories;
     final visible = _visibleCategories(all);
     final cells = <Widget>[
       for (final cat in visible)

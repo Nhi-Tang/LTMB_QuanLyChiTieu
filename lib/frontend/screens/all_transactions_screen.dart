@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
-import '../../backend/services/transaction_service.dart';
 import '../../core/widgets/money_text.dart';
 import '../../core/widgets/category_icon.dart';
 import '../utils/app_translations.dart';
 import '../utils/app_language.dart';
 import '../theme/app_colors.dart';
+import '../widgets/transaction_sheet/transaction_detail_sheet.dart';
 
 class AllTransactionsScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -23,6 +23,9 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   String _searchQuery = '';
   String _filterType = 'all'; // 'all', 'expense', 'income'
 
+  /// Bản sao danh sách để cập nhật ngay khi sửa/xoá trong màn này
+  late final List<TransactionItem> _transactions = List.of(widget.transactions);
+
   String _formatDateTime(DateTime date) {
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
@@ -33,7 +36,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
   }
 
   List<TransactionItem> get _filteredTransactions {
-    return widget.transactions.where((t) {
+    return _transactions.where((t) {
       if (_filterType == 'expense' && !t.isExpense) return false;
       if (_filterType == 'income' && t.isExpense) return false;
       if (_searchQuery.isNotEmpty) {
@@ -46,147 +49,15 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
     }).toList();
   }
 
-  void _showTransactionDetailSheet(TransactionItem item) {
-    final isExpense = item.isExpense;
-    final formattedDateTime = _formatDateTime(item.date);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.grey400,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Header Icon & Title
-            Row(
-              children: [
-                CategoryIcon(
-                  categoryOrIconKey: item.category,
-                  size: 48,
-                  bgColor: isExpense ? AppColors.expenseBg : AppColors.incomeBg,
-                  iconColor: isExpense ? AppColors.expenseStrong : AppColors.income,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title.isNotEmpty ? item.title : item.category,
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.ink),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        context.tCategory(item.category),
-                        style: TextStyle(fontSize: 13, color: AppColors.grey500),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Details Box
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: AppColors.rule),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(context.t('Số tiền:'), style: TextStyle(fontSize: 14, color: AppColors.grey500)),
-                      MoneyText(
-                        amount: item.amount,
-                        prefix: isExpense ? '-' : '+',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isExpense ? AppColors.expenseStrong : AppColors.income,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(context.t('Ngày giờ:'), style: TextStyle(fontSize: 14, color: AppColors.grey500)),
-                      Text(
-                        formattedDateTime,
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.tealDark),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(context.t('Loại giao dịch:'), style: TextStyle(fontSize: 14, color: AppColors.grey500)),
-                      Text(
-                        isExpense ? context.t('Chi tiêu (-)') : context.t('Thu nhập (+)'),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: isExpense ? AppColors.expenseStrong : AppColors.income,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Action Button (Xóa giao dịch)
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await TransactionService.instance.removeTransaction(item.id, uid: item.uid, date: item.date);
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.t('Đã xóa giao dịch thành công!')), backgroundColor: Colors.red),
-                  );
-                },
-                icon: const Icon(Icons.delete_outline_rounded),
-                label: Text(context.t('Xóa giao dịch'), style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
-      ),
+  void _openTransaction(TransactionItem item) {
+    showTransactionDetailSheet(
+      context,
+      item,
+      onUpdated: (updated) => setState(() {
+        final i = _transactions.indexWhere((t) => t.id == updated.id);
+        if (i != -1) _transactions[i] = updated;
+      }),
+      onDeleted: () => setState(() => _transactions.removeWhere((t) => t.id == item.id)),
     );
   }
 
@@ -274,7 +145,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                     itemBuilder: (context, index) {
                       final item = transactionsList[index];
                       return InkWell(
-                        onTap: () => _showTransactionDetailSheet(item),
+                        onTap: () => _openTransaction(item),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
