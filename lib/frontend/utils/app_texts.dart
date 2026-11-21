@@ -65,6 +65,7 @@ const Map<String, List<String>> appTexts = {
   'Danh mục': ['Category', 'カテゴリ', '类别', '카테고리'],
   'DANH MỤC': ['CATEGORY', 'カテゴリ', '类别', '카테고리'],
   'Danh mục cố định': ['Fixed category', '固定カテゴリ', '固定类别', '고정 카테고리'],
+  'Chạm để đổi danh mục': ['Tap to change category', 'タップしてカテゴリを変更', '点击更改类别', '탭하여 카테고리 변경'],
   'Ghi chú': ['Note', 'メモ', '备注', '메모'],
   'Sửa ghi chú': ['Edit note', 'メモを編集', '编辑备注', '메모 수정'],
   'Ghi chú (Tùy chọn)': ['Note (optional)', 'メモ（任意）', '备注（可选）', '메모 (선택)'],
