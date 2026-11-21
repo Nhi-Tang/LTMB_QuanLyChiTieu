@@ -6,12 +6,12 @@ import '../../backend/services/budget_service.dart';
 import '../../backend/services/in_app_notification_service.dart';
 import '../../backend/services/transaction_service.dart';
 import '../../core/widgets/money_text.dart';
-import '../../core/widgets/category_icon.dart';
 import '../../core/utils/money_input_formatter.dart';
 import '../theme/app_colors.dart';
 import '../utils/app_translations.dart';
 import '../widgets/budget_form_sheet.dart';
 import '../widgets/notification/notification_center_sheet.dart';
+import '../widgets/transaction_sheet/transaction_detail_sheet.dart';
 import 'all_transactions_screen.dart';
 import 'budgets_screen.dart';
 import '../utils/app_language.dart';
@@ -102,233 +102,6 @@ class _HomeTabState extends State<HomeTab> {
         });
       }
     } catch (_) {}
-  }
-
-  String _formatDateTime(DateTime date) {
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-    return '$hour:$minute - $day/$month/$year';
-  }
-
-  void _showTransactionDetailSheet(TransactionItem item) {
-    final isExpense = item.isExpense;
-    final dt = item.date;
-    final formattedDateTime = _formatDateTime(dt);
-
-    final titleController = TextEditingController(text: item.title.isNotEmpty ? item.title : item.category);
-    final amountController = TextEditingController(text: formatMoney(item.amount));
-    bool isSaving = false;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (sheetCtx, setSheetState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.grey400,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Header Icon & Category (Fixed)
-                    Row(
-                      children: [
-                        CategoryIcon(
-                          categoryOrIconKey: item.category,
-                          size: 48,
-                          bgColor: isExpense ? AppColors.expenseBg : AppColors.incomeBg,
-                          iconColor: isExpense ? AppColors.expenseStrong : AppColors.income,
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.tCategory(item.category),
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                context.t('Danh mục cố định'),
-                                style: TextStyle(fontSize: 12, color: AppColors.grey500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Editable Fields Box
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.rule),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 1. Tên ghi chú (Editable)
-                          Text(context.t('Ghi chú / Tên giao dịch:'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.grey500)),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: titleController,
-                            decoration: InputDecoration(
-                              hintText: context.t('Nhập tên ghi chú...'),
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          // 2. Số tiền (Editable)
-                          Text(context.t('Số tiền (đ):'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.grey500)),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: amountController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [MoneyInputFormatter()],
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isExpense ? AppColors.expenseStrong : AppColors.income,
-                            ),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              prefixText: isExpense ? '- ' : '+ ',
-                              prefixStyle: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: isExpense ? AppColors.expenseStrong : AppColors.income,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          // 3. Thời gian & Loại
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(context.t('Thời gian:'), style: TextStyle(fontSize: 12, color: AppColors.grey500)),
-                              Text(
-                                formattedDateTime,
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: HomeTab.darkBeige),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Action Buttons (Xóa / Lưu)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            onPressed: isSaving
-                                ? null
-                                : () async {
-                                    Navigator.pop(sheetCtx);
-                                    await TransactionService.instance.removeTransaction(item.id, uid: item.uid, date: item.date);
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(context.t('Đã xóa giao dịch thành công!')), backgroundColor: Colors.red),
-                                    );
-                                  },
-                            icon: const Icon(Icons.delete_outline_rounded),
-                            label: Text(context.t('Xóa'), style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            onPressed: isSaving
-                                ? null
-                                : () async {
-                                    final newTitle = titleController.text.trim();
-                                    final newAmount = parseMoney(amountController.text).toDouble();
-                                    if (newAmount <= 0) {
-                                      ScaffoldMessenger.of(sheetCtx).showSnackBar(
-                                        SnackBar(content: Text(context.t('Vui lòng nhập số tiền hợp lệ!')), backgroundColor: Colors.orange),
-                                      );
-                                      return;
-                                    }
-
-                                    setSheetState(() => isSaving = true);
-                                    final updatedTx = item.copyWith(
-                                      title: newTitle.isNotEmpty ? newTitle : item.category,
-                                      amount: newAmount,
-                                    );
-
-                                    await TransactionService.instance.updateTransaction(updatedTx, uid: item.uid);
-
-                                    if (!sheetCtx.mounted) return;
-                                    Navigator.pop(sheetCtx);
-                                    if (!mounted) return;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(context.t('Đã lưu thay đổi giao dịch!')), backgroundColor: Colors.green),
-                                    );
-                                  },
-                            icon: isSaving
-                                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Icon(Icons.save_rounded),
-                            label: Text(context.t('Lưu thay đổi'), style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   void _openNotificationCenter() {
@@ -574,7 +347,7 @@ class _HomeTabState extends State<HomeTab> {
                   content: item.title.isNotEmpty ? item.title : context.tCategory(item.category),
                   amount: item.amount,
                   isExpense: item.isExpense,
-                  onTap: () => _showTransactionDetailSheet(item),
+                  onTap: () => showTransactionDetailSheet(context, item),
                 )),
           Align(
             alignment: Alignment.centerRight,
