@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'backend/database/db_helper.dart';
 import 'backend/models/user_model.dart';
-import 'backend/services/auth_service.dart';
 import 'backend/services/category_repository.dart';
-import 'backend/services/sync_service.dart';
-import 'frontend/screens/auth_screen.dart';
 import 'frontend/screens/home_screen.dart';
 import 'frontend/utils/app_language.dart';
 import 'frontend/theme/app_colors.dart';
@@ -15,14 +9,7 @@ import 'frontend/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint('Firebase initialization error: $e');
-  }
-  await AppLanguage.instance.load(uid: FirebaseAuth.instance.currentUser?.uid);
+  await AppLanguage.instance.load(uid: DatabaseHelper.localUid);
   await AppTheme.instance.load();
   runApp(const MouseyApp());
 }
@@ -107,46 +94,34 @@ class _MouseyAppState extends State<MouseyApp> with WidgetsBindingObserver {
           ),
         );
       },
-      home: const AuthGate(),
+      home: const AppStartGate(),
     );
   }
 }
 
-class AuthGate extends StatefulWidget {
-  const AuthGate({super.key});
+/// Tải hồ sơ người dùng trên máy rồi vào thẳng màn hình chính
+class AppStartGate extends StatefulWidget {
+  const AppStartGate({super.key});
 
   @override
-  State<AuthGate> createState() => _AuthGateState();
+  State<AppStartGate> createState() => _AppStartGateState();
 }
 
-class _AuthGateState extends State<AuthGate> {
-  // Giữ stream/future qua các lần dựng lại (đổi ngôn ngữ, sáng/tối) để không
+class _AppStartGateState extends State<AppStartGate> {
+  // Giữ future qua các lần dựng lại (đổi ngôn ngữ, sáng/tối) để không
   // hiện lại màn chờ và không tạo lại HomeScreen, làm mất tab đang mở.
-  final Stream<User?> _authChanges = FirebaseAuth.instance.authStateChanges();
-  String? _uid;
-  Future<UserModel?>? _userFuture;
-
-  Future<UserModel?> _loadUser(User firebaseUser) {
-    if (_userFuture == null || _uid != firebaseUser.uid) {
-      _uid = firebaseUser.uid;
-      _userFuture = DatabaseHelper.instance.getCurrentUser(firebaseUser.uid).then((user) {
-        // Background sync with backend (non-blocking on network error)
-        AuthService().syncSessionInBackground(firebaseUser);
-        SyncService.instance.syncAll();
-        CategoryRepository.instance.loadIconKeys();
-        return user;
-      });
-    }
-    return _userFuture!;
-  }
+  late final Future<UserModel> _userFuture =
+      DatabaseHelper.instance.getOrCreateLocalUser().then((user) {
+    CategoryRepository.instance.loadIconKeys();
+    return user;
+  });
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: _authChanges,
-      initialData: FirebaseAuth.instance.currentUser,
+    return FutureBuilder<UserModel>(
+      future: _userFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!snapshot.hasData) {
           return Scaffold(
             backgroundColor: AppColors.tealWhite,
             body: Center(
@@ -154,43 +129,7 @@ class _AuthGateState extends State<AuthGate> {
             ),
           );
         }
-
-        if (snapshot.hasData && snapshot.data != null) {
-          final firebaseUser = snapshot.data!;
-
-          return FutureBuilder<UserModel?>(
-            future: _loadUser(firebaseUser),
-            builder: (context, userSnapshot) {
-              if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(
-                  backgroundColor: AppColors.tealWhite,
-                  body: Center(
-                    child: CircularProgressIndicator(color: AppColors.teal),
-                  ),
-                );
-              }
-
-              final localUser = userSnapshot.data ?? UserModel(
-                uid: firebaseUser.uid,
-                name: firebaseUser.displayName ?? firebaseUser.email?.split('@').first ?? context.t('Người dùng'),
-                email: firebaseUser.email ?? '',
-                password: '',
-                photoUrl: firebaseUser.photoURL,
-                provider: firebaseUser.providerData.isNotEmpty ? firebaseUser.providerData.first.providerId : 'password',
-                createdAt: DateTime.now().toIso8601String(),
-              );
-
-              return HomeScreen(
-                key: ValueKey('user_${firebaseUser.uid}'),
-                currentUser: localUser,
-              );
-            },
-          );
-        }
-
-        _uid = null;
-        _userFuture = null;
-        return const AuthScreen();
+        return HomeScreen(currentUser: snapshot.data!);
       },
     );
   }

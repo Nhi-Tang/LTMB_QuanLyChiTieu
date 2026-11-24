@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../backend/models/transaction_model.dart';
 import '../../backend/models/user_model.dart';
-import '../../backend/services/auth_service.dart';
 import '../../backend/services/bank_notification_listener_manager.dart';
 import '../../backend/services/daily_reminder_service.dart';
 import '../../backend/services/transaction_service.dart';
@@ -89,35 +88,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(context.t('Xác nhận đăng xuất')),
-        content: Text(context.t('Bạn có chắc chắn muốn đăng xuất khỏi Mousey?')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(context.t('Hủy'), style: TextStyle(color: AppColors.grey500)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accentBeige,
-              foregroundColor: AppColors.onTeal,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await AuthService().signOut();
-            },
-            child: Text(context.t('Đăng xuất'), style: const TextStyle(color: AppColors.onTeal, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
   List<TransactionItem> get _filteredTransactions {
     return _transactions.where((t) =>
       !t.isDeleted &&
@@ -203,7 +173,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               totalExpense: _totalExpense,
               totalBalance: _totalBalance,
               transactions: _transactions,
-              onLogout: () => _logout(context),
               onAddIncome: () => _showAddTransactionModal(defaultExpense: false),
               onAddExpense: () => _showAddTransactionModal(defaultExpense: true),
             ),
@@ -230,7 +199,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onLanguageChanged: (newLanguage) {
                 AppLanguage.instance.change(newLanguage, uid: _currentUser.uid);
               },
-              onLogout: () => _logout(context),
             ),
           ],
         ),

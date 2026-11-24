@@ -66,8 +66,8 @@ void main() {
 
   test('AppLanguage.t dùng ngôn ngữ hiện tại', () {
     AppLanguage.instance.value = 'English (US)';
-    expect(AppLanguage.instance.t('Đăng xuất'), 'Log out');
+    expect(AppLanguage.instance.t('Hủy'), 'Cancel');
     AppLanguage.instance.value = 'Tiếng Việt';
-    expect(AppLanguage.instance.t('Đăng xuất'), 'Đăng xuất');
+    expect(AppLanguage.instance.t('Hủy'), 'Hủy');
   });
 }

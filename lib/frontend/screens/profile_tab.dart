@@ -14,7 +14,6 @@ import '../widgets/notification/notification_settings_screen.dart';
 import '../widgets/notification/pending_inbox.dart';
 import '../widgets/export_options_bottom_sheet.dart';
 import '../widgets/profile/app_settings_sheets.dart';
-import '../widgets/profile/cloud_sync_tile.dart';
 import '../widgets/profile/delete_data_dialog.dart';
 import '../widgets/profile/edit_profile_dialog.dart';
 import '../widgets/profile/ledger_sheets.dart';
@@ -28,7 +27,6 @@ class ProfileTab extends StatefulWidget {
   final Function(UserModel updatedUser) onUserUpdated;
   final Function(String newAvatarKey) onAvatarChanged;
   final Function(String newLanguage) onLanguageChanged;
-  final VoidCallback onLogout;
 
   const ProfileTab({
     super.key,
@@ -37,7 +35,6 @@ class ProfileTab extends StatefulWidget {
     required this.onUserUpdated,
     required this.onAvatarChanged,
     required this.onLanguageChanged,
-    required this.onLogout,
   });
 
   @override
@@ -343,19 +340,8 @@ class _ProfileTabState extends State<ProfileTab> {
 
           const SizedBox(height: 24),
 
-          // GROUP: ĐỒNG BỘ DỮ LIỆU ĐÁM MÂY (CLOUD SYNC)
-          ProfileSectionHeader(AppTranslations.tr(lang, 'cloud_sync_section')),
-          const SizedBox(height: 8),
-          SettingsTileGroup(
-            children: [
-              CloudSyncTile(uid: widget.currentUser.uid),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // GROUP: QUẢN LÝ TÀI KHOẢN & BẢO MẬT
-          ProfileSectionHeader(AppTranslations.tr(lang, 'account_security_section')),
+          // GROUP: QUẢN LÝ DỮ LIỆU
+          ProfileSectionHeader(AppTranslations.tr(lang, 'data_section')),
           const SizedBox(height: 8),
           SettingsTileGroup(
             children: [
@@ -394,32 +380,6 @@ class _ProfileTabState extends State<ProfileTab> {
                 leading: const AssetIcon('ui_thong_tin'),
                 title: Text(AppTranslations.tr(lang, 'version'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), overflow: TextOverflow.ellipsis),
                 trailing: Text('v1.0.0', style: TextStyle(fontSize: 13, color: AppColors.grey500, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // GROUP: ĐĂNG XUẤT TÀI KHOẢN
-          ProfileSectionHeader(AppTranslations.tr(lang, 'logout').toUpperCase()),
-          const SizedBox(height: 8),
-          SettingsTileGroup(
-            children: [
-              SettingsTile(
-                leading: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(color: Colors.red.shade50, shape: BoxShape.circle),
-                  child: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
-                ),
-                title: Text(
-                  AppTranslations.tr(lang, 'logout'),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(AppTranslations.tr(lang, 'logout_subtitle'), style: TextStyle(fontSize: 12, color: AppColors.grey500), overflow: TextOverflow.ellipsis),
-                trailing: Icon(Icons.chevron_right, color: AppColors.grey500),
-                onTap: widget.onLogout,
               ),
             ],
           ),

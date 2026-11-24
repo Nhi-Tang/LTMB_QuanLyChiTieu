@@ -1,83 +1,55 @@
+/// Hồ sơ người dùng lưu trên máy (app không còn đăng nhập/đăng ký)
 class UserModel {
   final int? id;
-  final String name;
-  final String email;
-  final String password;
-  final bool isActive; // true = active, false = locked
-  final String createdAt;
-
-  // New Firebase / Social login fields
   final String? uid;
+  final String name;
   final String? photoUrl;
-  final String provider; // 'password', 'google.com', 'facebook.com'
-  final String? lastLoginAt;
+  final String createdAt;
 
   UserModel({
     this.id,
-    required this.name,
-    required this.email,
-    required this.password,
-    this.isActive = true,
-    required this.createdAt,
     this.uid,
+    required this.name,
     this.photoUrl,
-    this.provider = 'password',
-    this.lastLoginAt,
+    required this.createdAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
-      'name': name,
-      'email': email,
-      'password': password,
-      'isActive': isActive ? 1 : 0,
-      'createdAt': createdAt,
       'uid': uid,
+      'name': name,
+      // Cột email/password của bảng users là NOT NULL (email UNIQUE) từ bản có đăng nhập
+      'email': uid ?? '',
+      'password': '',
       'photoUrl': photoUrl,
-      'provider': provider,
-      'lastLoginAt': lastLoginAt,
+      'createdAt': createdAt,
     };
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'] as int?,
-      name: map['name'] as String? ?? map['displayName'] as String? ?? 'User',
-      email: map['email'] as String? ?? '',
-      password: map['password'] as String? ?? '',
-      isActive: (map['isActive'] as int? ?? 1) == 1,
-      createdAt: map['createdAt'] as String? ?? DateTime.now().toString(),
       uid: map['uid'] as String?,
+      name: map['name'] as String? ?? 'User',
       photoUrl: map['photoUrl'] as String?,
-      provider: map['provider'] as String? ?? 'password',
-      lastLoginAt: map['lastLoginAt'] as String?,
+      createdAt: map['createdAt'] as String? ?? DateTime.now().toIso8601String(),
     );
   }
 
   UserModel copyWith({
     int? id,
-    String? name,
-    String? email,
-    String? password,
-    bool? isActive,
-    String? createdAt,
     String? uid,
+    String? name,
     String? photoUrl,
-    String? provider,
-    String? lastLoginAt,
+    String? createdAt,
   }) {
     return UserModel(
       id: id ?? this.id,
-      name: name ?? this.name,
-      email: email ?? this.email,
-      password: password ?? this.password,
-      isActive: isActive ?? this.isActive,
-      createdAt: createdAt ?? this.createdAt,
       uid: uid ?? this.uid,
+      name: name ?? this.name,
       photoUrl: photoUrl ?? this.photoUrl,
-      provider: provider ?? this.provider,
-      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
