@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../backend/models/user_model.dart';
 import '../../theme/app_colors.dart';
 
-/// Bìa sổ: tên, email
+/// Bìa sổ: tên người dùng
 class ProfileCoverCard extends StatelessWidget {
   final UserModel user;
   final VoidCallback onTap;
@@ -32,12 +32,6 @@ class ProfileCoverCard extends StatelessWidget {
                       Text(
                         user.name,
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8)),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
