@@ -25,6 +25,7 @@ abstract class BankParser {
     required String title,
     required String text,
     DateTime? timestamp,
+    String notifKey = '',
   }) {
     if (BankNotificationParser.isNonTransaction(title, text)) {
       debugPrint('🚫 [Parser] REASON: NON_TRANSACTION_KEYWORD | title=$title');
@@ -48,6 +49,8 @@ abstract class BankParser {
       type: type,
       timestamp: occurredAt,
       accountLast4: accountLast4,
+      content: '$title|$text',
+      notifKey: notifKey,
     );
 
     return ParsedBankNotification(

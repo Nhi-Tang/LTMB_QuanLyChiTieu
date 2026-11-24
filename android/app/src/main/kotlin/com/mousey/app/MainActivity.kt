@@ -65,13 +65,38 @@ class MainActivity : FlutterActivity() {
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL_NOTIFICATIONS)
             .setStreamHandler(object : EventChannel.StreamHandler {
                 override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    activeSink = events
                     BankNotificationService.eventSink = events
                 }
 
                 override fun onCancel(arguments: Any?) {
-                    BankNotificationService.eventSink = null
+                    releaseSink()
                 }
             })
+    }
+
+    // Sink do engine của Activity này tạo ra
+    private var activeSink: EventChannel.EventSink? = null
+
+    /** Gỡ sink khi engine bị hủy (đóng app / vuốt khỏi đa nhiệm).
+     *  onCancel KHÔNG được gọi trong trường hợp này, nếu giữ sink cũ thì
+     *  service tưởng gửi thành công nhưng thông báo bị mất. */
+    private fun releaseSink() {
+        val sink = activeSink ?: return
+        if (BankNotificationService.eventSink === sink) {
+            BankNotificationService.eventSink = null
+        }
+        activeSink = null
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        releaseSink()
+        super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    override fun onDestroy() {
+        releaseSink()
+        super.onDestroy()
     }
 
     private fun isNotificationServiceEnabled(): Boolean {

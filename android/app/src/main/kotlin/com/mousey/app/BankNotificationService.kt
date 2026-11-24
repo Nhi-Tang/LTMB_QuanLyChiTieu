@@ -1,8 +1,12 @@
 package com.mousey.app
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
@@ -17,6 +21,14 @@ class BankNotificationService : NotificationListenerService() {
         private const val TAG = "MouseNoti"
         private const val PREFS_NAME = "mousey_notif_queue"
         private const val QUEUE_KEY = "pending_notifications"
+
+        // Thông báo dự phòng khi Flutter chưa chạy (app đã bị đóng)
+        private const val FALLBACK_CHANNEL_ID = "mousey_bank_pending"
+        private const val FALLBACK_NOTIFICATION_ID = 73001
+
+        // Cài đặt bật/tắt đọc thông báo ngân hàng do Flutter (shared_preferences) lưu
+        private const val FLUTTER_PREFS_NAME = "FlutterSharedPreferences"
+        private const val FLUTTER_BANK_ENABLED_KEY = "flutter.bank_notifications_enabled"
 
         var eventSink: EventChannel.EventSink? = null
             set(value) {
@@ -47,13 +59,10 @@ class BankNotificationService : NotificationListenerService() {
             packageName.lowercase() in ALLOWED_PACKAGES
 
         fun sendEvent(data: Map<String, Any?>): Boolean {
+            val sink = eventSink ?: return false
             return try {
-                if (eventSink != null) {
-                    eventSink?.success(data)
-                    true
-                } else {
-                    false
-                }
+                sink.success(data)
+                true
             } catch (e: Exception) {
                 Log.e(TAG, "Error sending event to Flutter: ${e.message}")
                 false
@@ -79,6 +88,15 @@ class BankNotificationService : NotificationListenerService() {
         super.onDestroy()
     }
 
+    private fun isBankReadingEnabled(): Boolean {
+        return try {
+            getSharedPreferences(FLUTTER_PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean(FLUTTER_BANK_ENABLED_KEY, true)
+        } catch (e: Exception) {
+            true
+        }
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
         try {
@@ -101,6 +119,8 @@ class BankNotificationService : NotificationListenerService() {
             // Lọc theo danh sách ngân hàng cho phép
             if (!isWhitelisted(packageName)) return
 
+            if (!isBankReadingEnabled()) return
+
             // 2. Đọc extras an toàn
             val extras = notification.extras
             val title = extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString() ?: ""
@@ -121,13 +141,17 @@ class BankNotificationService : NotificationListenerService() {
                 "text" to text,
                 "bigText" to bigText,
                 "postTime" to postTime,
-                "timestamp" to postTime
+                "timestamp" to postTime,
+                // Khóa thông báo hệ thống: phân biệt 2 giao dịch cùng số tiền
+                "notifKey" to (sbn.key ?: "")
             )
 
             // 5. Gửi sang Flutter, nếu engine chưa sẵn sàng thì lưu tạm vào hàng đợi
+            //    và hiện thông báo dự phòng để người dùng biết có giao dịch mới
             val sent = sendEvent(data)
             if (!sent) {
-                enqueuePendingNotification(data)
+                val queueSize = enqueuePendingNotification(data)
+                showFallbackNotification(queueSize)
             }
         } catch (e: Exception) {
             if (BuildConfig.DEBUG) {
@@ -136,8 +160,9 @@ class BankNotificationService : NotificationListenerService() {
         }
     }
 
+    /** Thêm vào hàng đợi, trả về số mục đang chờ */
     @Synchronized
-    private fun enqueuePendingNotification(data: Map<String, Any?>) {
+    private fun enqueuePendingNotification(data: Map<String, Any?>): Int {
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val queueJson = prefs.getString(QUEUE_KEY, "[]") ?: "[]"
@@ -162,25 +187,26 @@ class BankNotificationService : NotificationListenerService() {
                 newArray.remove(0)
             }
 
+            // Lưu nguyên văn (bộ nhớ riêng của app, xóa ngay khi Flutter nhận):
+            // nếu che số/tên ở đây thì parser phía Flutter không đọc được số tài khoản,
+            // nội dung chuyển khoản và có thể tính sai số tiền
             val jsonObj = JSONObject()
-            data.forEach { (k, v) ->
-                if ((k == "title" || k == "text" || k == "bigText") && v is String) {
-                    jsonObj.put(k, maskSensitiveNumbers(v))
-                } else {
-                    jsonObj.put(k, v)
-                }
-            }
+            data.forEach { (k, v) -> jsonObj.put(k, v) }
             newArray.put(jsonObj)
 
             prefs.edit().putString(QUEUE_KEY, newArray.toString()).apply()
             Log.d(TAG, "Enqueued pending notification. Queue size: ${newArray.length()}")
+            return newArray.length()
         } catch (e: Exception) {
             Log.e(TAG, "Error enqueueing notification: ${e.message}")
+            return 1
         }
     }
 
     @Synchronized
     private fun flushPendingQueue() {
+        // Chưa có Flutter lắng nghe thì giữ nguyên hàng đợi, không được xóa
+        if (eventSink == null) return
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val queueJson = prefs.getString(QUEUE_KEY, "[]") ?: "[]"
@@ -190,25 +216,84 @@ class BankNotificationService : NotificationListenerService() {
 
             val now = System.currentTimeMillis()
             val cutoff = now - (24 * 60 * 60 * 1000L)
+            val remaining = JSONArray()
 
             for (i in 0 until array.length()) {
                 val obj = array.optJSONObject(i) ?: continue
                 val time = obj.optLong("postTime", 0)
-                if (time > cutoff) {
-                    val map = mutableMapOf<String, Any?>()
-                    val keys = obj.keys()
-                    while (keys.hasNext()) {
-                        val key = keys.next()
-                        map[key] = obj.get(key)
-                    }
-                    sendEvent(map)
+                if (time <= cutoff) continue
+
+                val map = mutableMapOf<String, Any?>()
+                val keys = obj.keys()
+                while (keys.hasNext()) {
+                    val key = keys.next()
+                    map[key] = obj.get(key)
+                }
+                if (!sendEvent(map)) {
+                    remaining.put(obj)
                 }
             }
 
-            prefs.edit().remove(QUEUE_KEY).apply()
-            Log.d(TAG, "Flushed pending notification queue (${array.length()} items).")
+            if (remaining.length() == 0) {
+                prefs.edit().remove(QUEUE_KEY).apply()
+                cancelFallbackNotification()
+            } else {
+                prefs.edit().putString(QUEUE_KEY, remaining.toString()).apply()
+            }
+            Log.d(TAG, "Flushed pending queue: ${array.length() - remaining.length()} sent, ${remaining.length()} kept.")
         } catch (e: Exception) {
             Log.e(TAG, "Error flushing notification queue: ${e.message}")
+        }
+    }
+
+    private fun showFallbackNotification(count: Int) {
+        try {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    FALLBACK_CHANNEL_ID,
+                    "Giao dịch ngân hàng",
+                    NotificationManager.IMPORTANCE_HIGH
+                )
+                manager.createNotificationChannel(channel)
+            }
+
+            val launchIntent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+            val piFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+            val contentIntent = PendingIntent.getActivity(this, 0, launchIntent, piFlags)
+
+            val title = if (count <= 1) "Có giao dịch ngân hàng mới" else "Có $count giao dịch ngân hàng mới"
+            val body = "Mở Mousey để xem và phân loại giao dịch"
+
+            @Suppress("DEPRECATION")
+            val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Notification.Builder(this, FALLBACK_CHANNEL_ID)
+            } else {
+                Notification.Builder(this).setPriority(Notification.PRIORITY_HIGH)
+            }
+            val notification = builder
+                .setSmallIcon(applicationInfo.icon)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setContentIntent(contentIntent)
+                .setAutoCancel(true)
+                .build()
+
+            manager.notify(FALLBACK_NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error showing fallback notification: ${e.message}")
+        }
+    }
+
+    private fun cancelFallbackNotification() {
+        try {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.cancel(FALLBACK_NOTIFICATION_ID)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cancelling fallback notification: ${e.message}")
         }
     }
 
