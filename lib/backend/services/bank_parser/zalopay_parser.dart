@@ -11,11 +11,12 @@ class ZaloPayParser extends BankParser {
     required String title,
     required String text,
     DateTime? timestamp,
+    String notifKey = '',
   }) {
     if (!_isRealTransaction(title, text)) {
       return null;
     }
-    return super.parseNotification(title: title, text: text, timestamp: timestamp);
+    return super.parseNotification(title: title, text: text, timestamp: timestamp, notifKey: notifKey);
   }
 
   bool _isRealTransaction(String title, String text) {
