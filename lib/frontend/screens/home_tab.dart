@@ -24,7 +24,6 @@ class HomeTab extends StatefulWidget {
   final double totalExpense;
   final double totalBalance;
   final List<TransactionItem> transactions;
-  final VoidCallback onLogout;
   final VoidCallback onAddIncome;
   final VoidCallback onAddExpense;
 
@@ -41,7 +40,6 @@ class HomeTab extends StatefulWidget {
     required this.totalExpense,
     required this.totalBalance,
     required this.transactions,
-    required this.onLogout,
     required this.onAddIncome,
     required this.onAddExpense,
   });

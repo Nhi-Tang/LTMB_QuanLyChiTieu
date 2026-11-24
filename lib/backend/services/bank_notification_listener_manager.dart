@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'bank_parser/bank_notification_parser.dart';
@@ -25,8 +24,8 @@ class BankNotificationListenerManager {
     _subscription = _eventChannel.receiveBroadcastStream().listen(
       (dynamic event) async {
         if (event is Map) {
-          // Chỉ ghi cho đúng tài khoản đang đăng nhập
-          if (uid == null || FirebaseAuth.instance.currentUser?.uid != uid) return;
+          // Chỉ ghi khi đã có hồ sơ người dùng trên máy
+          if (uid == null) return;
 
           final prefs = await SharedPreferences.getInstance();
           final enabled = prefs.getBool('bank_notifications_enabled') ?? true;

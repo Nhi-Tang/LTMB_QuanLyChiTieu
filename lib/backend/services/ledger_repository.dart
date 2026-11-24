@@ -1,6 +1,5 @@
 import '../database/db_helper.dart';
 import 'transaction_service.dart';
-import 'sync_service.dart';
 import '../../frontend/utils/app_language.dart';
 
 class LedgerRepository {
@@ -20,7 +19,6 @@ class LedgerRepository {
     // Set thành activeLedgerId
     await TransactionService.instance.setCurrentLedgerId(newId, uid: uid);
     
-    SyncService.instance.syncAll();
     
     return newId;
   }

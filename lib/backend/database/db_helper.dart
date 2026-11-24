@@ -4,8 +4,6 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:uuid/uuid.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:bcrypt/bcrypt.dart';
 import '../models/app_notification_model.dart';
 import '../models/budget_model.dart';
 import '../models/category_model.dart';
@@ -14,7 +12,6 @@ import '../models/savings_goal_model.dart';
 import '../models/savings_transaction_model.dart';
 import '../models/transaction_model.dart';
 import '../models/user_model.dart';
-import '../services/sync_service.dart';
 import '../services/transaction_service.dart';
 import '../services/in_app_notification_service.dart';
 import '../../core/utils/account_masker.dart';
@@ -28,14 +25,11 @@ class DatabaseHelper {
 
   DatabaseHelper._init();
 
-  String? get _currentUid {
-    try {
-      return FirebaseAuth.instance.currentUser?.uid;
-    } catch (_) {
-      return null;
-    }
-  }
-  String? get currentUid => _currentUid;
+  /// App không còn tài khoản: mọi dữ liệu thuộc về một người dùng cố định trên máy
+  static const String localUid = 'local_user';
+
+  String? get _currentUid => localUid;
+  String? get currentUid => localUid;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -61,6 +55,8 @@ class DatabaseHelper {
       onOpen: (db) async {
         debugPrint('🗄️ [DatabaseHelper] onOpen: database path=${db.path}, version=${await db.getVersion()}');
         await ensureSchema(db);
+        // Dữ liệu của tài khoản đăng nhập cũ chuyển sang người dùng trên máy
+        await _migrateToLocalUser(db);
         // Sau khi đã có schema chuẩn, chèn dữ liệu ledger mặc định
         await _ensureDefaultLedgers(db);
       },
@@ -268,30 +264,76 @@ class DatabaseHelper {
       await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_isRead ON app_notifications(isRead);");
     } catch (_) {}
 
-    // Bản cũ tự tạo 2 tài khoản mẫu (admin/user) chỉ có trong SQLite, giờ đăng nhập qua Firebase nên xoá đi
+    // Bản cũ tự tạo 2 tài khoản mẫu (admin/user) chỉ có trong SQLite: xoá đi
     await db.execute('DROP TABLE IF EXISTS user_change');
     await db.delete(
       'users',
       where: "email IN ('admin@mousey.com', 'user@mousey.com') AND (uid IS NULL OR uid = '')",
     );
-
-    await _hashExistingPlaintextPasswords(db);
   }
 
-  Future<void> _hashExistingPlaintextPasswords(Database db) async {
+  static const List<String> _uidTables = [
+    'users',
+    'ledgers',
+    'transactions',
+    'savings_goals',
+    'categories',
+    'ledger_categories',
+    'budgets',
+    'budget_alerts',
+    'pending_transactions',
+    'app_notifications',
+  ];
+
+  /// Bản có đăng nhập lưu dữ liệu theo uid Firebase. Chuyển toàn bộ sang [localUid]
+  /// để người dùng cập nhật app không mất dữ liệu. Chạy lại nhiều lần cũng không sao.
+  Future<void> _migrateToLocalUser(Database db) async {
     try {
-      final users = await db.query('users');
-      for (var u in users) {
-        final id = u['id'];
-        final pass = u['password'] as String? ?? '';
-        if (pass.isNotEmpty && !pass.startsWith('\$2')) {
-          final hashed = BCrypt.hashpw(pass, BCrypt.gensalt());
-          await db.update('users', {'password': hashed}, where: 'id = ?', whereArgs: [id]);
-          debugPrint('🔐 [DatabaseHelper] Hashed legacy plaintext password for user id=$id');
-        }
+      final oldUids = <String>{};
+      for (final table in ['users', 'ledgers', 'transactions']) {
+        final rows = await db.rawQuery(
+          "SELECT DISTINCT uid FROM $table WHERE uid IS NOT NULL AND uid != '' AND uid != ?",
+          [localUid],
+        );
+        oldUids.addAll(rows.map((r) => r['uid'] as String));
       }
+      if (oldUids.isEmpty) return;
+
+      const localDefault = 'default_$localUid';
+      await db.transaction((txn) async {
+        for (final old in oldUids) {
+          final oldDefault = 'default_$old';
+          final hasLocalDefault = (await txn.query('ledgers', where: 'id = ?', whereArgs: [localDefault])).isNotEmpty;
+          final hasOldDefault = (await txn.query('ledgers', where: 'id = ?', whereArgs: [oldDefault])).isNotEmpty;
+          if (hasOldDefault && !hasLocalDefault) {
+            // Sổ mặc định của tài khoản cũ trở thành sổ mặc định trên máy
+            await txn.update('ledgers', {'id': localDefault}, where: 'id = ?', whereArgs: [oldDefault]);
+            for (final table in ['transactions', 'budgets', 'savings_goals', 'ledger_categories']) {
+              await txn.update(table, {'ledgerId': localDefault}, where: 'ledgerId = ?', whereArgs: [oldDefault]);
+            }
+          } else if (hasOldDefault) {
+            // Đã có sổ mặc định trên máy: giữ sổ cũ như một sổ thường
+            await txn.update('ledgers', {'isDefault': 0}, where: 'id = ?', whereArgs: [oldDefault]);
+          }
+        }
+
+        for (final table in _uidTables) {
+          await txn.rawUpdate(
+            "UPDATE $table SET uid = ? WHERE uid IS NOT NULL AND uid != '' AND uid != ?",
+            [localUid, localUid],
+          );
+        }
+
+        // Chỉ giữ một hồ sơ người dùng (bản ghi mới nhất)
+        await txn.rawDelete(
+          'DELETE FROM users WHERE uid = ? AND id NOT IN (SELECT MAX(id) FROM users WHERE uid = ?)',
+          [localUid, localUid],
+        );
+        await txn.update('users', {'email': localUid, 'password': ''}, where: 'uid = ?', whereArgs: [localUid]);
+      });
+      debugPrint('🗄️ [DatabaseHelper] Migrated ${oldUids.length} account(s) to local user');
     } catch (e) {
-      debugPrint('Error hashing plaintext passwords: $e');
+      debugPrint('🗄️ [DatabaseHelper] Migrate to local user failed: $e');
     }
   }
 
@@ -300,6 +342,8 @@ class DatabaseHelper {
     // Bổ sung uid = '' nếu có dữ liệu legacy
     final List<String> allUids = uidsResult.map((m) => m['uid'] as String).toList();
     if (!allUids.contains('')) allUids.add('');
+    // Trước đây sổ mặc định được tạo lúc đồng bộ sau khi đăng nhập, giờ luôn tạo cho người dùng trên máy
+    if (!allUids.contains(localUid)) allUids.add(localUid);
 
     for (final uid in allUids) {
       final defaultLedgerId = 'default_$uid';
@@ -604,17 +648,9 @@ class DatabaseHelper {
       } catch (_) {}
     }
     if (oldVersion < 20) {
-      // Migration v20: Mã hóa mật khẩu user bằng bcrypt nếu chưa được mã hóa
+      // Migration v20 (cũ): mã hóa mật khẩu. App không còn đăng nhập nên xoá hẳn mật khẩu đã lưu
       try {
-        final users = await db.query('users');
-        for (var u in users) {
-          final id = u['id'];
-          final pass = u['password'] as String? ?? '';
-          if (pass.isNotEmpty && !pass.startsWith('\$2')) {
-            final hashed = BCrypt.hashpw(pass, BCrypt.gensalt());
-            await db.update('users', {'password': hashed}, where: 'id = ?', whereArgs: [id]);
-          }
-        }
+        await db.update('users', {'password': ''});
       } catch (_) {}
     }
     if (oldVersion < 22) {
@@ -903,7 +939,6 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
-    SyncService.instance.syncAll();
     return ledgerId;
   }
 
@@ -923,7 +958,6 @@ class DatabaseHelper {
       whereArgs: [ledgerId, targetUid],
     );
 
-    SyncService.instance.syncAll();
     return res;
   }
 
@@ -981,7 +1015,6 @@ class DatabaseHelper {
       isSynced: false,
     );
     final res = await db.insert('transactions', itemToSave.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
-    SyncService.instance.syncAll();
     TransactionService.instance.notifyUpdated();
     return res;
   }
@@ -1000,7 +1033,6 @@ class DatabaseHelper {
       where: 'id = ? AND (uid = ? OR uid IS NULL)',
       whereArgs: [id, targetUid],
     );
-    SyncService.instance.syncAll();
     TransactionService.instance.notifyUpdated();
     return res;
   }
@@ -1019,53 +1051,25 @@ class DatabaseHelper {
       where: 'uid = ? OR uid IS NULL',
       whereArgs: [targetUid],
     );
-    SyncService.instance.syncAll();
     return res;
   }
 
-  // --- SOCIAL LOGIN & USER DAO METHODS ---
+  // --- HỒ SƠ NGƯỜI DÙNG TRÊN MÁY ---
 
-  Future<int> insertOrUpdateUser(UserModel user) async {
+  /// Lấy hồ sơ người dùng trên máy, chưa có thì tạo mới
+  Future<UserModel> getOrCreateLocalUser() async {
     final db = await instance.database;
-    String passToSave = user.password;
-    if (passToSave.isNotEmpty && !passToSave.startsWith('\$2')) {
-      passToSave = BCrypt.hashpw(passToSave, BCrypt.gensalt());
-    }
-    final userToSave = user.copyWith(password: passToSave);
-    return await db.insert(
-      'users',
-      userToSave.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<UserModel?> getCurrentUser(String uid) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'uid = ?',
-      whereArgs: [uid],
-    );
+    final result = await db.query('users', where: 'uid = ?', whereArgs: [localUid], limit: 1);
     if (result.isNotEmpty) {
       return UserModel.fromMap(result.first);
     }
-    return null;
-  }
-
-  Future<int> clearUserSession(String uid) async {
-    final db = await instance.database;
-    return await db.delete('users', where: 'uid = ?', whereArgs: [uid]);
-  }
-
-  // --- USER CRUD ---
-
-  Future<List<UserModel>> getAllUsers() async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      orderBy: 'id DESC',
+    final user = UserModel(
+      uid: localUid,
+      name: AppLanguage.instance.t('Người dùng'),
+      createdAt: DateTime.now().toIso8601String(),
     );
-    return result.map((map) => UserModel.fromMap(map)).toList();
+    final id = await db.insert('users', user.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    return user.copyWith(id: id);
   }
 
   Future<int> updateUser(UserModel user) async {
@@ -1105,7 +1109,6 @@ class DatabaseHelper {
       isSynced: false,
     );
     await db.insert('savings_goals', goalToSave.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
-    SyncService.instance.syncAll();
     return goalId;
   }
 
@@ -1122,7 +1125,6 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [goal.id],
     );
-    SyncService.instance.syncAll();
     return res;
   }
 
@@ -1146,7 +1148,6 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [goalId],
     );
-    SyncService.instance.syncAll();
     return res;
   }
 
@@ -1197,7 +1198,6 @@ class DatabaseHelper {
       }
     }
 
-    SyncService.instance.syncAll();
     return txId;
   }
 
@@ -1280,7 +1280,6 @@ class DatabaseHelper {
         isSynced: false,
       );
       await db.update('budgets', budgetToUpdate.toMap(), where: 'id = ?', whereArgs: [existingId]);
-      SyncService.instance.syncAll();
       return existingId;
     }
 
@@ -1295,7 +1294,6 @@ class DatabaseHelper {
       isSynced: false,
     );
     await db.insert('budgets', budgetToSave.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
-    SyncService.instance.syncAll();
     return budgetId;
   }
 
@@ -1317,7 +1315,6 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [budget.id],
     );
-    SyncService.instance.syncAll();
     return res;
   }
 
@@ -1334,7 +1331,6 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [budgetId],
     );
-    SyncService.instance.syncAll();
     return res;
   }
 

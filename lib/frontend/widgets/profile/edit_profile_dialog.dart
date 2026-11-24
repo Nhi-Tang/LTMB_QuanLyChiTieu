@@ -18,7 +18,6 @@ void showEditProfileDialog(
 }) {
   final lang = context.lang;
   final nameController = TextEditingController(text: currentUser.name);
-  final emailController = TextEditingController(text: currentUser.email);
   final formKey = GlobalKey<FormState>();
   var avatarKey = selectedAvatarKey;
 
@@ -88,20 +87,6 @@ void showEditProfileDialog(
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập họ và tên') : null,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: AppTranslations.tr(lang, 'email_or_phone'),
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: AssetIcon('ui_thu', size: 26),
-                      ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? context.t('Vui lòng nhập Email / SĐT') : null,
-                  ),
                 ],
               ),
             ),
@@ -122,12 +107,8 @@ void showEditProfileDialog(
               ),
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  final newName = nameController.text.trim();
-                  final newEmail = emailController.text.trim().toLowerCase();
-
                   final updatedUser = currentUser.copyWith(
-                    name: newName,
-                    email: newEmail,
+                    name: nameController.text.trim(),
                   );
 
                   await DatabaseHelper.instance.updateUser(updatedUser);
