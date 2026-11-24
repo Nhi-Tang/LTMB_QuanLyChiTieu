@@ -288,9 +288,14 @@ class BankNotificationParser {
     required String type,
     required DateTime timestamp,
     required String accountLast4,
+    String content = '',
+    String notifKey = '',
   }) {
     final roundedMinute = timestamp.millisecondsSinceEpoch ~/ (10 * 60 * 1000);
-    final rawKey = '${bankName.toLowerCase()}_${amount}_${type.toLowerCase()}_${roundedMinute}_$accountLast4';
+    // Thêm nội dung thông báo + khóa thông báo hệ thống để 2 giao dịch cùng số tiền
+    // trong cùng 10 phút không bị coi là trùng (chỉ trùng khi cùng 1 thông báo bị đăng lại)
+    final normalizedContent = content.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
+    final rawKey = '${bankName.toLowerCase()}_${amount}_${type.toLowerCase()}_${roundedMinute}_${accountLast4}_${normalizedContent}_$notifKey';
     return sha256.convert(utf8.encode(rawKey)).toString();
   }
 
@@ -299,12 +304,13 @@ class BankNotificationParser {
     required String title,
     required String text,
     DateTime? timestamp,
+    String notifKey = '',
   }) {
     if (isNonTransaction(title, text)) {
       return null;
     }
 
     final parser = _getParser(packageName, title, text);
-    return parser.parseNotification(title: title, text: text, timestamp: timestamp);
+    return parser.parseNotification(title: title, text: text, timestamp: timestamp, notifKey: notifKey);
   }
 }

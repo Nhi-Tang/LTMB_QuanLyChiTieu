@@ -48,6 +48,7 @@ class BankNotificationListenerManager {
             title: title,
             text: text,
             timestamp: timestamp,
+            notifKey: event['notifKey']?.toString() ?? '',
           );
 
           if (parsed != null) {
